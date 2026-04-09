@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WATCHR Mobile - Web Concept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07090d;--bg1:#0c1018;--bg2:#111621;--bg3:#161d2c;--line:#1e2840;--line2:#283350;--t0:#e8edf8;--t1:#9aabc8;--t2:#4d6082;--t3:#2a3a58;--up:#ff3b47;--dn:#2b7fff;--amber:#f5a623;--teal:#00d4aa;--purple:#a371f7;--mono:"IBM Plex Mono",monospace;--sans:"Noto Sans KR",sans-serif;--w:1180px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--t0);font-family:var(--sans);background:radial-gradient(circle at top left,rgba(163,113,247,.12),transparent 24%),radial-gradient(circle at top right,rgba(0,212,170,.08),transparent 20%),linear-gradient(180deg,#0a0d14 0%,#07090d 100%)}
+a{text-decoration:none;color:inherit}button{font:inherit}iframe{display:block;width:100%;border:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.shell{width:min(calc(100% - 32px),var(--w));margin:0 auto}.mono{font-family:var(--mono)}
+.top{position:sticky;top:0;z-index:20;background:rgba(7,9,13,.82);backdrop-filter:blur(14px);border-bottom:1px solid rgba(40,51,80,.7)}
+.topin{width:min(calc(100% - 32px),var(--w));margin:0 auto;min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:12px;font:600 13px var(--mono);letter-spacing:2px;text-transform:uppercase}.dot{width:10px;height:10px;border-radius:50%;background:var(--amber);box-shadow:0 0 16px var(--amber);animation:blink 2s infinite}
+.nav{display:flex;gap:10px;flex-wrap:wrap}.nav a{padding:8px 12px;border:1px solid transparent;border-radius:999px;color:var(--t2);font:11px var(--mono);letter-spacing:1px;text-transform:uppercase}.nav a:hover{background:var(--bg1);border-color:var(--line2);color:var(--t0)}
+.hero{padding:48px 0 24px}.hero-grid,.journey,.workflow,.cta{display:grid;grid-template-columns:1.05fr .95fr;gap:24px}
+.panel,.card,.tabcopy,.tabstats,.flowaside,.cta-box{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(12,16,24,.96),rgba(10,13,19,.88));border:1px solid var(--line);border-radius:24px;box-shadow:0 24px 80px rgba(0,0,0,.4)}
+.panel::before,.card::before,.tabcopy::before,.tabstats::before,.flowaside::before,.cta-box::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(135deg,rgba(255,255,255,.04),transparent 30%)}
+.copy{padding:34px}.eyebrow,.status,.chip,.pill,.tabbtn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;font:11px var(--mono);letter-spacing:1px;text-transform:uppercase}
+.eyebrow{padding:8px 12px;border:1px solid rgba(0,212,170,.35);background:rgba(0,212,170,.08);color:var(--teal)}.eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}
+h1{margin:20px 0 14px;max-width:11ch;font:600 clamp(38px,6vw,74px)/.95 var(--mono);letter-spacing:-2px}
+.lead,.sdesc,.small{color:var(--t1);line-height:1.8}.lead{font-size:16px}.small{font-size:13px}.chips,.metrics,.btns,.tabs{display:flex;gap:10px;flex-wrap:wrap}.chips{margin:22px 0 26px}
+.chip{padding:6px 12px;border:1px solid var(--line2);background:rgba(12,16,24,.92);color:var(--t1)}.chip.amber{color:var(--amber);border-color:rgba(245,166,35,.34);background:rgba(245,166,35,.08)}.chip.purple{color:var(--purple);border-color:rgba(163,113,247,.35);background:rgba(163,113,247,.08)}
+.metrics{margin-top:28px}.metric{min-width:150px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:rgba(17,22,33,.82)}.ml{color:var(--t3);font:10px var(--mono);letter-spacing:1px;text-transform:uppercase}.mv{margin-top:8px;font:24px var(--mono)}.mn{margin-top:4px;color:var(--t2);font-size:12px}
+.btns{margin-top:28px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border-radius:999px;border:1px solid transparent;font:12px var(--mono);letter-spacing:1px;text-transform:uppercase}.btn.primary{background:var(--amber);color:#07090d}.btn.secondary{background:rgba(17,22,33,.86);border-color:var(--line2)}.btn.ghost{background:rgba(0,212,170,.06);border-color:rgba(0,212,170,.3);color:var(--teal)}
+.preview{padding:22px}.ptop,.section-head,.preview-links{display:flex;align-items:center;justify-content:space-between;gap:14px}.dots{display:flex;gap:8px}.dots span{width:10px;height:10px;border-radius:50%}.dots span:nth-child(1){background:#ff5f57}.dots span:nth-child(2){background:#febc2e}.dots span:nth-child(3){background:#28c840}
+.status{padding:6px 10px;border:1px solid rgba(0,212,170,.35);background:rgba(0,212,170,.08);color:var(--teal)}.frame{margin-top:16px;border:1px solid var(--line2);border-radius:18px;overflow:hidden;background:#050709}.frame iframe{height:520px}
+.preview-links{margin-top:14px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:rgba(17,22,33,.82)}
+.section{padding:28px 0}.sk{color:var(--t3);font:11px var(--mono);letter-spacing:2px;text-transform:uppercase}.st{margin:8px 0 0;font:600 clamp(26px,3vw,40px)/1.05 var(--mono);letter-spacing:-1px}.sdesc{max-width:58ch;font-size:15px}
+.grid4,.grid3,.grid2,.footer-links{display:grid;gap:16px}.grid4{grid-template-columns:repeat(4,1fr)}.grid3{grid-template-columns:repeat(3,1fr)}.grid2,.footer-links{grid-template-columns:repeat(2,1fr)}
+.card{padding:22px;transition:transform .16s,border-color .16s}.card:hover{transform:translateY(-2px);border-color:var(--line2)}.cl{color:var(--t3);font:10px var(--mono);letter-spacing:1.4px;text-transform:uppercase}.ct{margin:14px 0 10px;font:20px var(--mono)}.cc{margin:0;color:var(--t1);font-size:14px;line-height:1.8}.cm{margin-top:18px;color:var(--amber);font:11px var(--mono);letter-spacing:1px;text-transform:uppercase}
+.journey .track{display:grid;gap:14px}.jitem{display:grid;grid-template-columns:auto 1fr;gap:14px;padding:18px 20px;border:1px solid var(--line);border-radius:20px;background:rgba(12,16,24,.9)}.jnode,.anum,.tbadge{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line2);background:rgba(17,22,33,.88);color:var(--amber);font:12px var(--mono)}
+.jt{margin:0 0 6px;font:18px var(--mono)}.jc{margin:0;color:var(--t1);font-size:14px;line-height:1.8}.flowaside{padding:24px}.alist{display:grid;gap:12px;margin-top:18px}.aitem{padding-top:12px;border-top:1px solid var(--line)}.aitem:first-child{padding-top:0;border-top:0}.ak{color:var(--t3);font:10px var(--mono);letter-spacing:1px;text-transform:uppercase}.av{margin-top:8px;color:var(--t0);font-size:14px;line-height:1.7}
+.tabs{margin-bottom:18px}.tabbtn{padding:10px 14px;border:1px solid var(--line2);background:rgba(12,16,24,.9);color:var(--t2);cursor:pointer}.tabbtn[aria-selected="true"]{background:var(--amber);border-color:var(--amber);color:#07090d}
+.tabpanel{display:none;grid-template-columns:1.1fr .9fr;gap:16px}.tabpanel.active{display:grid}.tabcopy,.tabstats{padding:24px}.tabcopy h3{margin:0 0 10px;font:24px var(--mono)}.tabcopy p{margin:0;color:var(--t1);font-size:15px;line-height:1.8}
+.points{display:grid;gap:10px;margin-top:20px}.points div{padding-left:14px;border-left:2px solid var(--line2);color:var(--t1);font-size:14px;line-height:1.75}.tabstats{display:grid;gap:12px}.sbox{padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:rgba(17,22,33,.78)}.sbox strong{display:block;margin-bottom:8px;font:14px var(--mono)}.sbox span{color:var(--t1);font-size:13px;line-height:1.7}
+.workflow .flowaside{padding:24px}.timeline{display:grid;gap:14px}.tstep{display:flex;gap:12px;align-items:start}.tbadge{width:30px;height:30px;color:var(--teal);font-size:11px}.tstep strong{display:block;margin-bottom:4px;font:15px var(--mono)}.tstep span{color:var(--t1);font-size:13px;line-height:1.7}
+.accords{display:grid;gap:12px}.acc{overflow:hidden;border:1px solid var(--line);border-radius:20px;background:rgba(12,16,24,.92)}.accbtn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;background:transparent;border:0;color:inherit;cursor:pointer}.accbtn:hover{background:rgba(17,22,33,.65)}
+.atitle{display:flex;align-items:center;gap:12px}.anum{width:28px;height:28px;font-size:11px}.acopy strong{display:block;font:16px var(--mono)}.acopy span{display:block;margin-top:4px;color:var(--t2);font-size:13px}.aind{color:var(--t2);font:14px var(--mono)}
+.accpanel{display:none;padding:0 20px 20px}.acc.open .accpanel{display:block}.code{padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:#060a10;color:#c9d1d9;font:12px/1.85 var(--mono);white-space:pre-wrap;overflow:auto}.note{margin-top:12px;color:var(--t1);font-size:13px;line-height:1.8}
+.cta-box{padding:28px}.cta h2{margin:12px 0 10px;font:600 clamp(28px,4vw,44px)/1.04 var(--mono)}.mini{display:grid;gap:12px}
+.footer{padding:18px 0 48px}.flink{padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:rgba(12,16,24,.88)}.flink strong{display:block;margin-bottom:8px;font:13px var(--mono)}.flink span{color:var(--t1);font-size:13px;line-height:1.7}.foot{margin-top:18px;color:var(--t3);font:10px var(--mono);letter-spacing:1px;text-transform:uppercase;text-align:center}
+code{color:var(--teal);font-family:var(--mono);font-size:12px}
+@media (max-width:1080px){.hero-grid,.journey,.workflow,.cta,.tabpanel.active{grid-template-columns:1fr}.grid4{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:720px){.shell,.topin{width:min(calc(100% - 20px),var(--w))}.topin{padding:10px 0;align-items:flex-start;flex-direction:column}.hero{padding-top:28px}.copy,.preview,.flowaside,.tabcopy,.tabstats,.cta-box{padding:20px}.frame iframe{height:420px}.grid4,.grid3,.grid2,.footer-links{grid-template-columns:1fr}.section-head,.preview-links{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="topin">
+    <a class="brand" href="#top"><span class="dot" aria-hidden="true"></span><span>WATCHR Mobile</span></a>
+    <nav class="nav" aria-label="섹션 이동">
+      <a href="#preview">Preview</a><a href="#promise">Promise</a><a href="#features">Features</a><a href="#workflow">Workflow</a><a href="#build">Build</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top" class="shell">
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="panel copy">
+        <div class="eyebrow">Dark Trading UI for Mobile</div>
+        <h1>시장 관찰부터 알림 이력까지 한 흐름으로.</h1>
+        <p class="lead">WATCHR Mobile은 단순 시세 앱이 아니라, 종목 추가부터 관찰, 알림, 기록까지를 하나의 짧은 사용자 루프로 묶는 도구입니다. 이 페이지는 작업지시서의 기술 밀도와 모바일 모크업의 감성을 웹용 컨셉 브리프로 재구성한 버전입니다.</p>
+        <div class="chips">
+          <span class="chip amber">4-TAB FLOW</span><span class="chip">WATCHLIST · FUTURES · ALERTS · HISTORY</span><span class="chip purple">EXPO + NODE REUSE</span><span class="chip">INTERNAL DOSSIER STYLE</span>
+        </div>
+        <div class="metrics">
+          <div class="metric"><div class="ml">Core Loop</div><div class="mv">4 STEP</div><div class="mn">추가 → 관찰 → 알림 → 기록</div></div>
+          <div class="metric"><div class="ml">Primary Surface</div><div class="mv">4 TABS</div><div class="mn">핵심 액션을 하단 탭에 응축</div></div>
+          <div class="metric"><div class="ml">Signal Style</div><div class="mv">HIGH TRUST</div><div class="mn">화려함보다 신뢰감과 속도감</div></div>
+        </div>
+        <div class="btns">
+          <a class="btn primary" href="#preview">View Concept</a>
+          <a class="btn secondary" href="watchr_mobile_design.html">Open Mockup</a>
+          <a class="btn ghost" href="watchr_mobile_작업지시서.html">Read Instruction</a>
+        </div>
+      </div>
+
+      <div class="panel preview" id="preview">
+        <div class="ptop">
+          <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div class="status">LIVE MOCKUP</div>
+        </div>
+        <div class="frame"><iframe src="watchr_mobile_design.html" title="WATCHR Mobile 라이브 프리뷰"></iframe></div>
+        <div class="preview-links">
+          <p class="small">프리뷰가 열리지 않아도 이 페이지는 단독으로 읽히도록 구성했습니다. 필요하면 모크업과 작업지시서를 별도 창에서 바로 열 수 있습니다.</p>
+          <div class="btns"><a class="btn secondary" href="watchr_mobile_design.html">Mockup</a><a class="btn secondary" href="watchr_mobile_작업지시서.html">Brief</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="promise">
+    <div class="section-head">
+      <div><div class="sk">Product Promise</div><h2 class="st">이 앱이 실제로 해결하는 것</h2></div>
+      <p class="sdesc">WATCHR Mobile은 정보를 나열하는 대신 사용자가 무엇을 보고 언제 반응할지를 제품의 기본 구조로 만듭니다.</p>
+    </div>
+    <div class="grid4">
+      <article class="card"><div class="cl">01 Watchlist</div><h3 class="ct">관심 종목을 한 줄 밀도로 압축</h3><p class="cc">가격, 변화율, 스파크라인, 알림 상태를 한 행에서 동시에 읽도록 설계해 빠른 스캔이 가능합니다.</p><div class="cm">Dense by design</div></article>
+      <article class="card"><div class="cl">02 Futures</div><h3 class="ct">시장 체온을 먼저 보여주는 대시보드</h3><p class="cc">선물과 주요 지수를 크게, 빠르게, 비교 가능하게 보여 주어 시장 방향성을 먼저 읽게 합니다.</p><div class="cm">Large numbers first</div></article>
+      <article class="card"><div class="cl">03 Alerts</div><h3 class="ct">조건을 세우고 백그라운드로 맡기기</h3><p class="cc">사용자는 목표가와 조건만 입력하면 됩니다. 앱은 쿨다운과 알림 흐름을 관리합니다.</p><div class="cm">Action over monitoring</div></article>
+      <article class="card"><div class="cl">04 History</div><h3 class="ct">반응한 이유를 나중에도 남기는 기록</h3><p class="cc">언제 어떤 조건에서 울렸는지 남겨, 나중의 판단 재료와 회고 자료로 활용할 수 있습니다.</p><div class="cm">Traceable signal log</div></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div><div class="sk">How It Works</div><h2 class="st">추가 → 관찰 → 알림 → 이력</h2></div>
+      <p class="sdesc">제품의 핵심은 탭 개수가 아니라 사용자 루프의 짧음입니다. 한 번 종목을 추가하면 이후 흐름이 끊기지 않도록 설계합니다.</p>
+    </div>
+    <div class="journey">
+      <div class="track">
+        <article class="jitem"><div class="jnode">01</div><div><h3 class="jt">Add</h3><p class="jc">워치리스트에 종목을 추가하고 기본 가격 조회를 시작합니다.</p></div></article>
+        <article class="jitem"><div class="jnode">02</div><div><h3 class="jt">Observe</h3><p class="jc">행 단위 정보와 선물 지표를 함께 보며 시장 흐름과 개별 종목 변화를 스캔합니다.</p></div></article>
+        <article class="jitem"><div class="jnode">03</div><div><h3 class="jt">Alert</h3><p class="jc">조건 충족 시 로컬 알림을 발생시키고, 같은 조건은 쿨다운으로 과발동을 막습니다.</p></div></article>
+        <article class="jitem"><div class="jnode">04</div><div><h3 class="jt">Review</h3><p class="jc">히스토리 탭에서 발동 기록과 시간 정보를 확인해 나중의 판단 자료로 활용합니다.</p></div></article>
+      </div>
+      <aside class="flowaside">
+        <div class="cl">System Character</div><h3 class="ct">모바일 트레이딩 UI를 웹 브리프로 번역</h3><p class="cc">감성은 다크 터미널, 구조는 제품 문서, 읽기 방식은 랜딩 페이지에 가깝게 재구성했습니다.</p>
+        <div class="alist">
+          <div class="aitem"><div class="ak">Tone</div><div class="av">기술적이고 차분하지만 살아 있는 시스템처럼 보여야 합니다.</div></div>
+          <div class="aitem"><div class="ak">Priority</div><div class="av">큰 숫자, 얇은 경계선, 작은 배지, 읽기 쉬운 카드 위계.</div></div>
+          <div class="aitem"><div class="ak">Interaction</div><div class="av">과한 애니메이션 대신 탭 전환, 접기/펼치기, 미세한 호버만 사용.</div></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <div class="section-head">
+      <div><div class="sk">Feature Spotlight</div><h2 class="st">4개 탭을 웹에서 읽기 쉬운 구조로 재해석</h2></div>
+      <p class="sdesc">아래 탭을 눌러 각 화면의 역할을 확인할 수 있습니다. 모바일 모크업과 연결되지만 이 문서만 읽어도 제품의 역할이 전달되도록 정리했습니다.</p>
+    </div>
+    <div class="tabs" role="tablist" aria-label="기능 탭">
+      <button class="tabbtn" role="tab" aria-selected="true" data-tab="watchlist">Watchlist</button>
+      <button class="tabbtn" role="tab" aria-selected="false" data-tab="futures">Futures</button>
+      <button class="tabbtn" role="tab" aria-selected="false" data-tab="alerts">Alerts</button>
+      <button class="tabbtn" role="tab" aria-selected="false" data-tab="history">History</button>
+    </div>
+    <div class="tabpanel active" data-panel="watchlist">
+      <div class="tabcopy"><h3>Watchlist는 가장 짧은 의사결정 화면입니다.</h3><p>종목 코드, 가격, 변화율, 미니 추세선, 알림 존재 여부를 한 줄에 모읍니다. 사용자는 스크롤만으로 여러 종목을 빠르게 훑을 수 있습니다.</p><div class="points"><div>왼쪽 액센트 바와 숫자 중심 타이포로 상승/하락 상태를 즉시 식별합니다.</div><div>상단 마켓 스트립으로 개별 종목과 시장 온도를 동시에 읽습니다.</div><div>실시간 감각은 주되, 레이아웃은 불필요하게 흔들리지 않게 유지합니다.</div></div></div>
+      <div class="tabstats"><div class="sbox"><strong>Primary Value</strong><span>한 눈에 많이 보는 화면. 정보 밀도가 핵심입니다.</span></div><div class="sbox"><strong>UI Motif</strong><span>행, 스파크라인, 얇은 구분선, 경고 pip.</span></div><div class="sbox"><strong>Build Hook</strong><span><code>useFocusEffect</code>와 5초 폴링.</span></div></div>
+    </div>
+    <div class="tabpanel" data-panel="futures">
+      <div class="tabcopy"><h3>Futures는 시장의 전체 체온을 먼저 보여줍니다.</h3><p>큰 카드 하나와 비교 가능한 2열 그리드를 조합해, 사용자가 개별 종목보다 시장 방향성을 먼저 파악하도록 유도합니다.</p><div class="points"><div>KOSPI200 같은 핵심 지표는 큰 숫자와 넓은 차트 공간으로 강조합니다.</div><div>나머지 지표는 동일한 셀 구조로 배치해 비교 속도를 높입니다.</div><div>API 실패 시에도 크래시 대신 대시 값으로 안전하게 비워 둡니다.</div></div></div>
+      <div class="tabstats"><div class="sbox"><strong>Primary Value</strong><span>장 시작 전후 흐름을 빠르게 읽을 수 있습니다.</span></div><div class="sbox"><strong>UI Motif</strong><span>빅 카드, 2x3 매트릭스, 하단 컬러 바.</span></div><div class="sbox"><strong>Build Hook</strong><span>60초 단위 새로고침과 fallback state.</span></div></div>
+    </div>
+    <div class="tabpanel" data-panel="alerts">
+      <div class="tabcopy"><h3>Alerts는 입력 플로우가 가장 중요한 화면입니다.</h3><p>종목 선택과 목표가 입력, 이상/이하 조건을 빠르게 등록하도록 만드는 폼 중심 화면입니다.</p><div class="points"><div>입력, 조건 선택, 등록 결과가 카드 안에서 단계적으로 읽혀야 합니다.</div><div>활성 알림 목록은 조건 색상과 삭제 동작이 분명해야 합니다.</div><div>탭 배지와 연결되면 현재 알림 개수를 앱 전역에서 파악할 수 있습니다.</div></div></div>
+      <div class="tabstats"><div class="sbox"><strong>Primary Value</strong><span>지켜보는 시간을 줄이고 행동을 앱에 위임합니다.</span></div><div class="sbox"><strong>UI Motif</strong><span>폼 카드, 상태 배지, 좌측 컬러 바, 삭제 버튼.</span></div><div class="sbox"><strong>Build Hook</strong><span><code>expo-notifications</code>와 60분 쿨다운.</span></div></div>
+    </div>
+    <div class="tabpanel" data-panel="history">
+      <div class="tabcopy"><h3>History는 결과를 남겨 제품의 신뢰를 만듭니다.</h3><p>알림이 언제 어떤 조건에서 울렸는지까지 시간축으로 쌓아, 사용자의 판단 보조 도구 역할을 강화합니다.</p><div class="points"><div>요약 카드로 총 발동 수와 오늘 발동 수를 빠르게 보여 줍니다.</div><div>이력 행은 종목, 시간, 조건, 당시 가격 순으로 짧고 또렷하게 읽혀야 합니다.</div><div>전체 삭제는 보조 기능이지만 확인 단계가 필요합니다.</div></div></div>
+      <div class="tabstats"><div class="sbox"><strong>Primary Value</strong><span>알림의 흔적을 남겨 나중의 판단 재료로 씁니다.</span></div><div class="sbox"><strong>UI Motif</strong><span>타임라인 느낌의 행, 요약 카드, CLR 액션.</span></div><div class="sbox"><strong>Build Hook</strong><span><code>AsyncStorage</code> 최대 50건과 최신순 정렬.</span></div></div>
+    </div>
+  </section>
+
+  <section class="section" id="build">
+    <div class="section-head">
+      <div><div class="sk">Build Notes</div><h2 class="st">웹과 모바일이 달라지는 지점만 선명하게</h2></div>
+      <p class="sdesc">중요한 것은 화려한 차이보다 상태 관리, 폴링, 저장소, 알림처럼 경험을 직접 바꾸는 기술 선택입니다.</p>
+    </div>
+    <div class="grid3">
+      <article class="card"><div class="cl">Storage</div><h3 class="ct">localStorage에서 <code>AsyncStorage</code>로</h3><p class="cc">웹의 동기 저장 대신 React Native 환경에 맞는 비동기 저장을 사용합니다. 키 prefix는 <code>sm_</code> 체계를 유지합니다.</p></article>
+      <article class="card"><div class="cl">Notification</div><h3 class="ct">브라우저 알림 대신 Expo 로컬 알림</h3><p class="cc">MVP 단계에서는 원격 푸시보다 로컬 알림으로 충분합니다. 권한 요청과 스케줄링 방식이 웹과 다릅니다.</p></article>
+      <article class="card"><div class="cl">Polling</div><h3 class="ct"><code>setInterval</code>보다 포커스 기반 갱신</h3><p class="cc">앱이 보이지 않을 때는 폴링을 멈춰야 합니다. 활성 화면에서만 갱신하는 방식이 배터리와 안정성에 유리합니다.</p></article>
+    </div>
+  </section>
+
+  <section class="section" id="workflow">
+    <div class="section-head">
+      <div><div class="sk">Workflow</div><h2 class="st">팀이 바로 움직일 수 있는 실행 시퀀스</h2></div>
+      <p class="sdesc">긴 단계 나열 대신 실제 제작 순서가 읽히는 구조로 재정리했습니다. 아래 단계는 접어서 읽을 수 있습니다.</p>
+    </div>
+    <div class="workflow">
+      <aside class="flowaside">
+        <div class="cl">Recommended Order</div><h3 class="ct">먼저 실행 가능 상태를 확보</h3>
+        <div class="timeline">
+          <div class="tstep"><div class="tbadge">01</div><div><strong>Shell + Tokens</strong><span>탭 네비게이션과 디자인 토큰을 먼저 고정합니다.</span></div></div>
+          <div class="tstep"><div class="tbadge">02</div><div><strong>Core Screens</strong><span>Watchlist와 Futures를 먼저 살려 정보 흐름을 확보합니다.</span></div></div>
+          <div class="tstep"><div class="tbadge">03</div><div><strong>Alerts MVP</strong><span>추가/삭제/쿨다운까지 포함한 기본 알림 루프를 완성합니다.</span></div></div>
+          <div class="tstep"><div class="tbadge">04</div><div><strong>History + Polish</strong><span>기록과 정리 화면을 넣고 전체 경험을 안정화합니다.</span></div></div>
+        </div>
+      </aside>
+      <div class="accords">
+        <section class="acc open"><button class="accbtn" type="button" aria-expanded="true"><span class="atitle"><span class="anum">1</span><span class="acopy"><strong>환경 세팅과 진입점 정리</strong><span>Expo 셸, 폰트, 토큰, 바텀 탭을 먼저 고정</span></span></span><span class="aind">OPEN</span></button><div class="accpanel"><div class="code">npx create-expo-app watchr-mobile --template blank-typescript
+npx expo install @react-navigation/native @react-navigation/bottom-tabs
+npx expo install expo-font @expo-google-fonts/ibm-plex-mono @expo-google-fonts/noto-sans-kr</div><p class="note">완료 기준은 앱이 뜨고, 4개 탭이 보이고, 토큰 색상이 전체 셸에 적용되는 것입니다.</p></div></section>
+        <section class="acc"><button class="accbtn" type="button" aria-expanded="false"><span class="atitle"><span class="anum">2</span><span class="acopy"><strong>Watchlist + Futures 화면 구현</strong><span>핵심 정보 구조를 가장 먼저 시각화</span></span></span><span class="aind">OPEN</span></button><div class="accpanel"><div class="code">components/
+  MarketStrip.tsx
+  TickerRow.tsx
+  Sparkline.tsx
+  FuturesBigCard.tsx
+  FuturesGrid.tsx</div><p class="note">종목 행과 선물 카드의 타입·색·정보 위계가 맞으면 이후 CRUD와 알림 흐름을 얹기 쉬워집니다.</p></div></section>
+        <section class="acc"><button class="accbtn" type="button" aria-expanded="false"><span class="atitle"><span class="anum">3</span><span class="acopy"><strong>Alerts MVP와 상태 저장 연결</strong><span>조건 등록과 로컬 알림, 쿨다운을 한 번에 묶기</span></span></span><span class="aind">OPEN</span></button><div class="accpanel"><div class="code">AsyncStorage keys:
+  sm_watchlist
+  sm_alerts
+  sm_history
+
+Notifications:
+  requestPermissionsAsync()
+  scheduleNotificationAsync()</div><p class="note">이 단계가 실질적 MVP입니다. 사용자가 앱을 계속 열어두지 않아도 반응을 받을 수 있어야 합니다.</p></div></section>
+        <section class="acc"><button class="accbtn" type="button" aria-expanded="false"><span class="atitle"><span class="anum">4</span><span class="acopy"><strong>History와 운영 문서 정리</strong><span>결과를 남기고 디버그 포맷까지 문서화</span></span></span><span class="aind">OPEN</span></button><div class="accpanel"><div class="code">History log payload:
+{ ticker, price, operator, target, time }
+
+Debug format:
+  Step 번호
+  Metro / Expo 에러 전문
+  실행 환경
+  재현 방식</div><p class="note">제품이 어디서 실패하는지 정리되어야 팀이 빠르게 이어받아 수정할 수 있습니다.</p></div></section>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="grid2">
+      <article class="card"><div class="cl">Encoding Guardrail</div><h3 class="ct">UTF-8을 끝까지 유지</h3><p class="cc">현재 원본 파일은 일부 환경에서 한글이 깨질 수 있으므로, 새 페이지는 UTF-8 기준으로 저장하고 배포 경로에서도 인코딩이 섞이지 않게 관리해야 합니다.</p></article>
+      <article class="card"><div class="cl">Embedding Guardrail</div><h3 class="ct">iframe 실패를 전제로 읽히게 설계</h3><p class="cc">라이브 프리뷰는 보조 수단입니다. 이 페이지 자체가 독립적인 설명력을 가져야 하므로 링크와 텍스트 설명을 함께 제공합니다.</p></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="cta">
+      <div class="cta-box">
+        <div class="sk">Next Move</div><h2>이제 이 컨셉을 실제 웹 또는 앱 작업의 기준 화면으로 쓸 수 있습니다.</h2>
+        <p class="lead">랜딩처럼 보이지만, 동시에 제품 브리프와 팀 온보딩 문서 역할도 하도록 구성했습니다. 다음 단계는 이 페이지를 기준으로 실제 앱 구현 우선순위나 웹 소개 페이지 방향을 더 구체화하는 것입니다.</p>
+        <div class="btns"><a class="btn primary" href="watchr_mobile_design.html">Open Live Mockup</a><a class="btn secondary" href="watchr_mobile_작업지시서.html">Open Full Brief</a></div>
+      </div>
+      <div class="mini">
+        <article class="card"><div class="cl">Use Case A</div><h3 class="ct">내부 데모 페이지</h3><p class="cc">PM, 디자인, 개발이 같은 화면을 보며 제품 정의를 맞출 때 사용.</p></article>
+        <article class="card"><div class="cl">Use Case B</div><h3 class="ct">실행 문서 허브</h3><p class="cc">모크업, 작업지시서, 구현 순서를 한 화면에서 연결하는 허브 역할.</p></article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer shell">
+  <div class="footer-links">
+    <a class="flink" href="watchr_mobile_design.html"><strong>Mockup</strong><span>모바일 4개 화면 프리뷰를 직접 열어 볼 수 있습니다.</span></a>
+    <a class="flink" href="watchr_mobile_작업지시서.html"><strong>Instruction Sheet</strong><span>원본 작업지시서 문서를 참고해 세부 구현 단계를 확인합니다.</span></a>
+  </div>
+  <div class="foot">WATCHR Mobile Web Concept · Dark Terminal Product Brief · 2026</div>
+</footer>
+
+<script>
+const tabs=document.querySelectorAll('.tabbtn');
+const panels=document.querySelectorAll('.tabpanel');
+tabs.forEach(tab=>tab.addEventListener('click',()=>{tabs.forEach(t=>t.setAttribute('aria-selected',String(t===tab)));panels.forEach(p=>p.classList.toggle('active',p.dataset.panel===tab.dataset.tab));}));
+document.querySelectorAll('.acc').forEach(acc=>{const btn=acc.querySelector('.accbtn');btn.addEventListener('click',()=>{const open=acc.classList.toggle('open');btn.setAttribute('aria-expanded',String(open));});});
+</script>
+</body>
+</html>
