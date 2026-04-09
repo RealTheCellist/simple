@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>WATCHR Mobile — 코딩 작업지시서</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07090d;--bg1:#0c1018;--bg2:#111621;--bg3:#161d2c;--line:#1e2840;--line2:#283350;--t0:#e8edf8;--t1:#9aabc8;--t2:#4d6082;--t3:#2a3a58;--up:#ff3b47;--dn:#2b7fff;--amber:#f5a623;--teal:#00d4aa;--purple:#a371f7;--green:#3fb950;--mono:'IBM Plex Mono',monospace;--sans:'Noto Sans KR',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+html{background:var(--bg);color:var(--t0);font-family:var(--sans)}body{font-size:14px;line-height:1.7}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.cover{background:var(--bg1);border-bottom:2px solid var(--line2);padding:44px 48px 36px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.chip{font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:12px;border:1px solid;letter-spacing:.5px}
+.cb{color:#58a6ff;border-color:#1f4e8a;background:#0d1f3c}.cg{color:var(--green);border-color:#1a4a26;background:#0d2418}.ca{color:var(--amber);border-color:#5a3e09;background:#1c1407}.cp{color:var(--purple);border-color:#4a2e8a;background:#1c1038}.ct{color:var(--teal);border-color:#004d40;background:rgba(0,212,170,.07)}
+h1{font-family:var(--mono);font-size:26px;font-weight:600;letter-spacing:3px;margin-bottom:6px;display:flex;align-items:center;gap:12px}
+.logo-dot{width:10px;height:10px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);animation:blink 2s infinite;flex-shrink:0}
+.cover-sub{color:var(--t2);font-size:12px;font-family:var(--mono);letter-spacing:1px;margin-bottom:20px}
+.env-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:18px}
+.env-box{background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:10px 14px}
+.env-lbl{font-family:var(--mono);font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.env-val{font-family:var(--mono);font-size:11px;font-weight:600}
+.wrap{max-width:960px;margin:0 auto;padding:40px 48px 80px}
+.sec{font-family:var(--mono);font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:2px;margin:44px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.sec:first-child{margin-top:0}
+.pv-wrap{border:1px solid var(--line2);border-radius:10px;overflow:hidden;margin-bottom:20px}
+.pv-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--bg3);border-bottom:1px solid var(--line)}
+.pv-dots{display:flex;gap:6px}
+.pv-dot{width:10px;height:10px;border-radius:50%}
+.pv-badge{font-family:var(--mono);font-size:9px;color:var(--teal);border:1px solid var(--teal);padding:2px 8px;border-radius:3px;letter-spacing:1px;background:rgba(0,212,170,.07)}
+.pv-frame{width:100%;height:540px;border:none;display:block;background:#050709}
+.code{background:#060a10;border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin-bottom:12px;font-family:var(--mono);font-size:11px;color:#c9d1d9;line-height:1.8;white-space:pre-wrap;overflow-x:auto}
+.c-g{color:var(--green)}.c-c{color:var(--t3)}.c-a{color:var(--amber)}.c-p{color:var(--purple)}.c-v{color:#79c0ff}.c-t{color:var(--teal)}
+.cont{background:#100b1a;border:1px solid #4a2e8a;border-radius:8px;overflow:hidden;margin-bottom:12px}
+.cont-hd{display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid #4a2e8a;background:#130e20}
+.cont-dot{width:7px;height:7px;border-radius:50%;background:var(--purple);flex-shrink:0}
+.cont-lbl{font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:.5px}
+.cont-tag{font-family:var(--mono);font-size:9px;padding:1px 7px;border-radius:3px;border:1px solid}
+.tc{color:#58a6ff;border-color:#1f4e8a;background:#0d1f3c}
+.cont-body{padding:13px 16px;font-family:var(--mono);font-size:11px;color:#c9d1d9;line-height:1.9;white-space:pre-wrap}
+.at{color:var(--purple)}.hl{color:var(--green)}.cm{color:var(--t3)}.ds{color:var(--amber)}.kw{color:#58a6ff}
+.apply-row{display:flex;align-items:center;gap:10px;padding:8px 16px;border-top:1px solid #4a2e8a;background:#0d0a18;font-family:var(--mono);font-size:10px;color:#4a3080}
+.apply-icon{color:var(--green);font-weight:700}
+.step{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.step-hd{display:flex;align-items:center;gap:14px;padding:14px 22px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none;background:var(--bg1)}
+.step-hd:hover{background:var(--bg2)}
+.snum{font-family:var(--mono);font-size:11px;font-weight:600;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid}
+.n0,.n1,.n2{color:#58a6ff;border-color:#1f4e8a;background:#0d1f3c}
+.n3,.n4{color:var(--teal);border-color:#004d40;background:rgba(0,212,170,.07)}
+.n5{color:var(--amber);border-color:#5a3e09;background:#1c1407}
+.n6,.n7{color:var(--purple);border-color:#4a2e8a;background:#1c1038}
+.step-title{font-size:14px;font-weight:700;flex:1}
+.step-eta{font-family:var(--mono);font-size:10px;color:var(--t2);background:var(--bg3);padding:3px 10px;border-radius:5px;border:1px solid var(--line)}
+.tog{color:var(--t2);font-size:11px;transition:transform .2s}
+.tog.open{transform:rotate(180deg)}
+.step-bd{padding:20px 24px;display:none;background:var(--bg)}
+.step-bd.open{display:block}
+.step-bd h3{font-family:var(--mono);font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:1.5px;margin:18px 0 10px}
+.step-bd h3:first-child{margin-top:0}
+.goal{background:var(--bg1);border-left:3px solid;border-radius:0 6px 6px 0;padding:11px 15px;font-size:13px;margin-bottom:14px}
+.gb{border-color:#58a6ff}.gg{border-color:var(--teal)}.ga{border-color:var(--amber)}.gp{border-color:var(--purple)}
+.warn{background:#1c1407;border:1px solid #5a3e09;border-radius:6px;padding:11px 15px;margin-top:14px}
+.warn-t{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--amber);margin-bottom:5px}
+.warn-b{font-size:12px;color:#a07030;line-height:1.7}
+.warn-b code{color:var(--amber);font-family:var(--mono)}
+.flist{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.fc{font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:5px;background:var(--bg1);border:1px solid var(--line);color:var(--t2)}
+.fc-n{border-color:#1a4a26;color:var(--green);background:#0d2418}
+.fc-e{border-color:#5a3e09;color:var(--amber);background:#1c1407}
+.verify{list-style:none}
+.verify li{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:13px;color:var(--t1)}
+.verify li:first-child{border-top:none}
+.chk{width:16px;height:16px;border-radius:3px;border:1.5px solid var(--t3);flex-shrink:0;margin-top:3px}
+.rule-card{background:var(--bg1);border:1px solid var(--line);border-radius:8px;padding:18px 20px;margin-bottom:16px}
+.rule-title{font-family:var(--mono);font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px}
+.rule-row{display:flex;gap:12px;padding:9px 0;border-top:1px solid var(--line);align-items:flex-start}
+.rule-row:first-of-type{border-top:none;padding-top:0}
+.rn{font-family:var(--mono);font-size:10px;color:#58a6ff;min-width:20px;flex-shrink:0;margin-top:2px}
+.rt{font-size:13px;color:var(--t1);line-height:1.6}
+.rt strong{color:var(--t0);font-weight:500}
+.tl{display:flex;margin:20px 0 28px;overflow-x:auto}
+.tl-s{flex:1;min-width:70px;text-align:center;position:relative}
+.tl-d{width:26px;height:26px;border-radius:50%;border:1.5px solid;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:600;position:relative;z-index:1;background:var(--bg)}
+.tl-line{position:absolute;top:12px;left:50%;width:100%;height:1px;background:var(--line)}
+.tl-n{font-size:10px;color:var(--t1)}
+.tl-t{font-size:9px;color:var(--t3);font-family:var(--mono)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mini{background:var(--bg1);border:1px solid var(--line);border-radius:6px;padding:11px 14px}
+.mini-t{font-family:var(--mono);font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.mini-b{font-size:12px;color:var(--t2);line-height:1.75}
+.mini-b code{color:#58a6ff;font-family:var(--mono);font-size:10px}
+.cmd{display:inline-block;font-family:var(--mono);font-size:11px;background:#060a10;border:1px solid var(--line);border-radius:3px;padding:1px 7px;color:#c9d1d9}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--line2);border-radius:2px}
+@media(max-width:640px){.cover{padding:32px 20px 28px}.wrap{padding:28px 20px 60px}.env-row{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="cover">
+  <div class="chips">
+    <span class="chip cb">작업지시서 v1.0</span>
+    <span class="chip cp">Continue.dev + Qwen3</span>
+    <span class="chip ct">Expo SDK 53</span>
+    <span class="chip cg">iOS + Android</span>
+    <span class="chip ca">디자인 확정</span>
+  </div>
+  <h1><div class="logo-dot"></div>WATCHR MOBILE</h1>
+  <div class="cover-sub">React Native · Expo · Continue.dev + Qwen3-Coder · 동일 Node.js 백엔드 재활용</div>
+  <div class="env-row">
+    <div class="env-box"><div class="env-lbl">에디터</div><div class="env-val" style="color:#58a6ff">VS Code</div></div>
+    <div class="env-box"><div class="env-lbl">AI 확장</div><div class="env-val" style="color:var(--purple)">Continue.dev</div></div>
+    <div class="env-box"><div class="env-lbl">모델</div><div class="env-val" style="color:var(--purple)">Qwen3-Coder</div></div>
+    <div class="env-box"><div class="env-lbl">프레임워크</div><div class="env-val" style="color:var(--teal)">Expo SDK 53</div></div>
+    <div class="env-box"><div class="env-lbl">백엔드</div><div class="env-val" style="color:var(--green)">Node.js 기존</div></div>
+  </div>
+</div>
+
+<div class="wrap">
+<div class="sec">확정 디자인 미리보기</div>
+<div class="pv-wrap">
+  <div class="pv-bar">
+    <div class="pv-dots"><div class="pv-dot" style="background:#ff5f57"></div><div class="pv-dot" style="background:#ffbd2e"></div><div class="pv-dot" style="background:#28c840"></div></div>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--t2)">WATCHR Mobile — 4 Screens Interactive</span>
+    <div class="pv-badge">LIVE MOCKUP</div>
+  </div>
+  <iframe class="pv-frame" src="watchr_mobile_design.html" title="WATCHR Mobile Design"></iframe>
+</div>
+<div class="two" style="margin-bottom:0">
+  <div class="mini"><div class="mini-t">핵심 결정</div><div class="mini-b">탭 네비게이션 4개 (Watchlist·Futures·Alerts·History)<br>웹과 동일 디자인 토큰 사용<br>기존 Node.js 백엔드 그대로 재활용</div></div>
+  <div class="mini"><div class="mini-t">웹과 다른 점 3가지</div><div class="mini-b">localStorage → <code>AsyncStorage</code><br>Notification API → <code>expo-notifications</code><br>setInterval → <code>useFocusEffect</code></div></div>
+</div>
+
+<div class="sec">전체 파일 구조</div>
+<div class="code"><span class="c-g">watchr-mobile/</span>
+├── <span class="c-a">.clinerules</span>              ← 디자인 토큰 + RN 규칙
+├── App.tsx                  ← 탭 네비게이션 진입점
+├── <span class="c-a">.env</span>                     ← EXPO_PUBLIC_API_URL
+└── src/
+    ├── screens/
+    │   ├── <span class="c-v">WatchlistScreen.tsx</span>  ← Tab 1
+    │   ├── <span class="c-v">FuturesScreen.tsx</span>    ← Tab 2
+    │   ├── <span class="c-v">AlertsScreen.tsx</span>     ← Tab 3
+    │   └── <span class="c-v">HistoryScreen.tsx</span>    ← Tab 4
+    ├── components/
+    │   ├── <span class="c-p">MarketStrip.tsx</span>      ← 상단 지수 스트립
+    │   ├── <span class="c-p">TickerRow.tsx</span>        ← 종목 행 (왼쪽 3px 바)
+    │   ├── <span class="c-p">Sparkline.tsx</span>        ← react-native-svg
+    │   ├── <span class="c-p">FuturesBigCard.tsx</span>   ← 선물 빅카드
+    │   └── <span class="c-p">FuturesGrid.tsx</span>      ← 2x3 지수 그리드
+    ├── hooks/
+    │   ├── <span class="c-t">useWatchlist.ts</span>      ← 종목 CRUD + 폴링
+    │   ├── <span class="c-t">useAlerts.ts</span>         ← 알림 조건 관리
+    │   └── <span class="c-t">useHistory.ts</span>        ← 이력 관리
+    ├── api/
+    │   └── <span class="c-g">client.ts</span>            ← fetch 래퍼
+    ├── notifications/
+    │   └── <span class="c-g">alertNotify.ts</span>       ← Expo Notifications
+    └── theme/
+        └── <span class="c-a">tokens.ts</span>            ← Colors + FontFamily</div>
+
+<div class="sec">웹 → 모바일 핵심 변경점</div>
+<div class="rule-card">
+  <div class="rule-title">반드시 숙지 — 웹 코드와 다른 3가지</div>
+  <div class="rule-row"><div class="rn">①</div><div class="rt"><strong>localStorage → AsyncStorage.</strong> <code style="font-family:var(--mono);font-size:11px;color:var(--teal)">@react-native-async-storage/async-storage</code> 사용. 비동기 API라 await 필수. 같은 키 prefix <code style="font-family:var(--mono);color:var(--amber)">"sm_"</code> 유지. 값은 JSON.stringify/parse.</div></div>
+  <div class="rule-row"><div class="rn">②</div><div class="rt"><strong>Notification API → expo-notifications.</strong> 브라우저 Notification 대신 expo-notifications 사용. 앱이 백그라운드 상태에서도 발송 가능. 권한 요청 코드가 다름.</div></div>
+  <div class="rule-row"><div class="rn">③</div><div class="rt"><strong>setInterval → useFocusEffect + useRef.</strong> 앱이 백그라운드로 가면 폴링을 멈춰야 배터리를 아낌. useFocusEffect 안에서 interval 시작, cleanup에서 clearInterval.</div></div>
+  <div class="rule-row"><div class="rn">④</div><div class="rt"><strong>Canvas → react-native-svg.</strong> Sparkline은 SVG Path로 구현. 웹 Canvas API 없음.</div></div>
+  <div class="rule-row"><div class="rn">⑤</div><div class="rt"><strong>API URL → 환경변수.</strong> <code style="font-family:var(--mono);color:var(--amber)">EXPO_PUBLIC_API_URL=http://[PC IP]:3000</code>. localhost는 시뮬레이터에서만 동작, 실기기에서는 PC IP 사용.</div></div>
+</div>
+
+<div class="sec">작업 순서</div>
+<div class="tl">
+  <div class="tl-s"><div class="tl-d n0">0<div class="tl-line"></div></div><div class="tl-n">환경 세팅</div><div class="tl-t">~45분</div></div>
+  <div class="tl-s"><div class="tl-d n1">1<div class="tl-line"></div></div><div class="tl-n">토큰+탭</div><div class="tl-t">~1h</div></div>
+  <div class="tl-s"><div class="tl-d n2">2<div class="tl-line"></div></div><div class="tl-n">Watchlist</div><div class="tl-t">~2h</div></div>
+  <div class="tl-s"><div class="tl-d n3">3<div class="tl-line"></div></div><div class="tl-n">Futures</div><div class="tl-t">~1.5h</div></div>
+  <div class="tl-s"><div class="tl-d n3" style="color:var(--teal);border-color:#004d40">4<div class="tl-line"></div></div><div class="tl-n">CRUD</div><div class="tl-t">~1.5h</div></div>
+  <div class="tl-s"><div class="tl-d n5">5<div class="tl-line"></div></div><div class="tl-n">알림 MVP</div><div class="tl-t">~2h</div></div>
+  <div class="tl-s"><div class="tl-d n6">6<div class="tl-line"></div></div><div class="tl-n">History</div><div class="tl-t">~1h</div></div>
+  <div class="tl-s"><div class="tl-d n7">7</div><div class="tl-n">복합알림</div><div class="tl-t">~2h</div></div>
+</div>
+
+<div class="sec">상세 작업지시</div>
+
+<!-- STEP 0 -->
+<div class="step">
+  <div class="step-hd" onclick="tog('s0')"><div class="snum n0">0</div><div class="step-title">환경 세팅 — Expo 프로젝트 + .clinerules</div><div class="step-eta">~45분</div><div class="tog" id="s0-t">▼</div></div>
+  <div class="step-bd open" id="s0">
+    <h3>터미널 직접 실행</h3>
+    <div class="code">npx create-expo-app watchr-mobile --template blank-typescript
+cd watchr-mobile && code .
+
+npx expo install expo-notifications expo-device
+npx expo install @react-native-async-storage/async-storage
+npx expo install react-native-svg
+npx expo install @react-navigation/native @react-navigation/bottom-tabs
+npx expo install react-native-screens react-native-safe-area-context
+npx expo install expo-font @expo-google-fonts/ibm-plex-mono @expo-google-fonts/noto-sans-kr
+
+mkdir -p src/screens src/components src/hooks src/api src/notifications src/theme
+
+# .env 생성 (PC의 실제 IP로 변경)
+# EXPO_PUBLIC_API_URL=http://192.168.1.x:3000</div>
+    <h3>.clinerules 내용</h3>
+    <div class="cont">
+      <div class="cont-hd"><div class="cont-dot"></div><div class="cont-lbl">.clinerules — 프로젝트 루트에 저장</div></div>
+      <div class="cont-body"><span class="cm"># WATCHR MOBILE — React Native + Expo SDK 53</span>
+프레임워크: React Native + Expo (TypeScript)
+내비게이션: @react-navigation/bottom-tabs (탭 4개)
+API: EXPO_PUBLIC_API_URL 환경변수
+
+<span class="cm"># 디자인 토큰 (src/theme/tokens.ts)</span>
+Colors.bg:#07090d  bg1:#0c1018  bg2:#111621  bg3:#161d2c
+Colors.line:#1e2840  line2:#283350
+Colors.t0:#e8edf8  t1:#9aabc8  t2:#4d6082  t3:#2a3a58
+Colors.up:#ff3b47  dn:#2b7fff  amber:#f5a623  teal:#00d4aa
+FontFamily.mono: IBM_Plex_Mono  sans: NotoSansKR
+
+<span class="cm"># 컴포넌트 규칙</span>
+- StyleSheet.create 사용 (inline style 최소화)
+- 색상은 Colors 토큰 import
+- 숫자/가격: IBM_Plex_Mono 폰트
+- 상승→Colors.up / 하락→Colors.dn
+- 왼쪽 액센트 바: borderLeftWidth:3, borderLeftColor
+
+<span class="cm"># 저장소</span>
+- AsyncStorage prefix: "sm_"
+- sm_watchlist / sm_alerts / sm_history
+- JSON.stringify/parse 필수
+
+<span class="cm"># 폴링</span>
+- useFocusEffect + useRef(intervalId)
+- Watchlist: 5000ms / Futures: 60000ms
+
+<span class="cm"># 알림</span>
+- expo-notifications (로컬 알림)
+- 쿨다운: alertId별 60분</div>
+    </div>
+    <h3>검증</h3>
+    <ul class="verify">
+      <li><div class="chk"></div><span class="cmd">npx expo start</span> → Expo Go에서 스캔 → 기본 화면 열림</li>
+      <li><div class="chk"></div>src/ 폴더 구조 생성 확인</li>
+      <li><div class="chk"></div>.env에 서버 IP 입력 확인</li>
+    </ul>
+  </div>
+</div>
+
+<!-- STEP 1 -->
+<div class="step">
+  <div class="step-hd" onclick="tog('s1')"><div class="snum n1">1</div><div class="step-title">디자인 토큰 + 탭 네비게이션 뼈대</div><div class="step-eta">~1시간</div><div class="tog" id="s1-t">▼</div></div>
+  <div class="step-bd" id="s1">
+    <h3>목표</h3>
+    <div class="goal gb">바텀탭 4개가 보이고 탭 전환이 된다. 탭바 배경은 #0c1018.</div>
+    <h3>만드는 파일</h3>
+    <div class="flist"><span class="fc fc-n">신규 src/theme/tokens.ts</span><span class="fc fc-n">신규 src/api/client.ts</span><span class="fc fc-e">수정 App.tsx</span></div>
+    <div class="cont">
+      <div class="cont-hd"><div class="cont-dot"></div><div class="cont-lbl">1-A &nbsp;tokens.ts + client.ts</div><span class="cont-tag tc">Chat</span></div>
+      <div class="cont-body">WATCHR Mobile Step 1.
+
+<span class="hl">src/theme/tokens.ts</span>:
+.clinerules 디자인 토큰 → RN 객체:
+<span class="ds">export const Colors = {
+  bg:'#07090d', bg1:'#0c1018', bg2:'#111621', bg3:'#161d2c',
+  line:'#1e2840', line2:'#283350',
+  t0:'#e8edf8', t1:'#9aabc8', t2:'#4d6082', t3:'#2a3a58',
+  up:'#ff3b47', upGlow:'rgba(255,59,71,.15)',
+  dn:'#2b7fff', dnGlow:'rgba(43,127,255,.15)',
+  amber:'#f5a623', teal:'#00d4aa',
+}
+export const FontFamily = { mono:'IBM_Plex_Mono', sans:'NotoSansKR' }
+export const fmtPrice = (n:number) => n.toLocaleString('ko-KR')
+export const fmtRate = (r:number) => (r>=0?'+':'')+r.toFixed(2)+'%'</span>
+
+<span class="hl">src/api/client.ts</span>:
+const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000'
+export async function fetchPrice(ticker:string)
+export async function fetchBatch(tickers:string[])
+export async function fetchFutures()
+각 함수: 실패 시 null 반환, console.warn('[SM]'...)</div>
+      <div class="apply-row"><span class="apply-icon">▶ Apply</span><span>tokens.ts → client.ts Apply</span></div>
+    </div>
+    <div class="cont">
+      <div class="cont-hd"><div class="cont-dot"></div><div class="cont-lbl">1-B &nbsp;App.tsx 탭 네비게이션</div><span class="cont-tag tc">Chat</span></div>
+      <div class="cont-body"><span class="at">@src/theme/tokens.ts</span>
+
+App.tsx를 바텀탭으로 교체:
+- useFonts로 IBM_Plex_Mono, NotoSansKR 로드
+- if (!fontsLoaded) return null
+- NavigationContainer + createBottomTabNavigator
+- 탭 4개: Watchlist / Futures / Alerts / History
+- 탭바 스타일:
+  backgroundColor: Colors.bg1
+  borderTopWidth: 0.5, borderTopColor: Colors.line2
+  activeTintColor: Colors.amber
+  inactiveTintColor: Colors.t3
+  height: 82 (Android), paddingBottom: 20
+- Alerts 탭: tabBarBadge 숫자 (나중에 연결, 지금은 undefined)</div>
+      <div class="apply-row"><span class="apply-icon">▶ Apply</span><span>App.tsx Apply → Expo Go 새로고침</span></div>
+    </div>
+    <h3>검증</h3>
+    <ul class="verify">
+      <li><div class="chk"></div>4개 탭이 하단에 표시</li>
+      <li><div class="chk"></div>활성 탭 amber, 비활성 t3 색상</li>
+      <li><div class="chk"></div>탭바 배경이 어두운 #0c1018</li>
+    </ul>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="step">
+  <div class="step-hd" onclick="tog('s2')"><div class="snum n2">2</div><div class="step-title">WatchlistScreen — 마켓 스트립 + 종목 행</div><div class="step-eta">~2시간</div><div class="tog" id="s2-t">▼</div></div>
+  <div class="step-bd" id="s2">
+    <h3>목표</h3>
+    <div class="goal gb">삼성전자 행 1개가 화면에 나타나고 5초마다 가격이 갱신된다.</div>
+    <h3>만드는 파일</h3>
+    <div class="flist"><span class="fc fc-n">신규 src/screens/WatchlistScreen.tsx</span><span class="fc fc-n">신규 src/components/MarketStrip.tsx</span><span class="fc fc-n">신규 src/components/TickerRow.tsx</span><span class="fc fc-n">신규 src/components/Sparkline.tsx</span></div>
+    <div class="cont">
+      <div class="cont-hd"><div class="cont-dot"></div><div class="cont-lbl">2-A &nbsp;Sparkline + TickerRow</div><span class="cont-tag tc">Chat</span></div>
+      <div class="cont-body"><span class="at">@src/theme/tokens.ts</span>
+
+<span class="hl">src/components/Sparkline.tsx</span>:
+react-native-svg Svg, Path 사용
+props: { data:number[], color:string, width?:52, height?:26 }
+data → SVG d 문자열 변환 (M...L...L...)
+fill="none" strokeWidth=1.2 opacity=.85
+
+<span class="hl">src/components/TickerRow.tsx</span>:
+props: { ticker, name, price, change, changeRate, sparkData:number[], hasAlert, onPress, onDelete }
+레이아웃:
+- 전체: flexDirection:'row', height:52, alignItems:'center', paddingHorizontal:16
+- borderBottomWidth:1, borderBottomColor:Colors.line
+- 왼쪽 3px 바: position:'absolute', left:0, top:0, bottom:0, width:3
+  isUp ? Colors.up : Colors.dn
+- 코드: IBM_Plex_Mono 13px fontWeight:'600', Colors.t0
+- 이름: NotoSansKR 10px Colors.t2 (hasAlert시 amber pip View 5px)
+- Sparkline 52x26 (margin 0 10px)
+- 가격: IBM_Plex_Mono 13px fontWeight:'500'
+- 등락률: IBM_Plex_Mono 9px
+모두 StyleSheet.create 사용</div>
+      <div class="apply-row"><span class="apply-icon">▶ Apply</span><span>Sparkline.tsx → TickerRow.tsx Apply</span></div>
+    </div>
+    <div class="cont">
+      <div class="cont-hd"><div class="cont-dot"></div><div class="cont-lbl">2-B &nbsp;MarketStrip + WatchlistScreen</div><span class="cont-tag tc">Chat</span></div>
+      <div class="cont-body"><span class="at">@src/components/TickerRow.tsx</span> <span class="at">@src/api/client.ts</span>
+
+<span class="hl">src/components/MarketStrip.tsx</span>:
+ScrollView horizontal, showsHorizontalScrollIndicator:false
+4개 아이템: KOSPI / KOSDAQ / NQ선물 / USD/KRW
+아이템: minWidth:100, padding 8 x 13, borderRightWidth:1
+지수명 7px t3 letterSpacing:1.5 / 가격 12px 500 / 등락 8px
+
+<span class="hl">src/screens/WatchlistScreen.tsx</span>:
+SafeAreaView bg:Colors.bg, StatusBar barStyle:'light-content'
+상단 앱바: "WATCHR" IBM_Plex_Mono 15px 600 + 장중 텍스트 + ⚙
+MarketStrip
+FlatList data=['005930.KS'] (하드코딩, Step4에서 훅으로 교체)
+useFocusEffect + useRef intervalRef
+  → 5초마다 fetchPrice('005930.KS') → setState
+  → cleanup: clearInterval</div>
+      <div class="apply-row"><span class="apply-icon">▶ Apply</span><span>MarketStrip.tsx → WatchlistScreen.tsx Apply</span></div>
+    </div>
+    <h3>검증</h3>
+    <ul class="verify">
+      <li><div class="chk"></div>WatchlistScreen에 삼성전자 행 표시</li>
+      <li><div class="chk"></div>상단 마켓 스트립 4개 지수 표시</li>
+      <li><div class="chk"></div>5초마다 가격 갱신 ([SM] 콘솔 로그 확인)</li>
+    </ul>
+    <div class="warn">
+      <div class="warn-t">⚠ 실기기 API 연결</div>
+      <div class="warn-b">실기기에서 <code>localhost:3000</code>은 접근 불가. <code>.env</code>에 PC의 실제 IP 주소 사용.<br>또는 <code>npx ngrok http 3000</code>으로 외부 URL 생성 후 사용.</div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="step">
+  <div class="step-hd" onclick="tog('s3')"><div class="snum n3">3</div><div class="step-title">FuturesScreen — 선물 빅카드 + 지수 그리드</div><div class="step-eta">~1.5시간</div><div class="tog" id="s3-t">▼</div></div>
+  <div class="step-bd" id="s3">
+    <h3>목표</h3>
+    <div class="goal gg">Futures 탭에 KOSPI200 빅카드 + 6개 그리드가 1분마다 갱신된다.</div>
+    <h3>만드는 파일</h3>
+    <div class="flist"><span class="fc fc-n">신규 src/screens/FuturesScreen.tsx</span><span class="fc fc-n">신규 src/components/FuturesBigCard.tsx</span><span class="fc fc-n">신규 src/components/FuturesGrid.tsx</span></div>
+    <div class="cont">
+      <div class="cont-hd"><div class="cont-dot"></div><div class="cont-lbl">3 &nbsp;Futures 화면 전체</div><span class="cont-tag tc">Chat</span></div>
+      <div class="cont-body"><span class="at">@src/theme/tokens.ts</span> <span class="at">@src/api/client.ts</span> <span class="at">@src/components/Sparkline.tsx</span>
+
+<span class="hl">src/components/FuturesBigCard.tsx</span>:
+bg1 배경, borderBottom 1px
+레이블 7px t3 uppercase / 가격 IBM_Plex_Mono 26px / 등락 12px badge
+Sparkline width:전체 height:44
+
+<span class="hl">src/components/FuturesGrid.tsx</span>:
+FlatList numColumns=2
+각 아이템: padding 11x14, borderBottom/Right 1px
+지수명 7px t3 / 가격 15px / 등락 9px
+하단 2px 바: up→Colors.up / dn→Colors.dn
+
+<span class="hl">src/screens/FuturesScreen.tsx</span>:
+FuturesBigCard (KOSPI200)
+FuturesGrid (나스닥/S&P500/KOSPI/KOSDAQ/USD-KRW/DOW)
+useFocusEffect + 60초 폴링 → fetchFutures()
+API 실패 시 null 처리, "—" 표시</div>
+      <div class="apply-row"><span class="apply-icon">▶ Apply</span><span>FuturesBigCard → FuturesGrid → FuturesScreen Apply</span></div>
+    </div>
+    <h3>검증</h3>
+    <ul class="verify">
+      <li><div class="chk"></div>Futures 탭 빅카드 + 6개 그리드 표시</li>
+      <li><div class="chk"></div>60초 갱신 콘솔 확인</li>
+      <li><div class="chk"></div>API 실패 시 크래시 없음</li>
+    </ul>
+  </div>
+</div>
+
+<!-- STEP 4 -->
+<div class="step">
+  <div class="step-hd" onclick="tog('s4')"><div class="snum n3" style="color:var(--teal);border-color:#004d40;background:rgba(0,212,170,.07)">4</div><div class="step-title">워치리스트 CRUD + AsyncStorage 영속화</div><div class="step-eta">~1.5시간</div><div class="tog" id="s4-t">▼</div></div>
+  <div class="step-bd" id="s4">
+    <h3>목표</h3>
+    <div class="goal gg">종목 추가·삭제, 앱 재시작 후 복원.</div>
+    <h3>만드는 파일</h3>
+    <div class="flist"><span class="fc fc-n">신규 src/hooks/useWatchlist.ts</span><span class="fc fc-e">수정 src/screens/WatchlistScreen.tsx</span></div>
+    <div class="cont">
+      <div class="cont-hd"><div class="cont-dot"></div><div class="cont-lbl">4 &nbsp;useWatchlist + CRUD UI</div><span class="cont-tag tc">Chat</span></div>
+      <div class="cont-body"><span class="at">@src/api/client.ts</span> <span class="at">@src/screens/WatchlistScreen.tsx</span>
+
+<span class="hl">src/hooks/useWatchlist.ts</span>:
+AsyncStorage "sm_watchlist"
+state: tickers (string[]), prices (Record-string-PriceData)
+addTicker(ticker): 대문자화, 중복 체크, AsyncStorage 저장
+removeTicker(ticker): 삭제, 저장
+useEffect: 초기 로드
+useFocusEffect + 5초 폴링: fetchBatch(tickers) → prices 업데이트
+반환: { tickers, prices, addTicker, removeTicker, isLoading }
+
+WatchlistScreen 수정:
+useWatchlist() 사용
++ 버튼 → Alert.prompt('종목 추가', '티커 입력') → addTicker
+FlatList data={tickers}
+롱프레스 → Alert.confirm → removeTicker
+빈 목록: "ADD TICKER TO BEGIN" 안내</div>
+      <div class="apply-row"><span class="apply-icon">▶ Apply</span><span>useWatchlist.ts → WatchlistScreen.tsx Apply</span></div>
+    </div>
+    <h3>검증</h3>
+    <ul class="verify">
+      <li><div class="chk"></div>+ 버튼 → 입력 → 행 추가 + 폴링 시작</li>
+      <li><div class="chk"></div>롱프레스 → 삭제 확인 → 제거</li>
+      <li><div class="chk"></div>앱 재시작 후 목록 복원</li>
+      <li><div class="chk"></div>중복 티커 무시</li>
+    </ul>
+  </div>
+</div>
+
+<!-- STEP 5 -->
+<div class="step">
+  <div class="step-hd" onclick="tog('s5')"><div class="snum n5">5</div><div class="step-title">AlertsScreen + Expo Notifications ★ MVP</div><div class="step-eta">~2시간</div><div class="tog" id="s5-t">▼</div></div>
+  <div class="step-bd" id="s5">
+    <h3>목표</h3>
+    <div class="goal ga">알림 조건 설정, 백그라운드에서도 push 알림 발동.<br><span style="color:var(--amber);font-size:12px;font-family:var(--mono)">★ MVP 완성점.</span></div>
+    <h3>만드는 파일</h3>
+    <div class="flist"><span class="fc fc-n">신규 src/notifications/alertNotify.ts</span><span class="fc fc-n">신규 src/hooks/useAlerts.ts</span><span class="fc fc-n">신규 src/screens/AlertsScreen.tsx</span><span class="fc fc-e">수정 src/hooks/useWatchlist.ts</span><span class="fc fc-e">수정 App.tsx (탭 배지)</span></div>
+    <div class="cont">
+      <div class="cont-hd"><div class="cont-dot"></div><div class="cont-lbl">5-A &nbsp;alertNotify + useAlerts</div><span class="cont-tag tc">Chat</span></div>
+      <div class="cont-body"><span class="hl">src/notifications/alertNotify.ts</span>:
+expo-notifications 사용
+requestPermission(): Notifications.requestPermissionsAsync()
+sendAlert(title:string, body:string):
+  Notifications.scheduleNotificationAsync({ content:{title,body,sound:true}, trigger:null })
+cooldownMap: Map-string-number (alertId → timestamp)
+isOnCooldown(id): 60분 체크
+
+<span class="hl">src/hooks/useAlerts.ts</span>:
+AsyncStorage "sm_alerts"
+조건: { id:string, ticker:string, operator:'above'|'below', price:number }
+addAlert, removeAlert, getAlerts
+checkAlerts(priceMap: Record-string-number):
+  조건 충족 + 쿨다운 아닌 경우 sendAlert 호출
+
+useWatchlist.ts 수정:
+폴링 결과 priceMap 빌드 후 checkAlerts(priceMap) 호출</div>
+      <div class="apply-row"><span class="apply-icon">▶ Apply</span><span>alertNotify.ts → useAlerts.ts → useWatchlist.ts Apply</span></div>
+    </div>
+    <div class="cont">
+      <div class="cont-hd"><div class="cont-dot"></div><div class="cont-lbl">5-B &nbsp;AlertsScreen UI</div><span class="cont-tag tc">Chat</span></div>
+      <div class="cont-body"><span class="at">@src/hooks/useAlerts.ts</span> <span class="at">@src/theme/tokens.ts</span>
+
+<span class="hl">src/screens/AlertsScreen.tsx</span>:
+디자인: 모바일 mockup 참조
+
+추가 카드 (bg1, borderRadius:10):
+- 종목 선택: Picker 또는 Modal sheet
+- 목표가: TextInput keyboardType:'numeric'
+- 이상/이하 버튼 2개 (up-glow / dn-glow)
+
+등록 목록 FlatList:
+- 각 아이템: 왼쪽 3px 바 (above→up, below→dn)
+- × 삭제 버튼
+
+App.tsx: tabBarBadge = useAlerts().getAlerts().length || undefined</div>
+      <div class="apply-row"><span class="apply-icon">▶ Apply</span><span>AlertsScreen.tsx → App.tsx Apply</span></div>
+    </div>
+    <h3>검증</h3>
+    <ul class="verify">
+      <li><div class="chk"></div>알림 권한 요청 최초 실행 시</li>
+      <li><div class="chk"></div>알림 추가 → Alerts 탭 배지 수 증가</li>
+      <li><div class="chk"></div>앱 백그라운드에서 조건 충족 → push 알림 도착</li>
+      <li><div class="chk"></div>60분 내 중복 발동 없음</li>
+    </ul>
+    <div class="warn">
+      <div class="warn-t">⚠ Expo Go vs EAS Build</div>
+      <div class="warn-b">Expo Go에서 로컬 알림 동작 확인. 원격 push는 <code>eas build</code> 이후 가능. 지금은 로컬 알림으로 충분.</div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 6 -->
+<div class="step">
+  <div class="step-hd" onclick="tog('s6')"><div class="snum n6">6</div><div class="step-title">HistoryScreen — 알림 이력 타임라인</div><div class="step-eta">~1시간</div><div class="tog" id="s6-t">▼</div></div>
+  <div class="step-bd" id="s6">
+    <h3>목표</h3>
+    <div class="goal gp">알림 이력이 타임라인으로 표시되고 전체 삭제가 동작한다.</div>
+    <div class="cont">
+      <div class="cont-hd"><div class="cont-dot"></div><div class="cont-lbl">6 &nbsp;useHistory + HistoryScreen</div><span class="cont-tag tc">Chat</span></div>
+      <div class="cont-body"><span class="at">@src/theme/tokens.ts</span>
+
+<span class="hl">src/hooks/useHistory.ts</span>:
+AsyncStorage "sm_history" 최대 50건
+addLog({ ticker, price, operator, target, time:string })
+getLogs(): 최신순, clearAll()
+
+<span class="hl">src/screens/HistoryScreen.tsx</span>:
+요약 2칸 그리드: 총발동(up색) / 오늘발동(amber색)
+FlatList 이력:
+  pip 6px circle: above→Colors.up / below→Colors.dn
+  종목코드 11px bold / 시각 8px t3
+  조건 9px up/dn 색 / 현재가 10px
+CLR 버튼 → Alert.confirm → clearAll()</div>
+      <div class="apply-row"><span class="apply-icon">▶ Apply</span><span>useHistory.ts → HistoryScreen.tsx Apply</span></div>
+    </div>
+    <h3>검증</h3>
+    <ul class="verify">
+      <li><div class="chk"></div>알림 발동 후 History 탭에 이력 표시</li>
+      <li><div class="chk"></div>요약 카드 숫자 정확</li>
+      <li><div class="chk"></div>CLR → 확인 → 목록 삭제</li>
+    </ul>
+  </div>
+</div>
+
+<!-- STEP 7 -->
+<div class="step">
+  <div class="step-hd" onclick="tog('s7')"><div class="snum n7">7</div><div class="step-title">복합 알림 — AND/OR 다중 조건 (Step 5 안정화 후)</div><div class="step-eta">~2시간</div><div class="tog" id="s7-t">▼</div></div>
+  <div class="step-bd" id="s7">
+    <h3>목표</h3>
+    <div class="goal gp">가격 + 거래량 AND/OR 조합. 웹 alerts.js와 동일 로직.</div>
+    <div class="cont">
+      <div class="cont-hd"><div class="cont-dot"></div><div class="cont-lbl">7 &nbsp;복합 조건 확장</div><span class="cont-tag tc">Chat</span></div>
+      <div class="cont-body"><span class="at">@src/hooks/useAlerts.ts</span> <span class="at">@src/screens/AlertsScreen.tsx</span>
+
+Step 7: 복합 알림.
+조건 구조: { id, ticker, logic:'AND'|'OR', conditions:[
+  { field:'price'|'volume'|'changeRate', operator:'above'|'below', value }
+]}
+conditions 1개 → 기존 단순 동작 (하위 호환)
+AlertsScreen: 조건 추가 + 버튼, AND/OR 토글</div>
+      <div class="apply-row"><span class="apply-icon">▶ Apply</span><span>useAlerts.ts → AlertsScreen.tsx Apply</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="sec">막혔을 때</div>
+<div class="cont">
+  <div class="cont-hd"><div class="cont-dot"></div><div class="cont-lbl">디버그 표준 형식</div><span class="cont-tag tc">Chat</span></div>
+  <div class="cont-body"><span class="at">@src/[관련파일.tsx]</span>
+
+Step [번호] 작업 중 문제.
+에러: [Metro/Expo 터미널 에러 전체 복붙]
+환경: Expo Go / iOS Simulator / Android Emulator [명시]
+원인 한 줄 설명 후 수정해줘. 디자인 토큰은 .clinerules 참조.</div>
+</div>
+<div class="two">
+  <div class="mini"><div class="mini-t">Metro 에러</div><div class="mini-b">터미널 빨간 에러 전체 복붙<br><code>npx expo start -c</code> 캐시 초기화 먼저</div></div>
+  <div class="mini"><div class="mini-t">RN 특유 규칙</div><div class="mini-b">StyleSheet에 단위(px) 쓰면 에러<br>AsyncStorage: JSON.stringify/parse 필수</div></div>
+  <div class="mini"><div class="mini-t">iOS vs Android</div><div class="mini-b">shadow: iOS shadow* / Android elevation<br>알림 권한: OS별 코드 다름</div></div>
+  <div class="mini"><div class="mini-t">/think 활용</div><div class="mini-b">복잡한 로직: <code>/think</code><br>단순 레이아웃: <code>/no_think</code></div></div>
+</div>
+
+<p style="text-align:center;font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:52px;letter-spacing:1px">WATCHR Mobile · Continue.dev + Qwen3 + Expo SDK 53 · 작업지시서 v1.0 · 2026.03</p>
+</div>
+<script>
+function tog(id){const b=document.getElementById(id),t=document.getElementById(id+'-t');const o=b.classList.toggle('open');t.textContent=o?'▲':'▼';t.classList.toggle('open',o)}
+</script>
+</body>
+</html>

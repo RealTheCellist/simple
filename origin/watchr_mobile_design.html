@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WATCHR Mobile — Design Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090d;--bg1:#0c1018;--bg2:#111621;--bg3:#161d2c;
+  --line:#1e2840;--line2:#283350;
+  --t0:#e8edf8;--t1:#9aabc8;--t2:#4d6082;--t3:#2a3a58;
+  --up:#ff3b47;--up-g:rgba(255,59,71,.15);
+  --dn:#2b7fff;--dn-g:rgba(43,127,255,.15);
+  --amber:#f5a623;--teal:#00d4aa;--purple:#a371f7;--green:#3fb950;
+  --mono:'IBM Plex Mono',monospace;--sans:'Noto Sans KR',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#050709;font-family:var(--sans);min-height:100vh}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes pip{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.6)}}
+
+.page-header{text-align:center;padding:40px 24px 28px;background:linear-gradient(180deg,#0a0d14 0%,#050709 100%);border-bottom:1px solid var(--line)}
+.page-logo{font-family:var(--mono);font-size:20px;font-weight:600;letter-spacing:4px;color:var(--t0);display:inline-flex;align-items:center;gap:10px;margin-bottom:6px}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);animation:blink 2s infinite}
+.page-sub{font-family:var(--mono);font-size:10px;color:var(--t3);letter-spacing:2px}
+
+.screen-tabs{display:flex;justify-content:center;gap:8px;padding:24px;flex-wrap:wrap}
+.stab{font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:6px 16px;border-radius:20px;border:1px solid var(--line2);background:var(--bg1);color:var(--t2);cursor:pointer;transition:all .2s}
+.stab:hover{border-color:var(--t2);color:var(--t1)}
+.stab.active{background:var(--amber);border-color:var(--amber);color:#000;font-weight:600}
+
+.frames-area{display:flex;justify-content:center;align-items:flex-start;gap:36px;padding:0 32px 60px;flex-wrap:wrap}
+.phone-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+.phone-label{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:2px;text-transform:uppercase}
+
+/* 폰 프레임 */
+.phone{width:320px;height:693px;background:var(--bg);border-radius:44px;border:1.5px solid #283350;overflow:hidden;position:relative;box-shadow:0 0 0 8px #060810,0 0 0 9px #1e2840,0 40px 80px rgba(0,0,0,.8)}
+.island{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:98px;height:30px;background:#000;border-radius:20px;z-index:20}
+.island::after{content:'';position:absolute;top:50%;right:16px;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:#111;box-shadow:inset 0 0 0 2px #222}
+
+.status-bar{position:absolute;top:0;left:0;right:0;height:56px;display:flex;align-items:flex-end;padding:0 26px 8px;z-index:15;background:transparent}
+.sb-time{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--t0)}
+.sb-r{margin-left:auto;display:flex;gap:5px;align-items:center;font-family:var(--mono);font-size:10px;color:var(--t0)}
+
+.scr{display:none;position:absolute;inset:0;padding-top:56px}
+.scr.active{display:block}
+.scr-inner{height:calc(100% - 82px);overflow-y:auto;scrollbar-width:none;background:var(--bg)}
+.scr-inner::-webkit-scrollbar{display:none}
+
+.app-bar{padding:10px 18px 10px;border-bottom:1px solid var(--line);background:var(--bg1);display:flex;align-items:center;justify-content:space-between}
+.ab-title{font-family:var(--mono);font-size:15px;font-weight:600;letter-spacing:2px;color:var(--t0)}
+.ab-sub{font-family:var(--mono);font-size:8px;color:var(--t3);letter-spacing:1.5px;margin-top:2px}
+.ab-btn{width:30px;height:30px;border-radius:7px;border:1px solid var(--line2);background:var(--bg2);color:var(--t2);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer}
+.ab-btns{display:flex;gap:6px}
+
+/* 유틸 */
+.up-c{color:var(--up)} .dn-c{color:var(--dn)} .mono{font-family:var(--mono)}
+.badge{font-family:var(--mono);font-size:8px;padding:2px 6px;border-radius:3px;letter-spacing:.5px}
+.b-up{background:var(--up-g);border:1px solid #7a1a22;color:var(--up)}
+.b-dn{background:var(--dn-g);border:1px solid #0e3a7a;color:var(--dn)}
+.b-amber{background:rgba(245,166,35,.12);border:1px solid #5a3e09;color:var(--amber)}
+.b-teal{background:rgba(0,212,170,.1);border:1px solid #004d40;color:var(--teal)}
+
+/* ──── WATCHLIST SCREEN ──── */
+.ms{display:flex;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);background:var(--bg1)}
+.ms::-webkit-scrollbar{display:none}
+.ms-item{flex-shrink:0;padding:8px 13px;border-right:1px solid var(--line)}
+.ms-name{font-family:var(--mono);font-size:7px;color:var(--t3);letter-spacing:1.5px;margin-bottom:3px}
+.ms-price{font-family:var(--mono);font-size:12px;font-weight:500}
+.ms-chg{font-family:var(--mono);font-size:8px;margin-top:1px}
+
+.wl-row{display:flex;align-items:center;padding:11px 16px;border-bottom:1px solid var(--line);position:relative;cursor:pointer;transition:background .1s}
+.wl-row:active{background:var(--bg1)}
+.wl-acbar{position:absolute;left:0;top:0;bottom:0;width:3px}
+.wl-left{flex:1;min-width:0}
+.wl-code{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--t0);letter-spacing:.5px}
+.wl-name{font-size:10px;color:var(--t2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alert-pip{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--amber);box-shadow:0 0 5px var(--amber);margin-right:4px;vertical-align:middle;animation:pip 1.5s infinite}
+.spark{width:52px;height:26px;margin:0 10px;flex-shrink:0}
+.wl-right{text-align:right;flex-shrink:0;min-width:76px}
+.wl-price{font-family:var(--mono);font-size:13px;font-weight:500}
+.wl-rate{font-family:var(--mono);font-size:9px;margin-top:2px}
+
+/* ──── FUTURES SCREEN ──── */
+.fut-big{padding:14px 16px 10px;border-bottom:1px solid var(--line);background:var(--bg1)}
+.fb-lbl{font-family:var(--mono);font-size:7px;color:var(--t3);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px}
+.fb-price{font-family:var(--mono);font-size:26px;font-weight:500;letter-spacing:1px}
+.fb-chg{font-family:var(--mono);font-size:11px;margin-top:3px;display:flex;align-items:center;gap:8px}
+.fb-chart{height:44px;margin-top:8px}
+
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.fg-item{padding:11px 14px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);cursor:pointer;transition:background .1s}
+.fg-item:nth-child(even){border-right:none}
+.fg-item:active{background:var(--bg1)}
+.fg-name{font-family:var(--mono);font-size:7px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
+.fg-price{font-family:var(--mono);font-size:15px;font-weight:500}
+.fg-chg{font-family:var(--mono);font-size:9px;margin-top:2px}
+.fg-bar{height:2px;margin-top:7px;border-radius:1px;opacity:.8}
+
+/* ──── ALERTS SCREEN ──── */
+.add-card{margin:12px 14px;background:var(--bg1);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.add-card-hd{padding:9px 13px;background:var(--bg2);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:8px;color:var(--t3);letter-spacing:2px;text-transform:uppercase}
+.add-card-body{padding:11px 13px;display:flex;flex-direction:column;gap:7px}
+.mock-sel{background:var(--bg);border:1px solid var(--line2);border-radius:6px;padding:7px 10px;font-family:var(--mono);font-size:10px;color:var(--t1);display:flex;align-items:center;justify-content:space-between}
+.mock-inp{background:var(--bg);border:1px solid var(--line2);border-radius:6px;padding:7px 10px;font-family:var(--mono);font-size:10px;color:var(--t0)}
+.btn2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.mbtn{padding:8px;border-radius:6px;font-family:var(--mono);font-size:9px;letter-spacing:.5px;border:1px solid;text-align:center;cursor:pointer}
+.mbtn-up{background:var(--up-g);border-color:#7a1a22;color:var(--up)}
+.mbtn-dn{background:var(--dn-g);border-color:#0e3a7a;color:var(--dn)}
+
+.al-stitle{padding:10px 16px 5px;font-family:var(--mono);font-size:8px;color:var(--t3);letter-spacing:2px;text-transform:uppercase}
+.al-row{padding:10px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.al-bar{width:3px;align-self:stretch;border-radius:2px;flex-shrink:0}
+.al-info{flex:1;padding-left:6px}
+.al-code{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--t0)}
+.al-cond{font-family:var(--mono);font-size:8px;margin-top:2px}
+.al-del{width:24px;height:24px;border-radius:5px;border:1px solid var(--line);background:var(--bg1);color:var(--t3);display:flex;align-items:center;justify-content:center;font-size:13px}
+
+/* ──── HISTORY SCREEN ──── */
+.hs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line)}
+.hs-box{padding:12px 14px;border-right:1px solid var(--line);background:var(--bg1)}
+.hs-box:last-child{border-right:none}
+.hs-lbl{font-family:var(--mono);font-size:7px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
+.hs-val{font-family:var(--mono);font-size:20px;font-weight:500}
+.hs-sub{font-family:var(--mono);font-size:8px;color:var(--t2);margin-top:2px}
+
+.hi-row{padding:11px 14px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;gap:8px;cursor:pointer;transition:background .1s}
+.hi-row:active{background:var(--bg1)}
+.hi-pip{width:6px;height:6px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.hi-body{flex:1}
+.hi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+.hi-code{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--t0)}
+.hi-time{font-family:var(--mono);font-size:8px;color:var(--t3)}
+.hi-desc{font-family:var(--mono);font-size:9px;line-height:1.5}
+.hi-price{font-family:var(--mono);font-size:10px;font-weight:500;margin-top:2px}
+
+/* 바텀탭 */
+.btabs{position:absolute;bottom:0;left:0;right:0;height:82px;background:rgba(8,10,18,.96);backdrop-filter:blur(20px);border-top:1px solid var(--line2);display:flex;padding-bottom:20px;z-index:15}
+.bt{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding-top:8px}
+.bt-icon{font-size:18px;line-height:1;color:var(--t3);transition:color .15s;position:relative;display:inline-block}
+.bt-badge{position:absolute;top:-3px;right:-8px;width:14px;height:14px;border-radius:7px;background:var(--up);color:#fff;font-family:var(--mono);font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.bt-lbl{font-family:var(--mono);font-size:7px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;transition:color .15s}
+.bt.active .bt-icon{color:var(--amber)}
+.bt.active .bt-lbl{color:var(--amber)}
+
+/* 설명 패널 */
+.desc-panel{width:248px;background:var(--bg1);border:1px solid var(--line);border-radius:10px;padding:18px;align-self:flex-start}
+.dp-hd{font-family:var(--mono);font-size:9px;color:var(--amber);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.dp-row{display:flex;gap:8px;padding:7px 0;border-top:1px solid var(--line);font-size:11px}
+.dp-row:first-of-type{border-top:none;padding-top:0}
+.dp-k{font-family:var(--mono);font-size:9px;color:var(--t3);min-width:72px;flex-shrink:0;margin-top:1px}
+.dp-v{color:var(--t1);line-height:1.5}
+.dp-c{font-family:var(--mono);font-size:9px;color:var(--teal);display:block;margin-top:3px}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-logo"><div class="logo-dot"></div>WATCHR MOBILE</div>
+  <div class="page-sub">iOS · Android Design Mockup · Bloomberg × Seoul Night</div>
+</div>
+
+<div class="screen-tabs">
+  <div class="stab active" onclick="setScr('watchlist',this)">01 Watchlist</div>
+  <div class="stab" onclick="setScr('futures',this)">02 Futures</div>
+  <div class="stab" onclick="setScr('alerts',this)">03 Alerts</div>
+  <div class="stab" onclick="setScr('history',this)">04 History</div>
+</div>
+
+<div class="frames-area">
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="island"></div>
+      <div class="status-bar">
+        <span class="sb-time">9:41</span>
+        <div class="sb-r"><span>▲▲▲</span><span>WiFi</span><span>🔋</span></div>
+      </div>
+
+      <!-- WATCHLIST -->
+      <div class="scr active" id="sc-watchlist">
+        <div class="scr-inner">
+          <div class="app-bar">
+            <div><div class="ab-title">WATCHR</div><div class="ab-sub">KOSPI 장중 · 09:35 KST</div></div>
+            <div class="ab-btns"><div class="ab-btn">＋</div><div class="ab-btn">⚙</div></div>
+          </div>
+          <div class="ms">
+            <div class="ms-item"><div class="ms-name">KOSPI</div><div class="ms-price up-c">2,628</div><div class="ms-chg up-c">+0.70%</div></div>
+            <div class="ms-item"><div class="ms-name">KOSDAQ</div><div class="ms-price dn-c">763</div><div class="ms-chg dn-c">−0.63%</div></div>
+            <div class="ms-item"><div class="ms-name">NQ FUT</div><div class="ms-price up-c">19,248</div><div class="ms-chg up-c">+0.65%</div></div>
+            <div class="ms-item"><div class="ms-name">USD/KRW</div><div class="ms-price up-c">1,382</div><div class="ms-chg up-c">+0.25%</div></div>
+          </div>
+          <div class="wl-row">
+            <div class="wl-acbar" style="background:var(--up)"></div>
+            <div class="wl-left"><div class="wl-code">005930</div><div class="wl-name"><span class="alert-pip"></span>삼성전자</div></div>
+            <svg class="spark" viewBox="0 0 52 26"><path d="M0,20 C6,17 12,13 18,11 C24,9 30,15 36,12 C42,9 46,7 52,5" fill="none" stroke="#ff3b47" stroke-width="1.2" opacity=".85"/></svg>
+            <div class="wl-right"><div class="wl-price up-c">79,800</div><div class="wl-rate up-c">+1.01%</div></div>
+          </div>
+          <div class="wl-row">
+            <div class="wl-acbar" style="background:var(--dn)"></div>
+            <div class="wl-left"><div class="wl-code">000660</div><div class="wl-name">SK하이닉스</div></div>
+            <svg class="spark" viewBox="0 0 52 26"><path d="M0,8 C6,11 12,13 18,16 C24,19 30,17 36,20 C42,18 46,22 52,24" fill="none" stroke="#2b7fff" stroke-width="1.2" opacity=".85"/></svg>
+            <div class="wl-right"><div class="wl-price dn-c">196,500</div><div class="wl-rate dn-c">−1.26%</div></div>
+          </div>
+          <div class="wl-row">
+            <div class="wl-acbar" style="background:var(--up)"></div>
+            <div class="wl-left"><div class="wl-code">035420</div><div class="wl-name">NAVER</div></div>
+            <svg class="spark" viewBox="0 0 52 26"><path d="M0,16 C6,13 12,15 18,11 C24,7 30,10 36,8 C42,6 46,7 52,5" fill="none" stroke="#ff3b47" stroke-width="1.2" opacity=".85"/></svg>
+            <div class="wl-right"><div class="wl-price up-c">216,500</div><div class="wl-rate up-c">+1.41%</div></div>
+          </div>
+          <div class="wl-row">
+            <div class="wl-acbar" style="background:var(--up)"></div>
+            <div class="wl-left"><div class="wl-code">396500</div><div class="wl-name">TIGER 반도체TOP10</div></div>
+            <svg class="spark" viewBox="0 0 52 26"><path d="M0,18 C6,15 12,18 18,14 C24,10 30,13 36,11 C42,9 46,10 52,8" fill="none" stroke="#ff3b47" stroke-width="1.2" opacity=".85"/></svg>
+            <div class="wl-right"><div class="wl-price up-c">31,800</div><div class="wl-rate up-c">+1.44%</div></div>
+          </div>
+          <div class="wl-row" style="opacity:.4">
+            <div class="wl-acbar" style="background:var(--line2)"></div>
+            <div class="wl-left"><div style="font-family:var(--mono);font-size:10px;color:var(--t3);letter-spacing:1.5px">+ 종목 추가</div></div>
+          </div>
+        </div>
+        <div class="btabs">
+          <div class="bt active"><span class="bt-icon">◱</span><span class="bt-lbl">Watch</span></div>
+          <div class="bt"><span class="bt-icon">↗</span><span class="bt-lbl">Futures</span></div>
+          <div class="bt"><span class="bt-icon" style="position:relative">◎<span class="bt-badge">2</span></span><span class="bt-lbl">Alerts</span></div>
+          <div class="bt"><span class="bt-icon">≡</span><span class="bt-lbl">History</span></div>
+        </div>
+      </div>
+
+      <!-- FUTURES -->
+      <div class="scr" id="sc-futures">
+        <div class="scr-inner">
+          <div class="app-bar">
+            <div><div class="ab-title">FUTURES</div><div class="ab-sub">야간선물 · 해외지수</div></div>
+            <div class="badge b-teal" style="font-size:8px;padding:4px 8px">장중</div>
+          </div>
+          <div class="fut-big">
+            <div class="fb-lbl">KOSPI 200 선물</div>
+            <div class="fb-price dn-c">348.20</div>
+            <div class="fb-chg dn-c"><span>−1.15</span><span class="badge b-dn">−0.33%</span></div>
+            <div class="fb-chart">
+              <svg width="100%" height="44" viewBox="0 0 280 44" preserveAspectRatio="none">
+                <path d="M0,16 C28,18 56,14 84,18 C112,22 140,20 168,24 C196,28 224,30 252,34 C264,32 272,34 280,36" fill="none" stroke="#2b7fff" stroke-width="1.5" opacity=".7"/>
+                <path d="M0,16 C28,18 56,14 84,18 C112,22 140,20 168,24 C196,28 224,30 252,34 C264,32 272,34 280,36 L280,44 L0,44Z" fill="rgba(43,127,255,.07)"/>
+              </svg>
+            </div>
+          </div>
+          <div class="fg">
+            <div class="fg-item"><div class="fg-name">NASDAQ FUT</div><div class="fg-price up-c">19,248</div><div class="fg-chg up-c">+0.65%</div><div class="fg-bar" style="background:var(--up)"></div></div>
+            <div class="fg-item"><div class="fg-name">S&P500 FUT</div><div class="fg-price up-c">5,412</div><div class="fg-chg up-c">+0.61%</div><div class="fg-bar" style="background:var(--up)"></div></div>
+            <div class="fg-item"><div class="fg-name">KOSPI</div><div class="fg-price up-c">2,628</div><div class="fg-chg up-c">+0.70%</div><div class="fg-bar" style="background:var(--up)"></div></div>
+            <div class="fg-item"><div class="fg-name">KOSDAQ</div><div class="fg-price dn-c">763</div><div class="fg-chg dn-c">−0.63%</div><div class="fg-bar" style="background:var(--dn)"></div></div>
+            <div class="fg-item"><div class="fg-name">USD/KRW</div><div class="fg-price up-c">1,382</div><div class="fg-chg up-c">+0.25%</div><div class="fg-bar" style="background:var(--up)"></div></div>
+            <div class="fg-item"><div class="fg-name">DOW FUT</div><div class="fg-price dn-c">44,821</div><div class="fg-chg dn-c">−0.12%</div><div class="fg-bar" style="background:var(--dn)"></div></div>
+          </div>
+        </div>
+        <div class="btabs">
+          <div class="bt"><span class="bt-icon">◱</span><span class="bt-lbl">Watch</span></div>
+          <div class="bt active"><span class="bt-icon">↗</span><span class="bt-lbl">Futures</span></div>
+          <div class="bt"><span class="bt-icon" style="position:relative">◎<span class="bt-badge">2</span></span><span class="bt-lbl">Alerts</span></div>
+          <div class="bt"><span class="bt-icon">≡</span><span class="bt-lbl">History</span></div>
+        </div>
+      </div>
+
+      <!-- ALERTS -->
+      <div class="scr" id="sc-alerts">
+        <div class="scr-inner">
+          <div class="app-bar">
+            <div><div class="ab-title">ALERTS</div><div class="ab-sub">2개 활성</div></div>
+            <div class="badge b-amber" style="font-size:8px;padding:4px 8px">2 ACTIVE</div>
+          </div>
+          <div class="add-card">
+            <div class="add-card-hd">NEW ALERT</div>
+            <div class="add-card-body">
+              <div class="mock-sel">삼성전자 005930 <span style="color:var(--t3)">▾</span></div>
+              <div class="mock-inp">목표가 <span style="color:var(--t3)">예: 80,000</span></div>
+              <div class="btn2">
+                <div class="mbtn mbtn-up">▲ 이상 알림</div>
+                <div class="mbtn mbtn-dn">▼ 이하 알림</div>
+              </div>
+            </div>
+          </div>
+          <div class="al-stitle">ACTIVE ALERTS</div>
+          <div class="al-row">
+            <div class="al-bar" style="background:var(--up)"></div>
+            <div class="al-info"><div class="al-code">005930 · 삼성전자</div><div class="al-cond up-c">▲ 80,000원 이상</div></div>
+            <div class="badge b-up" style="font-size:8px">대기</div>
+            <div class="al-del">×</div>
+          </div>
+          <div class="al-row">
+            <div class="al-bar" style="background:var(--dn)"></div>
+            <div class="al-info"><div class="al-code">000660 · SK하이닉스</div><div class="al-cond dn-c">▼ 190,000원 이하</div></div>
+            <div class="badge b-dn" style="font-size:8px">대기</div>
+            <div class="al-del">×</div>
+          </div>
+        </div>
+        <div class="btabs">
+          <div class="bt"><span class="bt-icon">◱</span><span class="bt-lbl">Watch</span></div>
+          <div class="bt"><span class="bt-icon">↗</span><span class="bt-lbl">Futures</span></div>
+          <div class="bt active"><span class="bt-icon" style="position:relative">◎<span class="bt-badge">2</span></span><span class="bt-lbl">Alerts</span></div>
+          <div class="bt"><span class="bt-icon">≡</span><span class="bt-lbl">History</span></div>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="scr" id="sc-history">
+        <div class="scr-inner">
+          <div class="app-bar">
+            <div><div class="ab-title">HISTORY</div><div class="ab-sub">알림 발동 이력</div></div>
+            <div class="ab-btn" style="font-size:10px;font-family:var(--mono);color:var(--t3)">CLR</div>
+          </div>
+          <div class="hs">
+            <div class="hs-box"><div class="hs-lbl">총 발동</div><div class="hs-val up-c">12</div><div class="hs-sub">지난 7일</div></div>
+            <div class="hs-box"><div class="hs-lbl">오늘</div><div class="hs-val" style="color:var(--amber)">3</div><div class="hs-sub">2026.03.28</div></div>
+          </div>
+          <div class="hi-row">
+            <div class="hi-pip" style="background:var(--up)"></div>
+            <div class="hi-body">
+              <div class="hi-top"><div class="hi-code">005930 삼성전자</div><div class="hi-time">09:32:14</div></div>
+              <div class="hi-desc up-c">▲ 80,000원 이상 도달</div>
+              <div class="hi-price up-c">현재가 80,200원</div>
+            </div>
+          </div>
+          <div class="hi-row">
+            <div class="hi-pip" style="background:var(--dn)"></div>
+            <div class="hi-body">
+              <div class="hi-top"><div class="hi-code">000660 SK하이닉스</div><div class="hi-time">어제 16:12</div></div>
+              <div class="hi-desc dn-c">▼ 195,000원 이하 이탈</div>
+              <div class="hi-price dn-c">현재가 194,500원</div>
+            </div>
+          </div>
+          <div class="hi-row">
+            <div class="hi-pip" style="background:var(--up)"></div>
+            <div class="hi-body">
+              <div class="hi-top"><div class="hi-code">396500 TIGER반도체</div><div class="hi-time">2일 전</div></div>
+              <div class="hi-desc up-c">▲ 31,000원 이상 도달</div>
+              <div class="hi-price up-c">현재가 31,200원</div>
+            </div>
+          </div>
+        </div>
+        <div class="btabs">
+          <div class="bt"><span class="bt-icon">◱</span><span class="bt-lbl">Watch</span></div>
+          <div class="bt"><span class="bt-icon">↗</span><span class="bt-lbl">Futures</span></div>
+          <div class="bt"><span class="bt-icon" style="position:relative">◎<span class="bt-badge">2</span></span><span class="bt-lbl">Alerts</span></div>
+          <div class="bt active"><span class="bt-icon">≡</span><span class="bt-lbl">History</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">iPhone 16 Pro · iOS 18 · Android 14</div>
+  </div>
+
+  <!-- 설명 패널 -->
+  <div class="desc-panel">
+    <div class="dp-hd" id="dp-hd">01 Watchlist</div>
+    <div id="dp-body"></div>
+  </div>
+</div>
+
+<script>
+const D={
+  watchlist:{hd:'01 Watchlist',rows:[
+    {k:'화면명',v:'WatchlistScreen',c:'screens/WatchlistScreen.tsx'},
+    {k:'마켓 스트립',v:'상단 4개 지수 가로 스크롤',c:'components/MarketStrip.tsx'},
+    {k:'종목 행',v:'TickerRow · 왼쪽 3px 액센트 바',c:'components/TickerRow.tsx'},
+    {k:'스파크라인',v:'20포인트 SVG · 종목 추가 시 생성',c:'components/Sparkline.tsx'},
+    {k:'Alert pip',v:'amber dot — 해당 종목 알림 있을 때'},
+    {k:'폴링',v:'5초 · useFocusEffect 포그라운드만'},
+    {k:'스와이프',v:'좌 스와이프 → 삭제 버튼 노출'},
+  ]},
+  futures:{hd:'02 Futures',rows:[
+    {k:'화면명',v:'FuturesScreen',c:'screens/FuturesScreen.tsx'},
+    {k:'빅카드',v:'KOSPI200 · 미니 차트 포함',c:'components/FuturesBigCard.tsx'},
+    {k:'지수 그리드',v:'2×3 · 6개 지수',c:'components/FuturesGrid.tsx'},
+    {k:'갱신주기',v:'60초 · useFocusEffect'},
+    {k:'API',v:'GET /api/futures (Node.js 서버)'},
+    {k:'하단 바',v:'height 2px · up/dn 컬러'},
+  ]},
+  alerts:{hd:'03 Alerts',rows:[
+    {k:'화면명',v:'AlertsScreen',c:'screens/AlertsScreen.tsx'},
+    {k:'알림 발송',v:'Expo Notifications · 백그라운드 포함'},
+    {k:'저장',v:'AsyncStorage "sm_alerts"'},
+    {k:'탭 배지',v:'활성 알림 수 = 배지 숫자'},
+    {k:'쿨다운',v:'60분 내 동일 조건 재발동 금지'},
+    {k:'조건 색상',v:'above → --up / below → --dn'},
+  ]},
+  history:{hd:'04 History',rows:[
+    {k:'화면명',v:'HistoryScreen',c:'screens/HistoryScreen.tsx'},
+    {k:'요약 카드',v:'총 발동 / 오늘 발동 2칸 그리드'},
+    {k:'저장',v:'AsyncStorage "sm_history" 최대 50건'},
+    {k:'pip 색상',v:'상승 발동 → --up · 하락 → --dn'},
+    {k:'전체 삭제',v:'CLR → Alert dialog 확인 후 삭제'},
+    {k:'자동 스크롤',v:'신규 이력 추가 시 최상단으로'},
+  ]},
+};
+function setScr(n,el){
+  document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sc-'+n).classList.add('active');
+  const d=D[n];
+  document.getElementById('dp-hd').textContent=d.hd;
+  document.getElementById('dp-body').innerHTML=d.rows.map(r=>`
+    <div class="dp-row">
+      <div class="dp-k">${r.k}</div>
+      <div class="dp-v">${r.v}${r.c?`<code class="dp-c">${r.c}</code>`:''}</div>
+    </div>`).join('');
+}
+setScr('watchlist',document.querySelector('.stab'));
+</script>
+</body>
+</html>

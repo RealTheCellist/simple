@@ -1,0 +1,22 @@
+// .clinerules
+# WATCHR MOBILE — React Native + Expo SDK 53 프레임워크: React Native + Expo (TypeScript) 내비게이션: @react-navigation/bottom-tabs (탭 4개) API: EXPO_PUBLIC_API_URL 환경변수
+
+# 디자인 토큰
+Colors.bg:#07090d
+bg1:#0c1018
+bg2:#111621
+Colors.up:#ff3b47
+dn:#2b7fff
+amber:#f5a623
+teal:#00d4aa
+
+FontFamily.mono:IBM_Plex_Mono
+sans:NotoSansKR
+
+# 코드 규칙
+- StyleSheet.create 사용
+- 색상은 Colors 토큰만 사용
+- 숫자/가격: IBM_Plex_Mono
+- 상승→Colors.up / 하락→Colors.dn
+- AsyncStorage prefix: sm_
+- useFocusEffect + useRef 폴링 패턴
