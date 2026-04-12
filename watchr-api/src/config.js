@@ -17,5 +17,8 @@ export const config = {
   mockFallback: toBool(process.env.MOCK_FALLBACK, true),
   upstreamTimeoutMs: toNumber(process.env.UPSTREAM_TIMEOUT_MS, 9000),
   cacheTtlMs: toNumber(process.env.CACHE_TTL_MS, 5000),
-  corsOrigin: process.env.CORS_ORIGIN || "*"
+  corsOrigin: process.env.CORS_ORIGIN || "*",
+  realtimeEnabled: toBool(process.env.REALTIME_ENABLED, true),
+  realtimePath: process.env.REALTIME_PATH || "/ws",
+  realtimeBroadcastMs: toNumber(process.env.REALTIME_BROADCAST_MS, 5000)
 };

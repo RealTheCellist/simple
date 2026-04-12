@@ -1,6 +1,6 @@
 import "./style.css";
 import { REFRESH_MS } from "./config";
-import { fetchOpsSnapshot } from "./api";
+import { connectRealtime, fetchOpsSnapshot } from "./api";
 import { FACTOR_META, defaultWeights, scoreWithWeights } from "./opsMath";
 import {
   applyReleaseVersion,
@@ -39,7 +39,8 @@ const state = {
   prediction: null,
   weights: loadWeights(defaultWeights()),
   qaEvents: loadQaEvents(),
-  release: loadReleaseState()
+  release: loadReleaseState(),
+  realtimeConnected: false
 };
 
 function signed(value, digits = 2) {
@@ -60,7 +61,9 @@ function statText(target, value, cls) {
 }
 
 function renderTopStats(health, prediction) {
-  statText(el.healthText, health?.status === "ok" ? "ONLINE" : "DEGRADED", health?.status === "ok" ? "up" : "dn");
+  const online = health?.status === "ok";
+  const suffix = state.realtimeConnected ? " · RT" : " · POLL";
+  statText(el.healthText, `${online ? "ONLINE" : "DEGRADED"}${suffix}`, online ? "up" : "dn");
   if (!prediction) {
     statText(el.biasText, "--");
     statText(el.scoreText, "--");
@@ -119,7 +122,11 @@ function buildWeightControls() {
 function renderSimulation() {
   const result = scoreWithWeights(state.futures, state.weights);
   statText(el.simBias, `SIM BIAS ${result.bias.toUpperCase()}`, toneClass(result.score));
-  statText(el.simScore, `SIM SCORE ${signed(result.score, 1)} | COVERAGE ${Math.round(result.coverage * 100)}%`, toneClass(result.score));
+  statText(
+    el.simScore,
+    `SIM SCORE ${signed(result.score, 1)} | COVERAGE ${Math.round(result.coverage * 100)}%`,
+    toneClass(result.score)
+  );
 }
 
 function renderQa() {
@@ -140,9 +147,24 @@ function renderRelease() {
     `<div class="row"><span class="name">현재 버전</span><span class="rate up">${state.release.current}</span><span class="score">active</span></div>`
   ];
   history.forEach((ver, idx) => {
-    rows.push(`<div class="row"><span class="name">이전 ${idx + 1}</span><span class="rate">${ver}</span><span class="score">rollback</span></div>`);
+    rows.push(
+      `<div class="row"><span class="name">이전 ${idx + 1}</span><span class="rate">${ver}</span><span class="score">rollback</span></div>`
+    );
   });
   el.releaseInfo.innerHTML = rows.join("");
+}
+
+function renderTimestamp(modeLabel) {
+  el.lastUpdated.textContent = `${modeLabel} ${new Date().toLocaleTimeString("ko-KR")}`;
+}
+
+function applySnapshot({ health, prediction, futures }, modeLabel) {
+  state.futures = futures || [];
+  state.prediction = prediction || null;
+  renderTopStats(health || { status: "error" }, state.prediction);
+  renderContributors();
+  renderSimulation();
+  renderTimestamp(modeLabel);
 }
 
 async function refreshNow() {
@@ -151,20 +173,52 @@ async function refreshNow() {
 
   try {
     const snapshot = await fetchOpsSnapshot();
-    state.futures = snapshot.open?.futures || [];
-    state.prediction = snapshot.open?.prediction || null;
-    renderTopStats(snapshot.health, state.prediction);
-    renderContributors();
-    renderSimulation();
-    el.lastUpdated.textContent = `업데이트 ${new Date().toLocaleTimeString("ko-KR")}`;
+    applySnapshot(
+      {
+        health: snapshot.health,
+        prediction: snapshot.open?.prediction,
+        futures: snapshot.open?.futures
+      },
+      "POLL"
+    );
   } catch (error) {
     renderTopStats({ status: "error" }, null);
     el.contributors.innerHTML = `<div class="row"><span class="name">API 연결 실패</span><span class="rate dn">ERR</span><span class="score">check backend</span></div>`;
-    el.lastUpdated.textContent = `실패 ${new Date().toLocaleTimeString("ko-KR")}`;
+    renderTimestamp("FAIL");
   } finally {
     el.refreshBtn.disabled = false;
     el.refreshBtn.textContent = "LIVE REFRESH";
   }
+}
+
+function setupRealtime() {
+  return connectRealtime({
+    onConnected: () => {
+      state.realtimeConnected = true;
+      renderTimestamp("RT CONNECTED");
+      renderTopStats({ status: "ok" }, state.prediction);
+    },
+    onDisconnected: () => {
+      state.realtimeConnected = false;
+      renderTimestamp("RT LOST");
+      renderTopStats({ status: "ok" }, state.prediction);
+      void refreshNow();
+    },
+    onSnapshot: (snapshot) => {
+      const data = snapshot?.data || {};
+      applySnapshot(
+        {
+          health: data.health,
+          prediction: data.prediction,
+          futures: data.futures
+        },
+        "RT"
+      );
+    },
+    onError: () => {
+      state.realtimeConnected = false;
+    }
+  });
 }
 
 function bindEvents() {
@@ -203,8 +257,18 @@ function boot() {
   renderRelease();
   renderSimulation();
   bindEvents();
-  refreshNow();
-  setInterval(refreshNow, REFRESH_MS);
+  void refreshNow();
+
+  const disconnectRealtime = setupRealtime();
+  window.addEventListener("beforeunload", () => {
+    disconnectRealtime?.();
+  });
+
+  setInterval(() => {
+    if (!state.realtimeConnected) {
+      void refreshNow();
+    }
+  }, REFRESH_MS);
 }
 
 boot();

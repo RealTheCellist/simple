@@ -1,6 +1,6 @@
 # WATCHR API
 
-WATCHR Web + WATCHR Mobile이 공통으로 사용하는 Node.js 백엔드입니다.
+WATCHR Web, Mobile, Ops가 공통으로 사용하는 Node.js 백엔드입니다.
 
 ## Quick Start
 
@@ -12,19 +12,46 @@ npm run dev
 
 기본 주소: `http://localhost:3000`
 
-## Endpoints
+## HTTP Endpoints
 
 - `GET /health`
 - `GET /api/price/:ticker`
 - `GET /api/price/batch?tickers=005930.KS,AAPL,NQ=F`
 - `GET /api/futures`
 - `GET /api/predict/open`
+- `GET /api/realtime/status`
+- `GET /api/realtime/snapshot`
+
+## Realtime (WebSocket)
+
+- 주소: `ws://localhost:3000/ws` (환경변수로 경로 변경 가능)
+- 서버 이벤트
+  - `welcome`
+  - `snapshot`
+  - `subscribed`
+  - `pong`
+  - `error`
+- 클라이언트 이벤트
+  - `{"type":"subscribe","channels":["health","prediction","futures"]}`
+  - `{"type":"snapshot"}`
+  - `{"type":"ping"}`
+
+## Environment
+
+- `PORT`, `HOST`
+- `MOCK_FALLBACK`
+- `UPSTREAM_TIMEOUT_MS`
+- `CACHE_TTL_MS`
+- `CORS_ORIGIN`
+- `REALTIME_ENABLED`
+- `REALTIME_PATH`
+- `REALTIME_BROADCAST_MS`
 
 ## Notes
 
-- 외부 데이터는 Yahoo chart API를 사용합니다.
-- 외부 호출 실패 시 `MOCK_FALLBACK=true`이면 모의 데이터로 응답합니다.
-- 웹/모바일 시연과 로컬 개발 안정성을 위해 짧은 TTL 캐시를 사용합니다.
+- 기본 외부 데이터 소스는 Yahoo chart API
+- 외부 호출 실패 시 `MOCK_FALLBACK=true`이면 모의 데이터 응답
+- WebSocket은 주기적으로 snapshot을 브로드캐스트
 
 ## Docker
 
@@ -33,7 +60,7 @@ docker build -t watchr-api .
 docker run --rm -p 3000:3000 --env-file .env watchr-api
 ```
 
-## Quality checks
+## Quality Checks
 
 ```bash
 npm run lint

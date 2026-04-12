@@ -1,9 +1,32 @@
+import http from "node:http";
 import express from "express";
 import { config } from "./config.js";
+import { createRealtimeHub } from "./realtime/hub.js";
 import { fetchBatchPrices, fetchFuturesSnapshot, fetchPrice } from "./services/marketData.js";
 import { predictOpenFromFutures } from "./services/prediction.js";
 
 const app = express();
+
+function healthPayload() {
+  return {
+    status: "ok",
+    service: "watchr-api",
+    env: config.nodeEnv,
+    mockFallback: config.mockFallback,
+    timestamp: new Date().toISOString()
+  };
+}
+
+async function buildRealtimeSnapshot() {
+  const futures = await fetchFuturesSnapshot();
+  const prediction = predictOpenFromFutures(futures);
+  return {
+    generatedAt: new Date().toISOString(),
+    health: healthPayload(),
+    futures,
+    prediction
+  };
+}
 
 app.use(express.json());
 app.use((req, res, next) => {
@@ -15,13 +38,7 @@ app.use((req, res, next) => {
 });
 
 app.get("/health", (req, res) => {
-  res.json({
-    status: "ok",
-    service: "watchr-api",
-    env: config.nodeEnv,
-    mockFallback: config.mockFallback,
-    timestamp: new Date().toISOString()
-  });
+  res.json(healthPayload());
 });
 
 app.get("/api/price/:ticker", async (req, res) => {
@@ -55,13 +72,39 @@ app.get("/api/futures", async (req, res) => {
 });
 
 app.get("/api/predict/open", async (req, res) => {
-  const futures = await fetchFuturesSnapshot();
-  const prediction = predictOpenFromFutures(futures);
+  const snapshot = await buildRealtimeSnapshot();
   return res.json({
-    prediction,
-    futures,
-    generatedAt: new Date().toISOString()
+    prediction: snapshot.prediction,
+    futures: snapshot.futures,
+    generatedAt: snapshot.generatedAt
   });
+});
+
+const server = http.createServer(app);
+const realtimeHub = config.realtimeEnabled
+  ? createRealtimeHub({
+      server,
+      path: config.realtimePath,
+      broadcastMs: config.realtimeBroadcastMs,
+      snapshotBuilder: buildRealtimeSnapshot
+    })
+  : null;
+
+app.get("/api/realtime/status", (req, res) => {
+  if (!realtimeHub) {
+    return res.json({
+      enabled: false,
+      path: config.realtimePath,
+      broadcastMs: config.realtimeBroadcastMs,
+      connections: 0
+    });
+  }
+  return res.json(realtimeHub.status());
+});
+
+app.get("/api/realtime/snapshot", async (req, res) => {
+  const snapshot = await buildRealtimeSnapshot();
+  return res.json(snapshot);
 });
 
 app.use((error, req, res, next) => {
@@ -69,6 +112,21 @@ app.use((error, req, res, next) => {
   res.status(500).json({ error: "internal_error" });
 });
 
-app.listen(config.port, config.host, () => {
-  console.log(`[watchr-api] running on http://${config.host}:${config.port}`);
+if (realtimeHub) {
+  realtimeHub.start();
+}
+
+server.listen(config.port, config.host, () => {
+  const wsStatus = realtimeHub ? ` ws:${config.realtimePath}` : " ws:disabled";
+  console.log(`[watchr-api] running on http://${config.host}:${config.port}${wsStatus}`);
 });
+
+function shutdown() {
+  if (realtimeHub) realtimeHub.stop();
+  server.close(() => {
+    process.exit(0);
+  });
+}
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
