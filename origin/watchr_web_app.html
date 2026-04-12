@@ -1,0 +1,1075 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WATCHR Web App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #06090f;
+  --bg-1: #0c1220;
+  --bg-2: #121b2f;
+  --line: #263759;
+  --line-strong: #3a5a92;
+  --text-0: #eaf1ff;
+  --text-1: #aebdde;
+  --text-2: #6f83ac;
+  --up: #ff4c53;
+  --down: #2d7fff;
+  --amber: #f8b231;
+  --teal: #12d7ad;
+  --mono: "IBM Plex Mono", monospace;
+  --sans: "Space Grotesk", sans-serif;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  color: var(--text-0);
+  font-family: var(--sans);
+  background:
+    radial-gradient(circle at 88% -4%, rgba(18, 215, 173, 0.13), transparent 22%),
+    radial-gradient(circle at 12% -3%, rgba(248, 178, 49, 0.13), transparent 20%),
+    linear-gradient(180deg, #0a0f19 0%, var(--bg) 100%);
+}
+
+.wrap { width: min(1180px, calc(100% - 28px)); margin: 0 auto; }
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  border-bottom: 1px solid rgba(58, 90, 146, 0.42);
+  backdrop-filter: blur(10px);
+  background: rgba(6, 9, 15, 0.8);
+}
+.topbar-inner {
+  width: min(1180px, calc(100% - 28px));
+  margin: 0 auto;
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font: 600 14px var(--mono);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.brand-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 14px rgba(248, 178, 49, 0.9);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  color: var(--text-1);
+  background: rgba(18, 27, 47, 0.7);
+  font: 11px var(--mono);
+  letter-spacing: 0.8px;
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 14px;
+  padding: 18px 0 32px;
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(12, 18, 32, 0.96), rgba(9, 14, 24, 0.92));
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.35);
+}
+
+.side {
+  position: sticky;
+  top: 84px;
+  height: fit-content;
+  padding: 16px;
+}
+.kicker { color: var(--text-2); font: 10px var(--mono); letter-spacing: 1.2px; text-transform: uppercase; }
+.side h2 { margin: 8px 0 10px; font: 600 24px var(--mono); letter-spacing: -0.7px; }
+.muted { margin: 0; color: var(--text-1); font-size: 13px; line-height: 1.75; }
+.field { margin-top: 12px; display: grid; gap: 6px; }
+.field label { color: var(--text-2); font: 11px var(--mono); letter-spacing: 0.7px; }
+
+.input,
+.select,
+.btn {
+  width: 100%;
+  min-height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  color: var(--text-0);
+  background: rgba(18, 27, 47, 0.76);
+  padding: 0 12px;
+}
+.input:focus,
+.select:focus {
+  outline: 1px solid var(--line-strong);
+  border-color: var(--line-strong);
+}
+.btn {
+  cursor: pointer;
+  font: 12px var(--mono);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  transition: transform 120ms ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn.primary {
+  color: #121826;
+  background: var(--amber);
+  border-color: var(--amber);
+  font-weight: 600;
+}
+
+.status {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  color: var(--text-1);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.status.ok { border-color: rgba(18, 215, 173, 0.5); color: var(--teal); }
+.status.warn { border-color: rgba(248, 178, 49, 0.5); color: var(--amber); }
+.status.err { border-color: rgba(255, 76, 83, 0.5); color: var(--up); }
+
+.main { padding: 14px; }
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  background: rgba(18, 27, 47, 0.7);
+  font: 12px var(--mono);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.tab-btn.active {
+  color: #0f1422;
+  border-color: var(--amber);
+  background: var(--amber);
+  font-weight: 600;
+}
+.tab-count {
+  min-width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line-strong);
+  color: var(--text-0);
+  background: rgba(12, 18, 32, 0.86);
+  font: 10px var(--mono);
+}
+
+.panel { display: none; }
+.panel.active { display: block; }
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.panel-head h3 {
+  margin: 0;
+  font: 600 24px var(--mono);
+  letter-spacing: -0.5px;
+}
+
+.add-row {
+  display: grid;
+  grid-template-columns: 1fr 110px;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr 0.7fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(18, 27, 47, 0.58);
+}
+.ticker { font: 600 14px var(--mono); }
+.name { margin-top: 2px; color: var(--text-2); font-size: 12px; }
+.price { font: 500 14px var(--mono); }
+.chg-up { color: var(--up); font: 500 12px var(--mono); }
+.chg-down { color: var(--down); font: 500 12px var(--mono); }
+
+.icon-btn {
+  min-width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  color: var(--text-1);
+  background: rgba(18, 27, 47, 0.85);
+  cursor: pointer;
+}
+.icon-btn:hover { border-color: var(--line-strong); color: var(--text-0); }
+.icon-btn.warn { color: var(--amber); }
+
+.empty {
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px dashed var(--line-strong);
+  text-align: center;
+  color: var(--text-2);
+  font: 12px var(--mono);
+  letter-spacing: 1px;
+}
+
+.futures-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+.future-card {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(18, 27, 47, 0.62);
+}
+.future-name { color: var(--text-2); font: 10px var(--mono); letter-spacing: 1px; text-transform: uppercase; }
+.future-price { margin-top: 8px; font: 600 22px var(--mono); }
+.future-change { margin-top: 6px; font: 12px var(--mono); }
+
+.alerts-form {
+  display: grid;
+  grid-template-columns: 1fr 130px 130px 96px;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.alert-row {
+  display: grid;
+  grid-template-columns: 1.2fr .85fr .75fr auto auto;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 11px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(18, 27, 47, 0.58);
+}
+
+.history-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.summary-card {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(18, 27, 47, 0.58);
+}
+.summary-key { color: var(--text-2); font: 10px var(--mono); letter-spacing: 1px; text-transform: uppercase; }
+.summary-value { margin-top: 6px; font: 600 22px var(--mono); }
+
+.history-row {
+  margin-bottom: 8px;
+  padding: 11px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(18, 27, 47, 0.58);
+}
+.history-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.history-code { font: 600 13px var(--mono); }
+.history-time { color: var(--text-2); font: 11px var(--mono); }
+.history-desc { margin-top: 6px; color: var(--text-1); font-size: 13px; }
+
+@media (max-width: 1020px) {
+  .shell { grid-template-columns: 1fr; }
+  .side { position: static; }
+}
+@media (max-width: 760px) {
+  .tabs { grid-template-columns: 1fr 1fr; }
+  .row, .alert-row { grid-template-columns: 1fr; }
+  .futures-grid, .history-summary { grid-template-columns: 1fr; }
+  .alerts-form { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="brand-dot"></span><span>WATCHR WEB APP</span></div>
+    <span class="pill">RUNNABLE MVP · LIVE DATA</span>
+  </div>
+</header>
+
+<main class="wrap shell">
+  <aside class="card side">
+    <div class="kicker">Runtime</div>
+    <h2>Connection</h2>
+    <p class="muted">Set backend URL. This app calls `/api/price/batch`, `/api/price/:ticker`, and `/api/futures`.</p>
+
+    <div class="field">
+      <label for="apiUrlInput">API BASE URL</label>
+      <input id="apiUrlInput" class="input" type="text" placeholder="http://localhost:3000">
+    </div>
+    <div class="field"><button id="saveApiBtn" class="btn primary" type="button">Save API URL</button></div>
+    <div id="connStatus" class="status">Not checked yet.</div>
+    <div class="field"><button id="checkApiBtn" class="btn" type="button">Check Backend</button></div>
+    <div class="field"><button id="refreshNowBtn" class="btn" type="button">Refresh Now</button></div>
+    <div class="field"><button id="notifBtn" class="btn" type="button">Enable Notifications</button></div>
+  </aside>
+
+  <section class="card main">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="watchlist" type="button">Watchlist</button>
+      <button class="tab-btn" data-tab="futures" type="button">Futures</button>
+      <button class="tab-btn" data-tab="alerts" type="button">Alerts <span id="alertsCount" class="tab-count">0</span></button>
+      <button class="tab-btn" data-tab="history" type="button">History <span id="historyCount" class="tab-count">0</span></button>
+    </div>
+
+    <div id="panel-watchlist" class="panel active">
+      <div class="panel-head">
+        <h3>Watchlist</h3>
+        <span id="watchlistMeta" class="pill">Idle</span>
+      </div>
+      <div class="add-row">
+        <input id="tickerInput" class="input" type="text" placeholder="Add ticker (e.g. 005930.KS, AAPL)">
+        <button id="addTickerBtn" class="btn primary" type="button">Add</button>
+      </div>
+      <div id="watchlistRows"></div>
+      <div id="watchlistEmpty" class="empty">ADD TICKER TO BEGIN</div>
+    </div>
+
+    <div id="panel-futures" class="panel">
+      <div class="panel-head">
+        <h3>Futures</h3>
+        <span id="futuresMeta" class="pill">Idle</span>
+      </div>
+      <div id="futuresGrid" class="futures-grid"></div>
+      <div id="futuresEmpty" class="empty">NO FUTURES DATA</div>
+    </div>
+
+    <div id="panel-alerts" class="panel">
+      <div class="panel-head">
+        <h3>Alerts</h3>
+        <span id="alertsMeta" class="pill">Idle</span>
+      </div>
+      <div class="alerts-form">
+        <select id="alertTickerSelect" class="select"></select>
+        <select id="alertOperatorSelect" class="select">
+          <option value="above">ABOVE</option>
+          <option value="below">BELOW</option>
+        </select>
+        <input id="alertTargetInput" class="input" type="number" min="0" step="0.01" placeholder="Target price">
+        <button id="addAlertBtn" class="btn primary" type="button">Add</button>
+      </div>
+      <div id="alertRows"></div>
+      <div id="alertsEmpty" class="empty">NO ACTIVE ALERTS</div>
+    </div>
+
+    <div id="panel-history" class="panel">
+      <div class="panel-head">
+        <h3>History</h3>
+        <button id="clearHistoryBtn" class="btn" type="button" style="max-width:140px;">Clear History</button>
+      </div>
+      <div class="history-summary">
+        <div class="summary-card"><div class="summary-key">Total Triggers</div><div id="sumTotal" class="summary-value">0</div></div>
+        <div class="summary-card"><div class="summary-key">Today</div><div id="sumToday" class="summary-value">0</div></div>
+        <div class="summary-card"><div class="summary-key">Unique Tickers</div><div id="sumTickers" class="summary-value">0</div></div>
+      </div>
+      <div id="historyRows"></div>
+      <div id="historyEmpty" class="empty">NO HISTORY LOGS</div>
+    </div>
+  </section>
+</main>
+
+<script>
+const STORAGE_KEYS = {
+  apiUrl: "watchr_api_url",
+  watchlist: "sm_watchlist",
+  alerts: "sm_alerts",
+  history: "sm_history"
+};
+
+const COOLDOWN_MS = 60 * 60 * 1000;
+
+const state = {
+  activeTab: "watchlist",
+  apiBaseUrl: localStorage.getItem(STORAGE_KEYS.apiUrl) || "http://localhost:3000",
+  watchlist: readArray(STORAGE_KEYS.watchlist, ["005930.KS"]),
+  prices: {},
+  futures: [],
+  alerts: readArray(STORAGE_KEYS.alerts, []),
+  history: readArray(STORAGE_KEYS.history, []),
+  timers: { watchlist: null, futures: null }
+};
+
+const el = {
+  apiUrlInput: document.getElementById("apiUrlInput"),
+  saveApiBtn: document.getElementById("saveApiBtn"),
+  checkApiBtn: document.getElementById("checkApiBtn"),
+  refreshNowBtn: document.getElementById("refreshNowBtn"),
+  notifBtn: document.getElementById("notifBtn"),
+  connStatus: document.getElementById("connStatus"),
+  tabButtons: Array.from(document.querySelectorAll(".tab-btn")),
+  watchlistRows: document.getElementById("watchlistRows"),
+  watchlistEmpty: document.getElementById("watchlistEmpty"),
+  watchlistMeta: document.getElementById("watchlistMeta"),
+  tickerInput: document.getElementById("tickerInput"),
+  addTickerBtn: document.getElementById("addTickerBtn"),
+  futuresGrid: document.getElementById("futuresGrid"),
+  futuresEmpty: document.getElementById("futuresEmpty"),
+  futuresMeta: document.getElementById("futuresMeta"),
+  alertsCount: document.getElementById("alertsCount"),
+  historyCount: document.getElementById("historyCount"),
+  alertsMeta: document.getElementById("alertsMeta"),
+  alertTickerSelect: document.getElementById("alertTickerSelect"),
+  alertOperatorSelect: document.getElementById("alertOperatorSelect"),
+  alertTargetInput: document.getElementById("alertTargetInput"),
+  addAlertBtn: document.getElementById("addAlertBtn"),
+  alertRows: document.getElementById("alertRows"),
+  alertsEmpty: document.getElementById("alertsEmpty"),
+  clearHistoryBtn: document.getElementById("clearHistoryBtn"),
+  historyRows: document.getElementById("historyRows"),
+  historyEmpty: document.getElementById("historyEmpty"),
+  sumTotal: document.getElementById("sumTotal"),
+  sumToday: document.getElementById("sumToday"),
+  sumTickers: document.getElementById("sumTickers")
+};
+
+function readArray(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function saveStateArrays() {
+  localStorage.setItem(STORAGE_KEYS.watchlist, JSON.stringify(state.watchlist));
+  localStorage.setItem(STORAGE_KEYS.alerts, JSON.stringify(state.alerts));
+  localStorage.setItem(STORAGE_KEYS.history, JSON.stringify(state.history));
+}
+
+function toNumber(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : NaN;
+}
+
+function fmtNumber(value) {
+  const number = toNumber(value);
+  return Number.isFinite(number) ? number.toLocaleString("en-US") : "-";
+}
+
+function fmtPercent(value) {
+  const number = toNumber(value);
+  if (!Number.isFinite(number)) return "-";
+  return `${number > 0 ? "+" : ""}${number.toFixed(2)}%`;
+}
+
+function todayKey(dateValue) {
+  const date = new Date(dateValue);
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+function makeId(prefix) {
+  return `${prefix}_${Date.now()}_${Math.random().toString(16).slice(2, 7)}`;
+}
+
+function setStatus(text, tone = "") {
+  el.connStatus.className = `status ${tone}`.trim();
+  el.connStatus.textContent = text;
+}
+
+function setTab(tab) {
+  state.activeTab = tab;
+  el.tabButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.tab === tab);
+  });
+  document.querySelectorAll(".panel").forEach((panel) => {
+    panel.classList.toggle("active", panel.id === `panel-${tab}`);
+  });
+}
+
+function updateCounts() {
+  const activeAlerts = state.alerts.filter((alert) => alert.enabled !== false).length;
+  el.alertsCount.textContent = String(activeAlerts);
+  el.historyCount.textContent = String(state.history.length);
+}
+
+function renderWatchlist() {
+  el.watchlistRows.innerHTML = "";
+  const hasItems = state.watchlist.length > 0;
+  el.watchlistEmpty.style.display = hasItems ? "none" : "block";
+
+  state.watchlist.forEach((ticker) => {
+    const quote = state.prices[ticker] || {};
+    const changePercent = quote.changePercent ?? quote.changeRate ?? 0;
+    const toneClass = toNumber(changePercent) >= 0 ? "chg-up" : "chg-down";
+    const name = quote.name || quote.companyName || "Unknown";
+    const activeAlertCount = state.alerts.filter((alert) => alert.ticker === ticker && alert.enabled !== false).length;
+
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `
+      <div>
+        <div class="ticker">${ticker}</div>
+        <div class="name">${name}${activeAlertCount ? ` · ${activeAlertCount} alert` : ""}</div>
+      </div>
+      <div class="price">${fmtNumber(quote.price)}</div>
+      <div class="${toneClass}">${fmtPercent(changePercent)}</div>
+      <button class="icon-btn" type="button" data-remove-ticker="${ticker}" aria-label="Remove ${ticker}">×</button>
+    `;
+    el.watchlistRows.appendChild(row);
+  });
+}
+
+function normalizeFutures(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (payload && Array.isArray(payload.data)) return payload.data;
+  if (payload && Array.isArray(payload.items)) return payload.items;
+  if (payload && typeof payload === "object") {
+    return Object.values(payload).filter((item) => item && typeof item === "object");
+  }
+  return [];
+}
+
+function renderFutures() {
+  el.futuresGrid.innerHTML = "";
+  const hasItems = state.futures.length > 0;
+  el.futuresEmpty.style.display = hasItems ? "none" : "block";
+
+  state.futures.forEach((item) => {
+    const symbol = item.symbol || item.ticker || "UNKNOWN";
+    const changePercent = item.changePercent ?? item.changeRate ?? 0;
+    const toneClass = toNumber(changePercent) >= 0 ? "chg-up" : "chg-down";
+
+    const card = document.createElement("article");
+    card.className = "future-card";
+    card.innerHTML = `
+      <div class="future-name">${symbol}</div>
+      <div class="future-price">${fmtNumber(item.price)}</div>
+      <div class="future-change ${toneClass}">${fmtPercent(changePercent)}</div>
+    `;
+    el.futuresGrid.appendChild(card);
+  });
+}
+
+function renderAlertTickerOptions() {
+  const current = el.alertTickerSelect.value;
+  el.alertTickerSelect.innerHTML = "";
+
+  if (!state.watchlist.length) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "NO TICKERS";
+    el.alertTickerSelect.appendChild(option);
+    el.alertTickerSelect.disabled = true;
+    el.addAlertBtn.disabled = true;
+    return;
+  }
+
+  state.watchlist.forEach((ticker) => {
+    const option = document.createElement("option");
+    option.value = ticker;
+    option.textContent = ticker;
+    el.alertTickerSelect.appendChild(option);
+  });
+
+  el.alertTickerSelect.disabled = false;
+  el.addAlertBtn.disabled = false;
+  if (state.watchlist.includes(current)) {
+    el.alertTickerSelect.value = current;
+  }
+}
+
+function renderAlerts() {
+  el.alertRows.innerHTML = "";
+  const hasItems = state.alerts.length > 0;
+  el.alertsEmpty.style.display = hasItems ? "none" : "block";
+  el.alertsMeta.textContent = `${state.alerts.length} total`;
+
+  state.alerts.forEach((alert) => {
+    const status = alert.enabled === false ? "PAUSED" : "LIVE";
+    const toneClass = alert.operator === "above" ? "chg-up" : "chg-down";
+
+    const row = document.createElement("div");
+    row.className = "alert-row";
+    row.innerHTML = `
+      <div>
+        <div class="ticker">${alert.ticker}</div>
+        <div class="name">${alert.operator.toUpperCase()} ${fmtNumber(alert.target)}</div>
+      </div>
+      <div class="${toneClass}">${status}</div>
+      <div class="name">${alert.lastFiredAt ? `Last ${new Date(alert.lastFiredAt).toLocaleTimeString()}` : "Never fired"}</div>
+      <button class="icon-btn warn" type="button" data-toggle-alert="${alert.id}">${alert.enabled === false ? "Play" : "Pause"}</button>
+      <button class="icon-btn" type="button" data-remove-alert="${alert.id}">×</button>
+    `;
+    el.alertRows.appendChild(row);
+  });
+}
+
+function renderHistory() {
+  el.historyRows.innerHTML = "";
+  const sorted = [...state.history].sort((a, b) => b.time - a.time);
+  const hasItems = sorted.length > 0;
+  el.historyEmpty.style.display = hasItems ? "none" : "block";
+
+  const today = todayKey(Date.now());
+  const todayCount = sorted.filter((item) => todayKey(item.time) === today).length;
+  const uniqueTickers = new Set(sorted.map((item) => item.ticker)).size;
+
+  el.sumTotal.textContent = String(sorted.length);
+  el.sumToday.textContent = String(todayCount);
+  el.sumTickers.textContent = String(uniqueTickers);
+
+  sorted.forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "history-row";
+    row.innerHTML = `
+      <div class="history-top">
+        <div class="history-code">${item.ticker}</div>
+        <div class="history-time">${new Date(item.time).toLocaleString()}</div>
+      </div>
+      <div class="history-desc">${item.operator.toUpperCase()} ${fmtNumber(item.target)} · Triggered at ${fmtNumber(item.price)}</div>
+    `;
+    el.historyRows.appendChild(row);
+  });
+}
+
+function renderAll() {
+  renderWatchlist();
+  renderFutures();
+  renderAlertTickerOptions();
+  renderAlerts();
+  renderHistory();
+  updateCounts();
+}
+
+async function fetchJson(path) {
+  const base = state.apiBaseUrl.replace(/\/+$/, "");
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 9000);
+  try {
+    const response = await fetch(`${base}${path}`, { signal: controller.signal });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function normalizePricePayload(payload) {
+  const map = {};
+  if (Array.isArray(payload)) {
+    payload.forEach((item) => {
+      const key = item?.ticker || item?.symbol;
+      if (key) map[key] = item;
+    });
+    return map;
+  }
+  if (payload && Array.isArray(payload.data)) {
+    payload.data.forEach((item) => {
+      const key = item?.ticker || item?.symbol;
+      if (key) map[key] = item;
+    });
+    return map;
+  }
+  if (payload && typeof payload === "object") {
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value && typeof value === "object") map[key] = value;
+    });
+  }
+  return map;
+}
+
+function findQuotePrice(ticker) {
+  const direct = state.prices[ticker];
+  if (direct) return toNumber(direct.price);
+  const upper = ticker.toUpperCase();
+  const key = Object.keys(state.prices).find((item) => item.toUpperCase() === upper);
+  return key ? toNumber(state.prices[key].price) : NaN;
+}
+
+function buildMockQuote(ticker, previous) {
+  const previousPrice = toNumber(previous?.price);
+  const seededBase = 100 + (ticker.length * 17);
+  const base = Number.isFinite(previousPrice) ? previousPrice : seededBase;
+  const drift = (Math.random() - 0.5) * Math.max(1, base * 0.015);
+  const nextPrice = Math.max(0.01, base + drift);
+  const changePercent = base > 0 ? ((nextPrice - base) / base) * 100 : 0;
+  return {
+    ticker,
+    symbol: ticker,
+    price: nextPrice,
+    changePercent
+  };
+}
+
+function buildMockFutures() {
+  const symbols = ["KOSPI200", "NASDAQ", "S&P500", "KOSDAQ", "USDKRW", "DOW"];
+  return symbols.map((symbol) => {
+    const anchor = symbol.length * 120 + 1000;
+    const drift = (Math.random() - 0.5) * (anchor * 0.01);
+    const price = anchor + drift;
+    const changePercent = (drift / anchor) * 100;
+    return { symbol, price, changePercent };
+  });
+}
+
+async function refreshWatchlist() {
+  if (!state.watchlist.length) {
+    el.watchlistMeta.textContent = "No tickers";
+    return;
+  }
+  el.watchlistMeta.textContent = "Loading...";
+
+  try {
+    const query = encodeURIComponent(state.watchlist.join(","));
+    const payload = await fetchJson(`/api/price/batch?tickers=${query}`);
+    let nextPrices = normalizePricePayload(payload);
+
+    if (!Object.keys(nextPrices).length && state.watchlist.length === 1) {
+      const singlePayload = await fetchJson(`/api/price/${encodeURIComponent(state.watchlist[0])}`);
+      nextPrices = normalizePricePayload([singlePayload]);
+    }
+
+    if (Object.keys(nextPrices).length) {
+      state.prices = { ...state.prices, ...nextPrices };
+    }
+
+    renderWatchlist();
+    checkAlertsAgainstPrices();
+    el.watchlistMeta.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+  } catch (error) {
+    const fallback = {};
+    state.watchlist.forEach((ticker) => {
+      fallback[ticker] = buildMockQuote(ticker, state.prices[ticker]);
+    });
+    state.prices = { ...state.prices, ...fallback };
+    renderWatchlist();
+    checkAlertsAgainstPrices();
+    el.watchlistMeta.textContent = `Mock ${new Date().toLocaleTimeString()}`;
+    setStatus(`Watchlist using mock data (${error.message}).`, "warn");
+  }
+}
+
+async function refreshFutures() {
+  el.futuresMeta.textContent = "Loading...";
+  try {
+    const payload = await fetchJson("/api/futures");
+    state.futures = normalizeFutures(payload);
+    renderFutures();
+    el.futuresMeta.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+  } catch (error) {
+    state.futures = buildMockFutures();
+    renderFutures();
+    el.futuresMeta.textContent = `Mock ${new Date().toLocaleTimeString()}`;
+    setStatus(`Futures using mock data (${error.message}).`, "warn");
+  }
+}
+
+function appendHistory(entry) {
+  state.history.unshift(entry);
+  if (state.history.length > 300) state.history = state.history.slice(0, 300);
+}
+
+function sendBrowserNotification(title, body) {
+  if (!("Notification" in window)) return false;
+  if (Notification.permission !== "granted") return false;
+  try {
+    const notification = new Notification(title, { body });
+    setTimeout(() => notification.close(), 5000);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function checkAlertsAgainstPrices() {
+  let firedCount = 0;
+  const now = Date.now();
+
+  state.alerts.forEach((alert) => {
+    if (alert.enabled === false) return;
+    const price = findQuotePrice(alert.ticker);
+    if (!Number.isFinite(price)) return;
+
+    const target = toNumber(alert.target);
+    if (!Number.isFinite(target)) return;
+
+    const hit = alert.operator === "above" ? price >= target : price <= target;
+    if (!hit) return;
+
+    const lastFiredAt = Number(alert.lastFiredAt || 0);
+    if (now - lastFiredAt < COOLDOWN_MS) return;
+
+    alert.lastFiredAt = now;
+    firedCount += 1;
+
+    appendHistory({
+      id: makeId("hist"),
+      alertId: alert.id,
+      ticker: alert.ticker,
+      operator: alert.operator,
+      target: target,
+      price: price,
+      time: now
+    });
+
+    const title = `${alert.ticker} ${alert.operator.toUpperCase()} ${fmtNumber(target)}`;
+    const body = `Current price: ${fmtNumber(price)}`;
+    sendBrowserNotification(title, body);
+  });
+
+  if (firedCount > 0) {
+    saveStateArrays();
+    renderAlerts();
+    renderHistory();
+    updateCounts();
+    setStatus(`${firedCount} alert trigger${firedCount > 1 ? "s" : ""} detected.`, "ok");
+  }
+}
+
+function addTicker() {
+  const raw = el.tickerInput.value.trim().toUpperCase();
+  if (!raw) return;
+  if (!/^[A-Z0-9._-]+$/.test(raw)) {
+    setStatus(`Invalid ticker format: ${raw}`, "warn");
+    return;
+  }
+  if (state.watchlist.includes(raw)) {
+    setStatus(`Ticker already exists: ${raw}`, "warn");
+    return;
+  }
+  state.watchlist.push(raw);
+  el.tickerInput.value = "";
+  saveStateArrays();
+  renderWatchlist();
+  renderAlertTickerOptions();
+  refreshWatchlist();
+}
+
+function removeTicker(ticker) {
+  state.watchlist = state.watchlist.filter((item) => item !== ticker);
+  delete state.prices[ticker];
+
+  const before = state.alerts.length;
+  state.alerts = state.alerts.filter((alert) => alert.ticker !== ticker);
+  const removedAlerts = before - state.alerts.length;
+
+  saveStateArrays();
+  renderAll();
+
+  if (removedAlerts > 0) {
+    setStatus(`Removed ${ticker} and ${removedAlerts} linked alert(s).`, "warn");
+  } else {
+    setStatus(`Removed ${ticker}.`, "ok");
+  }
+}
+
+function addAlert() {
+  const ticker = el.alertTickerSelect.value;
+  const operator = el.alertOperatorSelect.value;
+  const target = toNumber(el.alertTargetInput.value);
+
+  if (!ticker) {
+    setStatus("Add a watchlist ticker first.", "warn");
+    return;
+  }
+  if (!Number.isFinite(target) || target <= 0) {
+    setStatus("Enter a valid positive target price.", "warn");
+    return;
+  }
+
+  const duplicate = state.alerts.find((alert) => alert.ticker === ticker && alert.operator === operator && Number(alert.target) === target);
+  if (duplicate) {
+    setStatus("Same alert already exists.", "warn");
+    return;
+  }
+
+  state.alerts.push({
+    id: makeId("alt"),
+    ticker,
+    operator,
+    target,
+    enabled: true,
+    lastFiredAt: 0
+  });
+
+  el.alertTargetInput.value = "";
+  saveStateArrays();
+  renderAlerts();
+  renderWatchlist();
+  updateCounts();
+  setStatus(`Alert added for ${ticker}.`, "ok");
+}
+
+function toggleAlert(alertId) {
+  const alert = state.alerts.find((item) => item.id === alertId);
+  if (!alert) return;
+  alert.enabled = alert.enabled === false;
+  saveStateArrays();
+  renderAlerts();
+  renderWatchlist();
+  updateCounts();
+}
+
+function removeAlert(alertId) {
+  state.alerts = state.alerts.filter((item) => item.id !== alertId);
+  saveStateArrays();
+  renderAlerts();
+  renderWatchlist();
+  updateCounts();
+}
+
+function clearHistory() {
+  if (!confirm("Clear all history logs?")) return;
+  state.history = [];
+  saveStateArrays();
+  renderHistory();
+  updateCounts();
+  setStatus("History cleared.", "ok");
+}
+
+async function checkBackend() {
+  setStatus("Checking backend...", "warn");
+  try {
+    await fetchJson("/api/futures");
+    setStatus("Backend reachable.", "ok");
+  } catch (error) {
+    setStatus(`Backend check failed: ${error.message}`, "err");
+  }
+}
+
+async function requestNotificationPermission() {
+  if (!("Notification" in window)) {
+    setStatus("Notifications are not supported in this browser.", "warn");
+    return;
+  }
+  const permission = await Notification.requestPermission();
+  if (permission === "granted") {
+    setStatus("Notifications enabled.", "ok");
+  } else {
+    setStatus(`Notification permission: ${permission}`, "warn");
+  }
+}
+
+function startPolling() {
+  clearInterval(state.timers.watchlist);
+  clearInterval(state.timers.futures);
+
+  state.timers.watchlist = setInterval(refreshWatchlist, 5000);
+  state.timers.futures = setInterval(() => {
+    if (state.activeTab === "futures") refreshFutures();
+  }, 60000);
+}
+
+function bindEvents() {
+  el.tabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const tab = button.dataset.tab;
+      setTab(tab);
+      if (tab === "watchlist") refreshWatchlist();
+      if (tab === "futures") refreshFutures();
+    });
+  });
+
+  el.saveApiBtn.addEventListener("click", () => {
+    const value = el.apiUrlInput.value.trim();
+    if (!value) return;
+    state.apiBaseUrl = value.replace(/\/+$/, "");
+    localStorage.setItem(STORAGE_KEYS.apiUrl, state.apiBaseUrl);
+    setStatus(`API URL saved: ${state.apiBaseUrl}`, "ok");
+  });
+
+  el.checkApiBtn.addEventListener("click", checkBackend);
+  el.refreshNowBtn.addEventListener("click", () => {
+    refreshWatchlist();
+    refreshFutures();
+  });
+  el.notifBtn.addEventListener("click", requestNotificationPermission);
+
+  el.addTickerBtn.addEventListener("click", addTicker);
+  el.tickerInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") addTicker();
+  });
+
+  el.watchlistRows.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-remove-ticker]");
+    if (!button) return;
+    removeTicker(button.dataset.removeTicker);
+  });
+
+  el.addAlertBtn.addEventListener("click", addAlert);
+
+  el.alertRows.addEventListener("click", (event) => {
+    const toggleButton = event.target.closest("[data-toggle-alert]");
+    if (toggleButton) {
+      toggleAlert(toggleButton.dataset.toggleAlert);
+      return;
+    }
+    const removeButton = event.target.closest("[data-remove-alert]");
+    if (removeButton) {
+      removeAlert(removeButton.dataset.removeAlert);
+    }
+  });
+
+  el.clearHistoryBtn.addEventListener("click", clearHistory);
+}
+
+async function init() {
+  el.apiUrlInput.value = state.apiBaseUrl;
+  bindEvents();
+  renderAll();
+  startPolling();
+  await refreshWatchlist();
+  updateCounts();
+  setStatus("Ready. Add tickers and alerts to start.", "ok");
+}
+
+init();
+</script>
+</body>
+</html>

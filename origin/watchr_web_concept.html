@@ -8,250 +8,990 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#07090d;--bg1:#0c1018;--bg2:#111621;--bg3:#161d2c;--line:#1e2840;--line2:#283350;--t0:#e8edf8;--t1:#9aabc8;--t2:#4d6082;--t3:#2a3a58;--up:#ff3b47;--dn:#2b7fff;--amber:#f5a623;--teal:#00d4aa;--purple:#a371f7;--mono:"IBM Plex Mono",monospace;--sans:"Noto Sans KR",sans-serif;--w:1180px}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--t0);font-family:var(--sans);background:radial-gradient(circle at top left,rgba(163,113,247,.12),transparent 24%),radial-gradient(circle at top right,rgba(0,212,170,.08),transparent 20%),linear-gradient(180deg,#0a0d14 0%,#07090d 100%)}
-a{text-decoration:none;color:inherit}button{font:inherit}iframe{display:block;width:100%;border:0}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
-.shell{width:min(calc(100% - 32px),var(--w));margin:0 auto}.mono{font-family:var(--mono)}
-.top{position:sticky;top:0;z-index:20;background:rgba(7,9,13,.82);backdrop-filter:blur(14px);border-bottom:1px solid rgba(40,51,80,.7)}
-.topin{width:min(calc(100% - 32px),var(--w));margin:0 auto;min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:16px}
-.brand{display:flex;align-items:center;gap:12px;font:600 13px var(--mono);letter-spacing:2px;text-transform:uppercase}.dot{width:10px;height:10px;border-radius:50%;background:var(--amber);box-shadow:0 0 16px var(--amber);animation:blink 2s infinite}
-.nav{display:flex;gap:10px;flex-wrap:wrap}.nav a{padding:8px 12px;border:1px solid transparent;border-radius:999px;color:var(--t2);font:11px var(--mono);letter-spacing:1px;text-transform:uppercase}.nav a:hover{background:var(--bg1);border-color:var(--line2);color:var(--t0)}
-.hero{padding:48px 0 24px}.hero-grid,.journey,.workflow,.cta{display:grid;grid-template-columns:1.05fr .95fr;gap:24px}
-.panel,.card,.tabcopy,.tabstats,.flowaside,.cta-box{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(12,16,24,.96),rgba(10,13,19,.88));border:1px solid var(--line);border-radius:24px;box-shadow:0 24px 80px rgba(0,0,0,.4)}
-.panel::before,.card::before,.tabcopy::before,.tabstats::before,.flowaside::before,.cta-box::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(135deg,rgba(255,255,255,.04),transparent 30%)}
-.copy{padding:34px}.eyebrow,.status,.chip,.pill,.tabbtn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;font:11px var(--mono);letter-spacing:1px;text-transform:uppercase}
-.eyebrow{padding:8px 12px;border:1px solid rgba(0,212,170,.35);background:rgba(0,212,170,.08);color:var(--teal)}.eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}
-h1{margin:20px 0 14px;max-width:11ch;font:600 clamp(38px,6vw,74px)/.95 var(--mono);letter-spacing:-2px}
-.lead,.sdesc,.small{color:var(--t1);line-height:1.8}.lead{font-size:16px}.small{font-size:13px}.chips,.metrics,.btns,.tabs{display:flex;gap:10px;flex-wrap:wrap}.chips{margin:22px 0 26px}
-.chip{padding:6px 12px;border:1px solid var(--line2);background:rgba(12,16,24,.92);color:var(--t1)}.chip.amber{color:var(--amber);border-color:rgba(245,166,35,.34);background:rgba(245,166,35,.08)}.chip.purple{color:var(--purple);border-color:rgba(163,113,247,.35);background:rgba(163,113,247,.08)}
-.metrics{margin-top:28px}.metric{min-width:150px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:rgba(17,22,33,.82)}.ml{color:var(--t3);font:10px var(--mono);letter-spacing:1px;text-transform:uppercase}.mv{margin-top:8px;font:24px var(--mono)}.mn{margin-top:4px;color:var(--t2);font-size:12px}
-.btns{margin-top:28px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border-radius:999px;border:1px solid transparent;font:12px var(--mono);letter-spacing:1px;text-transform:uppercase}.btn.primary{background:var(--amber);color:#07090d}.btn.secondary{background:rgba(17,22,33,.86);border-color:var(--line2)}.btn.ghost{background:rgba(0,212,170,.06);border-color:rgba(0,212,170,.3);color:var(--teal)}
-.preview{padding:22px}.ptop,.section-head,.preview-links{display:flex;align-items:center;justify-content:space-between;gap:14px}.dots{display:flex;gap:8px}.dots span{width:10px;height:10px;border-radius:50%}.dots span:nth-child(1){background:#ff5f57}.dots span:nth-child(2){background:#febc2e}.dots span:nth-child(3){background:#28c840}
-.status{padding:6px 10px;border:1px solid rgba(0,212,170,.35);background:rgba(0,212,170,.08);color:var(--teal)}.frame{margin-top:16px;border:1px solid var(--line2);border-radius:18px;overflow:hidden;background:#050709}.frame iframe{height:520px}
-.preview-links{margin-top:14px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:rgba(17,22,33,.82)}
-.section{padding:28px 0}.sk{color:var(--t3);font:11px var(--mono);letter-spacing:2px;text-transform:uppercase}.st{margin:8px 0 0;font:600 clamp(26px,3vw,40px)/1.05 var(--mono);letter-spacing:-1px}.sdesc{max-width:58ch;font-size:15px}
-.grid4,.grid3,.grid2,.footer-links{display:grid;gap:16px}.grid4{grid-template-columns:repeat(4,1fr)}.grid3{grid-template-columns:repeat(3,1fr)}.grid2,.footer-links{grid-template-columns:repeat(2,1fr)}
-.card{padding:22px;transition:transform .16s,border-color .16s}.card:hover{transform:translateY(-2px);border-color:var(--line2)}.cl{color:var(--t3);font:10px var(--mono);letter-spacing:1.4px;text-transform:uppercase}.ct{margin:14px 0 10px;font:20px var(--mono)}.cc{margin:0;color:var(--t1);font-size:14px;line-height:1.8}.cm{margin-top:18px;color:var(--amber);font:11px var(--mono);letter-spacing:1px;text-transform:uppercase}
-.journey .track{display:grid;gap:14px}.jitem{display:grid;grid-template-columns:auto 1fr;gap:14px;padding:18px 20px;border:1px solid var(--line);border-radius:20px;background:rgba(12,16,24,.9)}.jnode,.anum,.tbadge{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line2);background:rgba(17,22,33,.88);color:var(--amber);font:12px var(--mono)}
-.jt{margin:0 0 6px;font:18px var(--mono)}.jc{margin:0;color:var(--t1);font-size:14px;line-height:1.8}.flowaside{padding:24px}.alist{display:grid;gap:12px;margin-top:18px}.aitem{padding-top:12px;border-top:1px solid var(--line)}.aitem:first-child{padding-top:0;border-top:0}.ak{color:var(--t3);font:10px var(--mono);letter-spacing:1px;text-transform:uppercase}.av{margin-top:8px;color:var(--t0);font-size:14px;line-height:1.7}
-.tabs{margin-bottom:18px}.tabbtn{padding:10px 14px;border:1px solid var(--line2);background:rgba(12,16,24,.9);color:var(--t2);cursor:pointer}.tabbtn[aria-selected="true"]{background:var(--amber);border-color:var(--amber);color:#07090d}
-.tabpanel{display:none;grid-template-columns:1.1fr .9fr;gap:16px}.tabpanel.active{display:grid}.tabcopy,.tabstats{padding:24px}.tabcopy h3{margin:0 0 10px;font:24px var(--mono)}.tabcopy p{margin:0;color:var(--t1);font-size:15px;line-height:1.8}
-.points{display:grid;gap:10px;margin-top:20px}.points div{padding-left:14px;border-left:2px solid var(--line2);color:var(--t1);font-size:14px;line-height:1.75}.tabstats{display:grid;gap:12px}.sbox{padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:rgba(17,22,33,.78)}.sbox strong{display:block;margin-bottom:8px;font:14px var(--mono)}.sbox span{color:var(--t1);font-size:13px;line-height:1.7}
-.workflow .flowaside{padding:24px}.timeline{display:grid;gap:14px}.tstep{display:flex;gap:12px;align-items:start}.tbadge{width:30px;height:30px;color:var(--teal);font-size:11px}.tstep strong{display:block;margin-bottom:4px;font:15px var(--mono)}.tstep span{color:var(--t1);font-size:13px;line-height:1.7}
-.accords{display:grid;gap:12px}.acc{overflow:hidden;border:1px solid var(--line);border-radius:20px;background:rgba(12,16,24,.92)}.accbtn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;background:transparent;border:0;color:inherit;cursor:pointer}.accbtn:hover{background:rgba(17,22,33,.65)}
-.atitle{display:flex;align-items:center;gap:12px}.anum{width:28px;height:28px;font-size:11px}.acopy strong{display:block;font:16px var(--mono)}.acopy span{display:block;margin-top:4px;color:var(--t2);font-size:13px}.aind{color:var(--t2);font:14px var(--mono)}
-.accpanel{display:none;padding:0 20px 20px}.acc.open .accpanel{display:block}.code{padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:#060a10;color:#c9d1d9;font:12px/1.85 var(--mono);white-space:pre-wrap;overflow:auto}.note{margin-top:12px;color:var(--t1);font-size:13px;line-height:1.8}
-.cta-box{padding:28px}.cta h2{margin:12px 0 10px;font:600 clamp(28px,4vw,44px)/1.04 var(--mono)}.mini{display:grid;gap:12px}
-.footer{padding:18px 0 48px}.flink{padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:rgba(12,16,24,.88)}.flink strong{display:block;margin-bottom:8px;font:13px var(--mono)}.flink span{color:var(--t1);font-size:13px;line-height:1.7}.foot{margin-top:18px;color:var(--t3);font:10px var(--mono);letter-spacing:1px;text-transform:uppercase;text-align:center}
-code{color:var(--teal);font-family:var(--mono);font-size:12px}
-@media (max-width:1080px){.hero-grid,.journey,.workflow,.cta,.tabpanel.active{grid-template-columns:1fr}.grid4{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:720px){.shell,.topin{width:min(calc(100% - 20px),var(--w))}.topin{padding:10px 0;align-items:flex-start;flex-direction:column}.hero{padding-top:28px}.copy,.preview,.flowaside,.tabcopy,.tabstats,.cta-box{padding:20px}.frame iframe{height:420px}.grid4,.grid3,.grid2,.footer-links{grid-template-columns:1fr}.section-head,.preview-links{flex-direction:column;align-items:flex-start}}
+:root {
+  --bg: #07090d;
+  --bg1: #0d111a;
+  --bg2: #121a28;
+  --line: #24324f;
+  --line-strong: #32476f;
+  --text-0: #ecf1ff;
+  --text-1: #a7b5d4;
+  --text-2: #5f7295;
+  --amber: #f5a623;
+  --teal: #00d4aa;
+  --red: #ff3b47;
+  --blue: #2b7fff;
+  --mono: "IBM Plex Mono", monospace;
+  --sans: "Noto Sans KR", sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--text-0);
+  font-family: var(--sans);
+  background:
+    radial-gradient(circle at 8% -2%, rgba(245, 166, 35, 0.12), transparent 28%),
+    radial-gradient(circle at 86% 0%, rgba(0, 212, 170, 0.12), transparent 24%),
+    linear-gradient(180deg, #090d14 0%, #07090d 100%);
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; }
+
+.shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid rgba(50, 71, 111, 0.55);
+  backdrop-filter: blur(12px);
+  background: rgba(7, 9, 13, 0.78);
+}
+
+.topbar-inner {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font: 600 13px var(--mono);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.brand-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 14px rgba(245, 166, 35, 0.9);
+}
+
+.nav {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nav-link {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  color: var(--text-2);
+  font: 11px var(--mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 150ms ease;
+}
+
+.nav-link:hover,
+.nav-link.is-active {
+  color: var(--text-0);
+  border-color: var(--line-strong);
+  background: rgba(13, 17, 26, 0.85);
+}
+
+.hero {
+  padding: 48px 0 24px;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.02fr 0.98fr;
+  gap: 22px;
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(13, 17, 26, 0.95), rgba(9, 12, 19, 0.92));
+  box-shadow: 0 24px 58px rgba(0, 0, 0, 0.45);
+}
+
+.hero-copy {
+  padding: 34px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid rgba(0, 212, 170, 0.3);
+  border-radius: 999px;
+  background: rgba(0, 212, 170, 0.08);
+  color: var(--teal);
+  font: 11px var(--mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.eyebrow::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+h1 {
+  margin: 18px 0 12px;
+  max-width: 11ch;
+  font: 600 clamp(38px, 5.6vw, 72px)/0.95 var(--mono);
+  letter-spacing: -1.8px;
+}
+
+.lead {
+  margin: 0;
+  color: var(--text-1);
+  font-size: 15px;
+  line-height: 1.85;
+}
+
+.chip-row {
+  margin: 22px 0 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 6px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  color: var(--text-1);
+  font: 11px var(--mono);
+  letter-spacing: 0.8px;
+}
+
+.chip.amber {
+  color: var(--amber);
+  border-color: rgba(245, 166, 35, 0.35);
+  background: rgba(245, 166, 35, 0.08);
+}
+
+.metrics {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.metric {
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(17, 24, 38, 0.75);
+}
+
+.metric-key {
+  color: var(--text-2);
+  font: 10px var(--mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.metric-value {
+  margin-top: 6px;
+  font: 22px var(--mono);
+}
+
+.metric-desc {
+  margin-top: 4px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.btn-row {
+  margin-top: 22px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  min-height: 46px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: 12px var(--mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: transform 140ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  color: #090d14;
+  background: var(--amber);
+}
+
+.btn-secondary {
+  border-color: var(--line-strong);
+  background: rgba(17, 24, 38, 0.82);
+}
+
+.hero-preview {
+  padding: 18px;
+}
+
+.preview-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.status-badge {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 212, 170, 0.35);
+  color: var(--teal);
+  background: rgba(0, 212, 170, 0.08);
+  font: 10px var(--mono);
+  letter-spacing: 1px;
+}
+
+.status-badge.warn {
+  color: var(--amber);
+  border-color: rgba(245, 166, 35, 0.35);
+  background: rgba(245, 166, 35, 0.08);
+}
+
+.preview-frame {
+  margin-top: 12px;
+  border-radius: 16px;
+  border: 1px solid var(--line-strong);
+  overflow: hidden;
+  background: #050709;
+}
+
+.preview-frame iframe {
+  width: 100%;
+  height: 510px;
+}
+
+.preview-fallback {
+  margin-top: 12px;
+  padding: 12px 13px;
+  border-radius: 13px;
+  border: 1px solid var(--line);
+  background: rgba(17, 24, 38, 0.8);
+  color: var(--text-1);
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.preview-fallback.is-hidden {
+  display: none;
+}
+
+.section {
+  padding: 26px 0;
+}
+
+.section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.kicker {
+  color: var(--text-2);
+  font: 11px var(--mono);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+h2 {
+  margin: 8px 0 0;
+  font: 600 clamp(26px, 3vw, 40px)/1.04 var(--mono);
+  letter-spacing: -1px;
+}
+
+.section-desc {
+  max-width: 58ch;
+  color: var(--text-1);
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.feature-card {
+  padding: 20px;
+}
+
+.feature-no {
+  color: var(--text-2);
+  font: 10px var(--mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.feature-title {
+  margin: 12px 0 8px;
+  font: 19px var(--mono);
+}
+
+.feature-copy {
+  margin: 0;
+  color: var(--text-1);
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.tab-button {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: rgba(17, 24, 38, 0.75);
+  color: var(--text-2);
+  font: 11px var(--mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.tab-button[aria-selected="true"] {
+  color: #090d14;
+  background: var(--amber);
+  border-color: var(--amber);
+}
+
+.tab-panel {
+  display: none;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 12px;
+}
+
+.tab-panel.is-active {
+  display: grid;
+}
+
+.panel-copy,
+.panel-stats {
+  padding: 22px;
+}
+
+.panel-copy h3 {
+  margin: 0 0 10px;
+  font: 23px var(--mono);
+}
+
+.panel-copy p {
+  margin: 0;
+  color: var(--text-1);
+  line-height: 1.8;
+}
+
+.point-list {
+  margin-top: 14px;
+  display: grid;
+  gap: 9px;
+}
+
+.point-list div {
+  padding-left: 10px;
+  border-left: 2px solid var(--line-strong);
+  color: var(--text-1);
+  font-size: 14px;
+}
+
+.stat {
+  padding: 12px 13px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(17, 24, 38, 0.75);
+}
+
+.stat strong {
+  display: block;
+  margin-bottom: 6px;
+  font: 14px var(--mono);
+}
+
+.stat span {
+  color: var(--text-1);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.workflow-grid {
+  display: grid;
+  grid-template-columns: 0.82fr 1.18fr;
+  gap: 12px;
+}
+
+.workflow-aside {
+  padding: 20px;
+}
+
+.timeline {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 10px;
+}
+
+.timeline-dot {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--teal);
+  font: 11px var(--mono);
+}
+
+.timeline-item strong {
+  display: block;
+  font: 14px var(--mono);
+}
+
+.timeline-item span {
+  color: var(--text-1);
+  font-size: 13px;
+}
+
+.accordion-list {
+  display: grid;
+  gap: 10px;
+}
+
+.accordion {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(13, 17, 26, 0.9);
+}
+
+.accordion-header {
+  width: 100%;
+  border: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px 18px;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.accordion-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.accordion-number {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  color: var(--amber);
+  font: 11px var(--mono);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.accordion-text strong {
+  display: block;
+  font: 15px var(--mono);
+}
+
+.accordion-text span {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.accordion-state {
+  color: var(--text-2);
+  font: 12px var(--mono);
+}
+
+.accordion-panel {
+  display: none;
+  padding: 0 18px 18px;
+}
+
+.accordion.is-open .accordion-panel {
+  display: block;
+}
+
+.code-wrap {
+  position: relative;
+}
+
+.copy-button {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  z-index: 2;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  color: var(--text-1);
+  background: rgba(17, 24, 38, 0.9);
+  font: 10px var(--mono);
+  letter-spacing: 0.8px;
+  cursor: pointer;
+}
+
+.copy-button.is-done {
+  color: var(--teal);
+}
+
+pre {
+  margin: 0;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #060a10;
+  color: #c9d1d9;
+  font: 12px/1.72 var(--mono);
+  white-space: pre-wrap;
+}
+
+.note {
+  margin-top: 10px;
+  color: var(--text-1);
+  font-size: 13px;
+}
+
+.build-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.build-card {
+  padding: 20px;
+}
+
+.footer {
+  padding: 18px 0 40px;
+  color: var(--text-2);
+}
+
+.footer-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.footer-card {
+  padding: 15px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(13, 17, 26, 0.88);
+}
+
+.footer-card strong {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--text-0);
+  font: 13px var(--mono);
+}
+
+.footer-card span {
+  color: var(--text-1);
+  font-size: 13px;
+}
+
+.footnote {
+  margin-top: 14px;
+  text-align: center;
+  font: 10px var(--mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: all 420ms ease;
+}
+
+.reveal.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 1080px) {
+  .hero-grid, .tab-panel.is-active, .workflow-grid { grid-template-columns: 1fr; }
+  .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .build-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .shell, .topbar-inner { width: min(1180px, calc(100% - 20px)); }
+  .topbar-inner { flex-direction: column; align-items: flex-start; padding: 8px 0; }
+  .hero-copy, .hero-preview, .feature-card, .panel-copy, .panel-stats, .workflow-aside, .build-card { padding: 18px; }
+  .metrics { grid-template-columns: 1fr; }
+  .grid-4, .build-grid, .footer-cards { grid-template-columns: 1fr; }
+  .preview-frame iframe { height: 430px; }
+  .section-head { flex-direction: column; align-items: flex-start; }
+}
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="topin">
-    <a class="brand" href="#top"><span class="dot" aria-hidden="true"></span><span>WATCHR Mobile</span></a>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#top"><span class="brand-dot"></span><span>WATCHR Mobile</span></a>
     <nav class="nav" aria-label="섹션 이동">
-      <a href="#preview">Preview</a><a href="#promise">Promise</a><a href="#features">Features</a><a href="#workflow">Workflow</a><a href="#build">Build</a>
+      <a class="nav-link" href="#preview" data-section="preview">Preview</a>
+      <a class="nav-link" href="#promise" data-section="promise">Promise</a>
+      <a class="nav-link" href="#features" data-section="features">Features</a>
+      <a class="nav-link" href="#workflow" data-section="workflow">Workflow</a>
+      <a class="nav-link" href="#build" data-section="build">Build</a>
     </nav>
   </div>
 </header>
 
-<main id="top" class="shell">
-  <section class="hero">
+<main class="shell" id="top">
+  <section class="hero reveal">
     <div class="hero-grid">
-      <div class="panel copy">
-        <div class="eyebrow">Dark Trading UI for Mobile</div>
+      <article class="card hero-copy">
+        <div class="eyebrow">Dark Trading UI Concept</div>
         <h1>시장 관찰부터 알림 이력까지 한 흐름으로.</h1>
-        <p class="lead">WATCHR Mobile은 단순 시세 앱이 아니라, 종목 추가부터 관찰, 알림, 기록까지를 하나의 짧은 사용자 루프로 묶는 도구입니다. 이 페이지는 작업지시서의 기술 밀도와 모바일 모크업의 감성을 웹용 컨셉 브리프로 재구성한 버전입니다.</p>
-        <div class="chips">
-          <span class="chip amber">4-TAB FLOW</span><span class="chip">WATCHLIST · FUTURES · ALERTS · HISTORY</span><span class="chip purple">EXPO + NODE REUSE</span><span class="chip">INTERNAL DOSSIER STYLE</span>
+        <p class="lead">WATCHR Mobile은 시세를 보는 앱이 아니라 종목 추가, 관찰, 알림, 기록까지를 짧은 루프로 묶는 도구입니다. 이 페이지는 작업지시서의 기술 밀도와 모크업의 분위기를 합쳐 웹용 컨셉 브리프로 정리한 버전입니다.</p>
+        <div class="chip-row">
+          <span class="chip amber">4-TAB FLOW</span>
+          <span class="chip">WATCHLIST · FUTURES · ALERTS · HISTORY</span>
+          <span class="chip">EXPO + NODE BACKEND</span>
         </div>
         <div class="metrics">
-          <div class="metric"><div class="ml">Core Loop</div><div class="mv">4 STEP</div><div class="mn">추가 → 관찰 → 알림 → 기록</div></div>
-          <div class="metric"><div class="ml">Primary Surface</div><div class="mv">4 TABS</div><div class="mn">핵심 액션을 하단 탭에 응축</div></div>
-          <div class="metric"><div class="ml">Signal Style</div><div class="mv">HIGH TRUST</div><div class="mn">화려함보다 신뢰감과 속도감</div></div>
+          <div class="metric"><div class="metric-key">Core Loop</div><div class="metric-value">4 STEP</div><div class="metric-desc">추가 → 관찰 → 알림 → 기록</div></div>
+          <div class="metric"><div class="metric-key">Primary Surface</div><div class="metric-value">4 TABS</div><div class="metric-desc">핵심 액션을 하단 탭에 응축</div></div>
+          <div class="metric"><div class="metric-key">Signal Style</div><div class="metric-value">HIGH TRUST</div><div class="metric-desc">과장 대신 정확한 정보 전달</div></div>
         </div>
-        <div class="btns">
-          <a class="btn primary" href="#preview">View Concept</a>
-          <a class="btn secondary" href="watchr_mobile_design.html">Open Mockup</a>
-          <a class="btn ghost" href="watchr_mobile_작업지시서.html">Read Instruction</a>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="#features">View Features</a>
+          <a class="btn btn-secondary" href="watchr_mobile_design.html">Open Mockup</a>
+          <a class="btn btn-secondary" href="watchr_mobile_작업지시서.html">Open Brief</a>
         </div>
-      </div>
+      </article>
 
-      <div class="panel preview" id="preview">
-        <div class="ptop">
-          <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
-          <div class="status">LIVE MOCKUP</div>
+      <article class="card hero-preview" id="preview">
+        <div class="preview-top">
+          <div class="kicker">Live Preview</div>
+          <span id="previewStatus" class="status-badge">CHECKING</span>
         </div>
-        <div class="frame"><iframe src="watchr_mobile_design.html" title="WATCHR Mobile 라이브 프리뷰"></iframe></div>
-        <div class="preview-links">
-          <p class="small">프리뷰가 열리지 않아도 이 페이지는 단독으로 읽히도록 구성했습니다. 필요하면 모크업과 작업지시서를 별도 창에서 바로 열 수 있습니다.</p>
-          <div class="btns"><a class="btn secondary" href="watchr_mobile_design.html">Mockup</a><a class="btn secondary" href="watchr_mobile_작업지시서.html">Brief</a></div>
+        <div class="preview-frame">
+          <iframe id="previewFrame" src="watchr_mobile_design.html" title="WATCHR Mobile Design Preview"></iframe>
         </div>
-      </div>
+        <div id="previewFallback" class="preview-fallback is-hidden">
+          프리뷰가 로드되지 않았습니다. 모크업 파일을 직접 열어 확인해 주세요.
+          <div class="btn-row">
+            <a class="btn btn-secondary" href="watchr_mobile_design.html">Open Mockup File</a>
+            <a class="btn btn-secondary" href="watchr_mobile_작업지시서.html">Open Instruction Sheet</a>
+          </div>
+        </div>
+      </article>
     </div>
   </section>
 
-  <section class="section" id="promise">
+  <section class="section reveal" id="promise">
     <div class="section-head">
-      <div><div class="sk">Product Promise</div><h2 class="st">이 앱이 실제로 해결하는 것</h2></div>
-      <p class="sdesc">WATCHR Mobile은 정보를 나열하는 대신 사용자가 무엇을 보고 언제 반응할지를 제품의 기본 구조로 만듭니다.</p>
+      <div><div class="kicker">Product Promise</div><h2>이 앱이 실제로 해결하는 것</h2></div>
+      <p class="section-desc">사용자가 무엇을 보고 언제 반응할지를 제품 구조로 정의합니다. 빠르게 읽고, 빠르게 설정하고, 놓치지 않고 기록하는 경험이 핵심입니다.</p>
     </div>
-    <div class="grid4">
-      <article class="card"><div class="cl">01 Watchlist</div><h3 class="ct">관심 종목을 한 줄 밀도로 압축</h3><p class="cc">가격, 변화율, 스파크라인, 알림 상태를 한 행에서 동시에 읽도록 설계해 빠른 스캔이 가능합니다.</p><div class="cm">Dense by design</div></article>
-      <article class="card"><div class="cl">02 Futures</div><h3 class="ct">시장 체온을 먼저 보여주는 대시보드</h3><p class="cc">선물과 주요 지수를 크게, 빠르게, 비교 가능하게 보여 주어 시장 방향성을 먼저 읽게 합니다.</p><div class="cm">Large numbers first</div></article>
-      <article class="card"><div class="cl">03 Alerts</div><h3 class="ct">조건을 세우고 백그라운드로 맡기기</h3><p class="cc">사용자는 목표가와 조건만 입력하면 됩니다. 앱은 쿨다운과 알림 흐름을 관리합니다.</p><div class="cm">Action over monitoring</div></article>
-      <article class="card"><div class="cl">04 History</div><h3 class="ct">반응한 이유를 나중에도 남기는 기록</h3><p class="cc">언제 어떤 조건에서 울렸는지 남겨, 나중의 판단 재료와 회고 자료로 활용할 수 있습니다.</p><div class="cm">Traceable signal log</div></article>
+    <div class="grid-4">
+      <article class="card feature-card"><div class="feature-no">01 Watchlist</div><h3 class="feature-title">행 단위 밀도</h3><p class="feature-copy">가격, 변동률, 추세선, 알림 상태를 한 줄에서 읽어 빠른 스캔을 가능하게 합니다.</p></article>
+      <article class="card feature-card"><div class="feature-no">02 Futures</div><h3 class="feature-title">시장 체온 파악</h3><p class="feature-copy">선물과 지수를 비교 가능한 구조로 보여 주어 시장 방향을 먼저 읽게 합니다.</p></article>
+      <article class="card feature-card"><div class="feature-no">03 Alerts</div><h3 class="feature-title">행동 위임</h3><p class="feature-copy">조건만 지정하면 앱이 백그라운드에서 감시하고 쿨다운까지 관리합니다.</p></article>
+      <article class="card feature-card"><div class="feature-no">04 History</div><h3 class="feature-title">판단 기록</h3><p class="feature-copy">언제 어떤 조건으로 울렸는지 저장해 다음 판단의 근거로 남깁니다.</p></article>
     </div>
   </section>
 
-  <section class="section">
+  <section class="section reveal" id="features">
     <div class="section-head">
-      <div><div class="sk">How It Works</div><h2 class="st">추가 → 관찰 → 알림 → 이력</h2></div>
-      <p class="sdesc">제품의 핵심은 탭 개수가 아니라 사용자 루프의 짧음입니다. 한 번 종목을 추가하면 이후 흐름이 끊기지 않도록 설계합니다.</p>
+      <div><div class="kicker">Feature Spotlight</div><h2>탭별 역할을 빠르게 확인</h2></div>
+      <p class="section-desc">키보드 화살표로도 탭 전환이 가능합니다. 접근성을 포함해 실제 데모용 페이지로 사용할 수 있게 구성했습니다.</p>
     </div>
-    <div class="journey">
-      <div class="track">
-        <article class="jitem"><div class="jnode">01</div><div><h3 class="jt">Add</h3><p class="jc">워치리스트에 종목을 추가하고 기본 가격 조회를 시작합니다.</p></div></article>
-        <article class="jitem"><div class="jnode">02</div><div><h3 class="jt">Observe</h3><p class="jc">행 단위 정보와 선물 지표를 함께 보며 시장 흐름과 개별 종목 변화를 스캔합니다.</p></div></article>
-        <article class="jitem"><div class="jnode">03</div><div><h3 class="jt">Alert</h3><p class="jc">조건 충족 시 로컬 알림을 발생시키고, 같은 조건은 쿨다운으로 과발동을 막습니다.</p></div></article>
-        <article class="jitem"><div class="jnode">04</div><div><h3 class="jt">Review</h3><p class="jc">히스토리 탭에서 발동 기록과 시간 정보를 확인해 나중의 판단 자료로 활용합니다.</p></div></article>
-      </div>
-      <aside class="flowaside">
-        <div class="cl">System Character</div><h3 class="ct">모바일 트레이딩 UI를 웹 브리프로 번역</h3><p class="cc">감성은 다크 터미널, 구조는 제품 문서, 읽기 방식은 랜딩 페이지에 가깝게 재구성했습니다.</p>
-        <div class="alist">
-          <div class="aitem"><div class="ak">Tone</div><div class="av">기술적이고 차분하지만 살아 있는 시스템처럼 보여야 합니다.</div></div>
-          <div class="aitem"><div class="ak">Priority</div><div class="av">큰 숫자, 얇은 경계선, 작은 배지, 읽기 쉬운 카드 위계.</div></div>
-          <div class="aitem"><div class="ak">Interaction</div><div class="av">과한 애니메이션 대신 탭 전환, 접기/펼치기, 미세한 호버만 사용.</div></div>
-        </div>
-      </aside>
+
+    <div class="tabs" role="tablist" aria-label="탭 스포트라이트">
+      <button class="tab-button" role="tab" aria-selected="true" id="tab-watchlist" data-tab="watchlist">Watchlist</button>
+      <button class="tab-button" role="tab" aria-selected="false" id="tab-futures" data-tab="futures">Futures</button>
+      <button class="tab-button" role="tab" aria-selected="false" id="tab-alerts" data-tab="alerts">Alerts</button>
+      <button class="tab-button" role="tab" aria-selected="false" id="tab-history" data-tab="history">History</button>
+    </div>
+
+    <div class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-watchlist" data-panel="watchlist">
+      <article class="card panel-copy"><h3>Watchlist는 즉시 스캔용 화면입니다.</h3><p>종목 코드, 가격, 변화율, 미니 추세를 압축해서 보여 줍니다.</p><div class="point-list"><div>왼쪽 액센트 바로 상태 구분.</div><div>상단 마켓 스트립으로 시장 감각 동시 제공.</div><div>5초 폴링 기준의 활성 화면 갱신.</div></div></article>
+      <article class="card panel-stats"><div class="stat"><strong>Primary Value</strong><span>빠른 스크롤 스캔</span></div><div class="stat"><strong>UI Motif</strong><span>행, 스파크라인, 경고 pip</span></div><div class="stat"><strong>Data Hook</strong><span>`fetchBatch` + focus polling</span></div></article>
+    </div>
+
+    <div class="tab-panel" role="tabpanel" aria-labelledby="tab-futures" data-panel="futures">
+      <article class="card panel-copy"><h3>Futures는 시장 방향성 화면입니다.</h3><p>빅카드와 2열 그리드로 지표 비교에 최적화합니다.</p><div class="point-list"><div>핵심 지표는 크게 강조.</div><div>나머지는 통일된 셀로 비교 속도 향상.</div><div>실패 시 안전한 fallback 표기.</div></div></article>
+      <article class="card panel-stats"><div class="stat"><strong>Primary Value</strong><span>시장 체온 파악</span></div><div class="stat"><strong>UI Motif</strong><span>Big card + 2x3 grid</span></div><div class="stat"><strong>Data Hook</strong><span>60초 단위 갱신</span></div></article>
+    </div>
+
+    <div class="tab-panel" role="tabpanel" aria-labelledby="tab-alerts" data-panel="alerts">
+      <article class="card panel-copy"><h3>Alerts는 입력 플로우가 핵심입니다.</h3><p>종목 선택, 목표가, 조건을 짧은 흐름으로 등록합니다.</p><div class="point-list"><div>조건 색으로 above/below 구분.</div><div>활성 목록과 삭제 동작을 분리 표시.</div><div>탭 배지와 연동해 상태 인지 강화.</div></div></article>
+      <article class="card panel-stats"><div class="stat"><strong>Primary Value</strong><span>감시 시간 단축</span></div><div class="stat"><strong>UI Motif</strong><span>폼 카드 + 상태 배지</span></div><div class="stat"><strong>Data Hook</strong><span>알림 쿨다운 60분</span></div></article>
+    </div>
+
+    <div class="tab-panel" role="tabpanel" aria-labelledby="tab-history" data-panel="history">
+      <article class="card panel-copy"><h3>History는 결과 신뢰를 만듭니다.</h3><p>알림 발동 이력을 시간축으로 쌓아 회고가 가능하도록 합니다.</p><div class="point-list"><div>총 발동/오늘 발동 요약 카드 제공.</div><div>시간, 조건, 가격을 한 행에 표기.</div><div>전체 삭제는 확인 단계 포함.</div></div></article>
+      <article class="card panel-stats"><div class="stat"><strong>Primary Value</strong><span>판단 근거 보존</span></div><div class="stat"><strong>UI Motif</strong><span>타임라인형 리스트</span></div><div class="stat"><strong>Data Hook</strong><span>최대 50건 로컬 저장</span></div></article>
     </div>
   </section>
 
-  <section class="section" id="features">
+  <section class="section reveal" id="workflow">
     <div class="section-head">
-      <div><div class="sk">Feature Spotlight</div><h2 class="st">4개 탭을 웹에서 읽기 쉬운 구조로 재해석</h2></div>
-      <p class="sdesc">아래 탭을 눌러 각 화면의 역할을 확인할 수 있습니다. 모바일 모크업과 연결되지만 이 문서만 읽어도 제품의 역할이 전달되도록 정리했습니다.</p>
+      <div><div class="kicker">Workflow</div><h2>실행 순서를 바로 공유할 수 있는 구조</h2></div>
+      <p class="section-desc">아코디언 내부 명령은 복사 버튼으로 바로 가져갈 수 있습니다.</p>
     </div>
-    <div class="tabs" role="tablist" aria-label="기능 탭">
-      <button class="tabbtn" role="tab" aria-selected="true" data-tab="watchlist">Watchlist</button>
-      <button class="tabbtn" role="tab" aria-selected="false" data-tab="futures">Futures</button>
-      <button class="tabbtn" role="tab" aria-selected="false" data-tab="alerts">Alerts</button>
-      <button class="tabbtn" role="tab" aria-selected="false" data-tab="history">History</button>
-    </div>
-    <div class="tabpanel active" data-panel="watchlist">
-      <div class="tabcopy"><h3>Watchlist는 가장 짧은 의사결정 화면입니다.</h3><p>종목 코드, 가격, 변화율, 미니 추세선, 알림 존재 여부를 한 줄에 모읍니다. 사용자는 스크롤만으로 여러 종목을 빠르게 훑을 수 있습니다.</p><div class="points"><div>왼쪽 액센트 바와 숫자 중심 타이포로 상승/하락 상태를 즉시 식별합니다.</div><div>상단 마켓 스트립으로 개별 종목과 시장 온도를 동시에 읽습니다.</div><div>실시간 감각은 주되, 레이아웃은 불필요하게 흔들리지 않게 유지합니다.</div></div></div>
-      <div class="tabstats"><div class="sbox"><strong>Primary Value</strong><span>한 눈에 많이 보는 화면. 정보 밀도가 핵심입니다.</span></div><div class="sbox"><strong>UI Motif</strong><span>행, 스파크라인, 얇은 구분선, 경고 pip.</span></div><div class="sbox"><strong>Build Hook</strong><span><code>useFocusEffect</code>와 5초 폴링.</span></div></div>
-    </div>
-    <div class="tabpanel" data-panel="futures">
-      <div class="tabcopy"><h3>Futures는 시장의 전체 체온을 먼저 보여줍니다.</h3><p>큰 카드 하나와 비교 가능한 2열 그리드를 조합해, 사용자가 개별 종목보다 시장 방향성을 먼저 파악하도록 유도합니다.</p><div class="points"><div>KOSPI200 같은 핵심 지표는 큰 숫자와 넓은 차트 공간으로 강조합니다.</div><div>나머지 지표는 동일한 셀 구조로 배치해 비교 속도를 높입니다.</div><div>API 실패 시에도 크래시 대신 대시 값으로 안전하게 비워 둡니다.</div></div></div>
-      <div class="tabstats"><div class="sbox"><strong>Primary Value</strong><span>장 시작 전후 흐름을 빠르게 읽을 수 있습니다.</span></div><div class="sbox"><strong>UI Motif</strong><span>빅 카드, 2x3 매트릭스, 하단 컬러 바.</span></div><div class="sbox"><strong>Build Hook</strong><span>60초 단위 새로고침과 fallback state.</span></div></div>
-    </div>
-    <div class="tabpanel" data-panel="alerts">
-      <div class="tabcopy"><h3>Alerts는 입력 플로우가 가장 중요한 화면입니다.</h3><p>종목 선택과 목표가 입력, 이상/이하 조건을 빠르게 등록하도록 만드는 폼 중심 화면입니다.</p><div class="points"><div>입력, 조건 선택, 등록 결과가 카드 안에서 단계적으로 읽혀야 합니다.</div><div>활성 알림 목록은 조건 색상과 삭제 동작이 분명해야 합니다.</div><div>탭 배지와 연결되면 현재 알림 개수를 앱 전역에서 파악할 수 있습니다.</div></div></div>
-      <div class="tabstats"><div class="sbox"><strong>Primary Value</strong><span>지켜보는 시간을 줄이고 행동을 앱에 위임합니다.</span></div><div class="sbox"><strong>UI Motif</strong><span>폼 카드, 상태 배지, 좌측 컬러 바, 삭제 버튼.</span></div><div class="sbox"><strong>Build Hook</strong><span><code>expo-notifications</code>와 60분 쿨다운.</span></div></div>
-    </div>
-    <div class="tabpanel" data-panel="history">
-      <div class="tabcopy"><h3>History는 결과를 남겨 제품의 신뢰를 만듭니다.</h3><p>알림이 언제 어떤 조건에서 울렸는지까지 시간축으로 쌓아, 사용자의 판단 보조 도구 역할을 강화합니다.</p><div class="points"><div>요약 카드로 총 발동 수와 오늘 발동 수를 빠르게 보여 줍니다.</div><div>이력 행은 종목, 시간, 조건, 당시 가격 순으로 짧고 또렷하게 읽혀야 합니다.</div><div>전체 삭제는 보조 기능이지만 확인 단계가 필요합니다.</div></div></div>
-      <div class="tabstats"><div class="sbox"><strong>Primary Value</strong><span>알림의 흔적을 남겨 나중의 판단 재료로 씁니다.</span></div><div class="sbox"><strong>UI Motif</strong><span>타임라인 느낌의 행, 요약 카드, CLR 액션.</span></div><div class="sbox"><strong>Build Hook</strong><span><code>AsyncStorage</code> 최대 50건과 최신순 정렬.</span></div></div>
-    </div>
-  </section>
 
-  <section class="section" id="build">
-    <div class="section-head">
-      <div><div class="sk">Build Notes</div><h2 class="st">웹과 모바일이 달라지는 지점만 선명하게</h2></div>
-      <p class="sdesc">중요한 것은 화려한 차이보다 상태 관리, 폴링, 저장소, 알림처럼 경험을 직접 바꾸는 기술 선택입니다.</p>
-    </div>
-    <div class="grid3">
-      <article class="card"><div class="cl">Storage</div><h3 class="ct">localStorage에서 <code>AsyncStorage</code>로</h3><p class="cc">웹의 동기 저장 대신 React Native 환경에 맞는 비동기 저장을 사용합니다. 키 prefix는 <code>sm_</code> 체계를 유지합니다.</p></article>
-      <article class="card"><div class="cl">Notification</div><h3 class="ct">브라우저 알림 대신 Expo 로컬 알림</h3><p class="cc">MVP 단계에서는 원격 푸시보다 로컬 알림으로 충분합니다. 권한 요청과 스케줄링 방식이 웹과 다릅니다.</p></article>
-      <article class="card"><div class="cl">Polling</div><h3 class="ct"><code>setInterval</code>보다 포커스 기반 갱신</h3><p class="cc">앱이 보이지 않을 때는 폴링을 멈춰야 합니다. 활성 화면에서만 갱신하는 방식이 배터리와 안정성에 유리합니다.</p></article>
-    </div>
-  </section>
-
-  <section class="section" id="workflow">
-    <div class="section-head">
-      <div><div class="sk">Workflow</div><h2 class="st">팀이 바로 움직일 수 있는 실행 시퀀스</h2></div>
-      <p class="sdesc">긴 단계 나열 대신 실제 제작 순서가 읽히는 구조로 재정리했습니다. 아래 단계는 접어서 읽을 수 있습니다.</p>
-    </div>
-    <div class="workflow">
-      <aside class="flowaside">
-        <div class="cl">Recommended Order</div><h3 class="ct">먼저 실행 가능 상태를 확보</h3>
+    <div class="workflow-grid">
+      <article class="card workflow-aside">
+        <div class="kicker">Recommended Order</div>
         <div class="timeline">
-          <div class="tstep"><div class="tbadge">01</div><div><strong>Shell + Tokens</strong><span>탭 네비게이션과 디자인 토큰을 먼저 고정합니다.</span></div></div>
-          <div class="tstep"><div class="tbadge">02</div><div><strong>Core Screens</strong><span>Watchlist와 Futures를 먼저 살려 정보 흐름을 확보합니다.</span></div></div>
-          <div class="tstep"><div class="tbadge">03</div><div><strong>Alerts MVP</strong><span>추가/삭제/쿨다운까지 포함한 기본 알림 루프를 완성합니다.</span></div></div>
-          <div class="tstep"><div class="tbadge">04</div><div><strong>History + Polish</strong><span>기록과 정리 화면을 넣고 전체 경험을 안정화합니다.</span></div></div>
+          <div class="timeline-item"><span class="timeline-dot">01</span><div><strong>Shell + Tokens</strong><span>기본 레이아웃과 토큰 고정</span></div></div>
+          <div class="timeline-item"><span class="timeline-dot">02</span><div><strong>Core Screens</strong><span>Watchlist/Futures 구현</span></div></div>
+          <div class="timeline-item"><span class="timeline-dot">03</span><div><strong>Alerts MVP</strong><span>조건 등록과 알림 루프</span></div></div>
+          <div class="timeline-item"><span class="timeline-dot">04</span><div><strong>History + QA</strong><span>기록 화면 및 검증</span></div></div>
         </div>
-      </aside>
-      <div class="accords">
-        <section class="acc open"><button class="accbtn" type="button" aria-expanded="true"><span class="atitle"><span class="anum">1</span><span class="acopy"><strong>환경 세팅과 진입점 정리</strong><span>Expo 셸, 폰트, 토큰, 바텀 탭을 먼저 고정</span></span></span><span class="aind">OPEN</span></button><div class="accpanel"><div class="code">npx create-expo-app watchr-mobile --template blank-typescript
+      </article>
+
+      <div class="accordion-list">
+        <section class="accordion is-open">
+          <button class="accordion-header" type="button" aria-expanded="true">
+            <span class="accordion-title"><span class="accordion-number">1</span><span class="accordion-text"><strong>환경 세팅</strong><span>진입점과 폰트, 네비게이션 구성</span></span></span>
+            <span class="accordion-state">OPEN</span>
+          </button>
+          <div class="accordion-panel">
+            <div class="code-wrap"><button class="copy-button" type="button">COPY</button><pre>npx create-expo-app watchr-mobile --template blank-typescript
 npx expo install @react-navigation/native @react-navigation/bottom-tabs
-npx expo install expo-font @expo-google-fonts/ibm-plex-mono @expo-google-fonts/noto-sans-kr</div><p class="note">완료 기준은 앱이 뜨고, 4개 탭이 보이고, 토큰 색상이 전체 셸에 적용되는 것입니다.</p></div></section>
-        <section class="acc"><button class="accbtn" type="button" aria-expanded="false"><span class="atitle"><span class="anum">2</span><span class="acopy"><strong>Watchlist + Futures 화면 구현</strong><span>핵심 정보 구조를 가장 먼저 시각화</span></span></span><span class="aind">OPEN</span></button><div class="accpanel"><div class="code">components/
-  MarketStrip.tsx
-  TickerRow.tsx
-  Sparkline.tsx
-  FuturesBigCard.tsx
-  FuturesGrid.tsx</div><p class="note">종목 행과 선물 카드의 타입·색·정보 위계가 맞으면 이후 CRUD와 알림 흐름을 얹기 쉬워집니다.</p></div></section>
-        <section class="acc"><button class="accbtn" type="button" aria-expanded="false"><span class="atitle"><span class="anum">3</span><span class="acopy"><strong>Alerts MVP와 상태 저장 연결</strong><span>조건 등록과 로컬 알림, 쿨다운을 한 번에 묶기</span></span></span><span class="aind">OPEN</span></button><div class="accpanel"><div class="code">AsyncStorage keys:
-  sm_watchlist
-  sm_alerts
-  sm_history
+npx expo install expo-font @expo-google-fonts/ibm-plex-mono @expo-google-fonts/noto-sans-kr</pre></div>
+            <p class="note">완료 기준: 앱 실행, 4탭 표시, 기본 폰트 적용.</p>
+          </div>
+        </section>
+
+        <section class="accordion">
+          <button class="accordion-header" type="button" aria-expanded="false">
+            <span class="accordion-title"><span class="accordion-number">2</span><span class="accordion-text"><strong>핵심 화면 구현</strong><span>Watchlist/Futures 구조 고정</span></span></span>
+            <span class="accordion-state">OPEN</span>
+          </button>
+          <div class="accordion-panel">
+            <div class="code-wrap"><button class="copy-button" type="button">COPY</button><pre>src/components/MarketStrip.tsx
+src/components/TickerRow.tsx
+src/components/Sparkline.tsx
+src/components/FuturesBigCard.tsx
+src/components/FuturesGrid.tsx</pre></div>
+            <p class="note">완료 기준: 정보 위계가 안정적으로 읽히는 UI 상태 확보.</p>
+          </div>
+        </section>
+
+        <section class="accordion">
+          <button class="accordion-header" type="button" aria-expanded="false">
+            <span class="accordion-title"><span class="accordion-number">3</span><span class="accordion-text"><strong>Alerts MVP</strong><span>조건 등록과 로컬 알림 연결</span></span></span>
+            <span class="accordion-state">OPEN</span>
+          </button>
+          <div class="accordion-panel">
+            <div class="code-wrap"><button class="copy-button" type="button">COPY</button><pre>AsyncStorage keys:
+sm_watchlist
+sm_alerts
+sm_history
 
 Notifications:
-  requestPermissionsAsync()
-  scheduleNotificationAsync()</div><p class="note">이 단계가 실질적 MVP입니다. 사용자가 앱을 계속 열어두지 않아도 반응을 받을 수 있어야 합니다.</p></div></section>
-        <section class="acc"><button class="accbtn" type="button" aria-expanded="false"><span class="atitle"><span class="anum">4</span><span class="acopy"><strong>History와 운영 문서 정리</strong><span>결과를 남기고 디버그 포맷까지 문서화</span></span></span><span class="aind">OPEN</span></button><div class="accpanel"><div class="code">History log payload:
-{ ticker, price, operator, target, time }
-
-Debug format:
-  Step 번호
-  Metro / Expo 에러 전문
-  실행 환경
-  재현 방식</div><p class="note">제품이 어디서 실패하는지 정리되어야 팀이 빠르게 이어받아 수정할 수 있습니다.</p></div></section>
+requestPermissionsAsync()
+scheduleNotificationAsync()</pre></div>
+            <p class="note">완료 기준: 조건 충족 시 알림 발동 + 쿨다운 동작.</p>
+          </div>
+        </section>
       </div>
     </div>
   </section>
 
-  <section class="section">
-    <div class="grid2">
-      <article class="card"><div class="cl">Encoding Guardrail</div><h3 class="ct">UTF-8을 끝까지 유지</h3><p class="cc">현재 원본 파일은 일부 환경에서 한글이 깨질 수 있으므로, 새 페이지는 UTF-8 기준으로 저장하고 배포 경로에서도 인코딩이 섞이지 않게 관리해야 합니다.</p></article>
-      <article class="card"><div class="cl">Embedding Guardrail</div><h3 class="ct">iframe 실패를 전제로 읽히게 설계</h3><p class="cc">라이브 프리뷰는 보조 수단입니다. 이 페이지 자체가 독립적인 설명력을 가져야 하므로 링크와 텍스트 설명을 함께 제공합니다.</p></article>
+  <section class="section reveal" id="build">
+    <div class="section-head">
+      <div><div class="kicker">Build Notes</div><h2>웹과 모바일의 구현 차이를 짧게 요약</h2></div>
+      <p class="section-desc">상태 저장, 알림 API, 폴링 방식처럼 사용자 체감이 큰 차이에 집중합니다.</p>
     </div>
-  </section>
-
-  <section class="section">
-    <div class="cta">
-      <div class="cta-box">
-        <div class="sk">Next Move</div><h2>이제 이 컨셉을 실제 웹 또는 앱 작업의 기준 화면으로 쓸 수 있습니다.</h2>
-        <p class="lead">랜딩처럼 보이지만, 동시에 제품 브리프와 팀 온보딩 문서 역할도 하도록 구성했습니다. 다음 단계는 이 페이지를 기준으로 실제 앱 구현 우선순위나 웹 소개 페이지 방향을 더 구체화하는 것입니다.</p>
-        <div class="btns"><a class="btn primary" href="watchr_mobile_design.html">Open Live Mockup</a><a class="btn secondary" href="watchr_mobile_작업지시서.html">Open Full Brief</a></div>
-      </div>
-      <div class="mini">
-        <article class="card"><div class="cl">Use Case A</div><h3 class="ct">내부 데모 페이지</h3><p class="cc">PM, 디자인, 개발이 같은 화면을 보며 제품 정의를 맞출 때 사용.</p></article>
-        <article class="card"><div class="cl">Use Case B</div><h3 class="ct">실행 문서 허브</h3><p class="cc">모크업, 작업지시서, 구현 순서를 한 화면에서 연결하는 허브 역할.</p></article>
-      </div>
+    <div class="build-grid">
+      <article class="card build-card"><div class="feature-no">Storage</div><h3 class="feature-title">localStorage → AsyncStorage</h3><p class="feature-copy">동기 저장 대신 비동기 저장. 키 체계는 `sm_` 유지.</p></article>
+      <article class="card build-card"><div class="feature-no">Notification</div><h3 class="feature-title">Browser API → Expo</h3><p class="feature-copy">권한 요청과 스케줄 방식이 달라 별도 유틸이 필요합니다.</p></article>
+      <article class="card build-card"><div class="feature-no">Polling</div><h3 class="feature-title">Always-on → Focus-aware</h3><p class="feature-copy">활성 화면에서만 갱신해 배터리와 안정성을 확보합니다.</p></article>
     </div>
   </section>
 </main>
 
-<footer class="footer shell">
-  <div class="footer-links">
-    <a class="flink" href="watchr_mobile_design.html"><strong>Mockup</strong><span>모바일 4개 화면 프리뷰를 직접 열어 볼 수 있습니다.</span></a>
-    <a class="flink" href="watchr_mobile_작업지시서.html"><strong>Instruction Sheet</strong><span>원본 작업지시서 문서를 참고해 세부 구현 단계를 확인합니다.</span></a>
+<footer class="shell footer">
+  <div class="footer-cards">
+    <a class="footer-card" href="watchr_mobile_design.html"><strong>Mockup</strong><span>모바일 4개 탭 시안을 바로 확인합니다.</span></a>
+    <a class="footer-card" href="watchr_mobile_작업지시서.html"><strong>Instruction Sheet</strong><span>원본 작업지시서에서 상세 단계를 확인합니다.</span></a>
   </div>
-  <div class="foot">WATCHR Mobile Web Concept · Dark Terminal Product Brief · 2026</div>
+  <div class="footnote">WATCHR Mobile Web Concept · 2026</div>
 </footer>
 
 <script>
-const tabs=document.querySelectorAll('.tabbtn');
-const panels=document.querySelectorAll('.tabpanel');
-tabs.forEach(tab=>tab.addEventListener('click',()=>{tabs.forEach(t=>t.setAttribute('aria-selected',String(t===tab)));panels.forEach(p=>p.classList.toggle('active',p.dataset.panel===tab.dataset.tab));}));
-document.querySelectorAll('.acc').forEach(acc=>{const btn=acc.querySelector('.accbtn');btn.addEventListener('click',()=>{const open=acc.classList.toggle('open');btn.setAttribute('aria-expanded',String(open));});});
+const navLinks = Array.from(document.querySelectorAll(".nav-link"));
+const sections = Array.from(document.querySelectorAll("section[id]"));
+
+const setActiveNav = (id) => {
+  navLinks.forEach((link) => link.classList.toggle("is-active", link.dataset.section === id));
+};
+
+if ("IntersectionObserver" in window) {
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) setActiveNav(entry.target.id);
+    });
+  }, { rootMargin: "-35% 0px -55% 0px", threshold: 0.01 });
+  sections.forEach((section) => sectionObserver.observe(section));
+
+  const revealObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("in");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach((element) => revealObserver.observe(element));
+} else {
+  document.querySelectorAll(".reveal").forEach((element) => element.classList.add("in"));
+}
+
+const tabButtons = Array.from(document.querySelectorAll(".tab-button"));
+const tabPanels = Array.from(document.querySelectorAll(".tab-panel"));
+
+const activateTab = (index) => {
+  const target = tabButtons[index];
+  if (!target) return;
+
+  tabButtons.forEach((button, buttonIndex) => {
+    const selected = buttonIndex === index;
+    button.setAttribute("aria-selected", String(selected));
+  });
+
+  tabPanels.forEach((panel) => panel.classList.toggle("is-active", panel.dataset.panel === target.dataset.tab));
+  target.focus();
+};
+
+tabButtons.forEach((button, index) => {
+  button.addEventListener("click", () => activateTab(index));
+  button.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      activateTab((index + 1) % tabButtons.length);
+    }
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      activateTab((index - 1 + tabButtons.length) % tabButtons.length);
+    }
+    if (event.key === "Home") {
+      event.preventDefault();
+      activateTab(0);
+    }
+    if (event.key === "End") {
+      event.preventDefault();
+      activateTab(tabButtons.length - 1);
+    }
+  });
+});
+
+document.querySelectorAll(".accordion").forEach((accordion) => {
+  const button = accordion.querySelector(".accordion-header");
+  const state = accordion.querySelector(".accordion-state");
+
+  button.addEventListener("click", () => {
+    const open = accordion.classList.toggle("is-open");
+    button.setAttribute("aria-expanded", String(open));
+    state.textContent = open ? "OPEN" : "CLOSED";
+  });
+});
+
+document.querySelectorAll(".copy-button").forEach((copyButton) => {
+  copyButton.addEventListener("click", async () => {
+    const codeElement = copyButton.parentElement.querySelector("pre");
+    if (!codeElement) return;
+
+    const text = codeElement.innerText;
+    try {
+      await navigator.clipboard.writeText(text);
+      copyButton.textContent = "COPIED";
+      copyButton.classList.add("is-done");
+      setTimeout(() => {
+        copyButton.textContent = "COPY";
+        copyButton.classList.remove("is-done");
+      }, 1200);
+    } catch {
+      copyButton.textContent = "FAILED";
+      setTimeout(() => { copyButton.textContent = "COPY"; }, 1200);
+    }
+  });
+});
+
+const previewFrame = document.getElementById("previewFrame");
+const previewStatus = document.getElementById("previewStatus");
+const previewFallback = document.getElementById("previewFallback");
+
+let previewResolved = false;
+const markPreviewFail = () => {
+  if (previewResolved) return;
+  previewResolved = true;
+  previewStatus.textContent = "FALLBACK";
+  previewStatus.classList.add("warn");
+  previewFallback.classList.remove("is-hidden");
+};
+
+const markPreviewSuccess = () => {
+  if (previewResolved) return;
+  previewResolved = true;
+  previewStatus.textContent = "LIVE";
+  previewFallback.classList.add("is-hidden");
+};
+
+previewFrame.addEventListener("load", markPreviewSuccess);
+previewFrame.addEventListener("error", markPreviewFail);
+setTimeout(markPreviewFail, 3000);
 </script>
 </body>
 </html>
