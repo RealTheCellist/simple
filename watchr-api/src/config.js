@@ -1,0 +1,21 @@
+import "dotenv/config";
+
+function toBool(value, fallback) {
+  if (value === undefined) return fallback;
+  return String(value).toLowerCase() === "true";
+}
+
+function toNumber(value, fallback) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+export const config = {
+  port: toNumber(process.env.PORT, 3000),
+  host: process.env.HOST || "0.0.0.0",
+  nodeEnv: process.env.NODE_ENV || "development",
+  mockFallback: toBool(process.env.MOCK_FALLBACK, true),
+  upstreamTimeoutMs: toNumber(process.env.UPSTREAM_TIMEOUT_MS, 9000),
+  cacheTtlMs: toNumber(process.env.CACHE_TTL_MS, 5000),
+  corsOrigin: process.env.CORS_ORIGIN || "*"
+};

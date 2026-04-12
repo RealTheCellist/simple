@@ -1,0 +1,21 @@
+{
+  "name": "watchr-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "WATCHR shared backend API for web and mobile clients",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "lint": "node --check src/index.js && node --check src/services/marketData.js && node --check src/services/prediction.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20.11"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2"
+  }
+}
