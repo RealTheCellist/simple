@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WATCHR OPS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Sora:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="bg-glow"></div>
+    <main class="app">
+      <section class="hero">
+        <p class="eyebrow">WATCHR OPS CONSOLE</p>
+        <h1>운영 시그널과 모델 실험을 한 화면에서</h1>
+        <div class="hero-actions">
+          <button id="refreshBtn" class="btn primary">LIVE REFRESH</button>
+          <span id="lastUpdated" class="muted">업데이트 대기중</span>
+        </div>
+      </section>
+
+      <section class="stats-grid">
+        <article class="stat">
+          <p class="label">API HEALTH</p>
+          <p id="healthText" class="value">--</p>
+        </article>
+        <article class="stat">
+          <p class="label">OPEN BIAS</p>
+          <p id="biasText" class="value">--</p>
+        </article>
+        <article class="stat">
+          <p class="label">MODEL SCORE</p>
+          <p id="scoreText" class="value">--</p>
+        </article>
+        <article class="stat">
+          <p class="label">CONFIDENCE</p>
+          <p id="confidenceText" class="value">--</p>
+        </article>
+      </section>
+
+      <section class="panel-grid">
+        <article class="panel">
+          <header class="panel-head">
+            <h2>지수 기여도</h2>
+            <span class="chip">LIVE</span>
+          </header>
+          <div id="contributors" class="rows"></div>
+        </article>
+
+        <article class="panel">
+          <header class="panel-head">
+            <h2>가중치 실험실</h2>
+            <span class="chip teal">SIMULATION</span>
+          </header>
+          <div id="weightControls" class="rows"></div>
+          <div class="sim-summary">
+            <p id="simBias">SIM BIAS --</p>
+            <p id="simScore">SIM SCORE --</p>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel-grid">
+        <article class="panel">
+          <header class="panel-head">
+            <h2>알림 품질 추적</h2>
+            <span class="chip amber">QA</span>
+          </header>
+          <div class="qa-actions">
+            <button id="addHitBtn" class="btn mini success">적중 +1</button>
+            <button id="addMissBtn" class="btn mini danger">오탐 +1</button>
+            <button id="clearQaBtn" class="btn mini">초기화</button>
+          </div>
+          <div id="qaStats" class="rows"></div>
+        </article>
+
+        <article class="panel">
+          <header class="panel-head">
+            <h2>모델 릴리즈 & 롤백</h2>
+            <span class="chip purple">RELEASE</span>
+          </header>
+          <div class="release-form">
+            <input id="versionInput" type="text" placeholder="예: ops-v1.1.0" />
+            <button id="applyVersionBtn" class="btn mini primary">적용</button>
+            <button id="rollbackBtn" class="btn mini">롤백</button>
+          </div>
+          <div id="releaseInfo" class="rows"></div>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

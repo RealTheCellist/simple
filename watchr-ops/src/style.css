@@ -1,0 +1,294 @@
+:root {
+  --bg: #090b12;
+  --bg2: #101627;
+  --line: #1e2a47;
+  --text: #e8eefb;
+  --muted: #95a4c4;
+  --teal: #13c8a8;
+  --amber: #f3b13b;
+  --up: #ff5a68;
+  --dn: #4c92ff;
+  --purple: #9d7aff;
+  --mono: "IBM Plex Mono", monospace;
+  --sans: "Sora", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: radial-gradient(circle at 18% -5%, #1f2a53 0%, #090b12 46%);
+  color: var(--text);
+  font-family: var(--sans);
+}
+
+.bg-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(130deg, rgba(19, 200, 168, 0.08), rgba(157, 122, 255, 0.08));
+}
+
+.app {
+  position: relative;
+  z-index: 1;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 40px 18px 70px;
+}
+
+.hero {
+  margin-bottom: 24px;
+  padding: 22px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: linear-gradient(130deg, rgba(16, 22, 39, 0.95), rgba(24, 17, 34, 0.95));
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--teal);
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  font-family: var(--mono);
+}
+
+h1 {
+  margin: 8px 0 0;
+  font-size: 30px;
+  line-height: 1.3;
+}
+
+.hero-actions {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 12px;
+  font-family: var(--mono);
+}
+
+.btn {
+  border: 1px solid var(--line);
+  background: #111a30;
+  color: var(--text);
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-family: var(--mono);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn.primary {
+  border-color: #2c8978;
+  background: #123930;
+}
+
+.btn.success {
+  border-color: #2d834f;
+  background: #133321;
+}
+
+.btn.danger {
+  border-color: #8d3a49;
+  background: #361923;
+}
+
+.btn.mini {
+  padding: 8px 10px;
+  font-size: 11px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.stat,
+.panel {
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  border-radius: 12px;
+}
+
+.stat {
+  padding: 12px;
+}
+
+.label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 1.2px;
+  font-family: var(--mono);
+}
+
+.value {
+  margin: 8px 0 0;
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 24px;
+}
+
+.panel-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.panel {
+  padding: 12px;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.chip {
+  border: 1px solid #2f4f9a;
+  color: #88a9ff;
+  background: #15213f;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+}
+
+.chip.teal {
+  border-color: #2d8978;
+  color: #68e2ca;
+  background: #123930;
+}
+
+.chip.amber {
+  border-color: #9c6f1f;
+  color: #f7c76c;
+  background: #352813;
+}
+
+.chip.purple {
+  border-color: #654bb7;
+  color: #baa6ff;
+  background: #261b42;
+}
+
+.rows {
+  display: grid;
+  gap: 8px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid #253256;
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: #0d1322;
+}
+
+.row .name {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.row .rate,
+.row .score {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.up {
+  color: var(--up);
+}
+
+.dn {
+  color: var(--dn);
+}
+
+.neutral {
+  color: var(--amber);
+}
+
+.weight-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 54px;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+}
+
+.weight-row input[type="range"] {
+  width: 100%;
+}
+
+.sim-summary {
+  margin-top: 10px;
+  border: 1px dashed #38456d;
+  border-radius: 10px;
+  padding: 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.sim-summary p {
+  margin: 0;
+}
+
+.sim-summary p + p {
+  margin-top: 6px;
+}
+
+.qa-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.release-form {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.release-form input {
+  background: #0d1322;
+  border: 1px solid #2a375c;
+  color: var(--text);
+  border-radius: 9px;
+  padding: 9px;
+  font-family: var(--mono);
+}
+
+@media (max-width: 920px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .panel-grid {
+    grid-template-columns: 1fr;
+  }
+}
