@@ -1,173 +1,168 @@
-// src/screens/WatchlistScreen.tsx
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView, StatusBar, TouchableOpacity, Alert } from 'react-native';
-import { Colors } from '../theme/tokens';
-import MarketStrip from '../components/MarketStrip';
-import TickerRow from '../components/TickerRow';
-import { fetchPrice } from '../api/client';
-import { useFocusEffect } from '@react-navigation/native';
-import { useWatchlist } from '../hooks/useWatchlist';
+import React, { useMemo, useState } from "react";
+import {
+  Alert,
+  FlatList,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from "react-native";
+import { Colors, FontFamily } from "../theme/tokens";
+import { useWatchlist } from "../hooks/useWatchlist";
+import MarketStrip from "../components/MarketStrip";
+import TickerRow from "../components/TickerRow";
 
-const WatchlistScreen: React.FC = () => {
-  const { tickers, prices, addTicker, removeTicker, isLoading } = useWatchlist();
-  const [refreshing, setRefreshing] = useState(false);
-  // Dummy market data
-  const marketData = [
-    { name: 'NASDAQ', price: 14231, changeRate: 1.23 },
-    { name: 'S&P 500', price: 4567, changeRate: 0.78 },
-    { name: 'KOSPI', price: 25431, changeRate: 0.23 },
-    { name: 'KOSDAQ', price: 8765, changeRate: -0.45 },
-  ];
+const MARKET_STRIP = [
+  { name: "KOSPI", price: 2651.32, changeRate: 0.48 },
+  { name: "KOSDAQ", price: 842.11, changeRate: -0.27 },
+  { name: "NQ FUT", price: 18641.5, changeRate: 0.62 },
+  { name: "USD/KRW", price: 1378.4, changeRate: -0.12 }
+];
 
-  const handleAddTicker = () => {
-    Alert.prompt('종목 추가', '티커를 입력하세요', [
-      {
-        text: '취소',
-        style: 'cancel'
-      },
-      {
-        text: '추가',
-        onPress: (ticker) => {
-          if (ticker && ticker.trim()) {
-            addTicker(ticker.trim());
-          }
-        }
-      }
+export default function WatchlistScreen() {
+  const { tickers, prices, addTicker, removeTicker } = useWatchlist();
+  const [tickerInput, setTickerInput] = useState("");
+
+  const sortedTickers = useMemo(() => [...tickers], [tickers]);
+
+  const onAdd = () => {
+    const value = tickerInput.trim();
+    if (!value) return;
+    void addTicker(value);
+    setTickerInput("");
+  };
+
+  const onDelete = (ticker: string) => {
+    Alert.alert("Remove Ticker", `${ticker} will be removed from watchlist.`, [
+      { text: "Cancel", style: "cancel" },
+      { text: "Remove", style: "destructive", onPress: () => void removeTicker(ticker) }
     ]);
   };
-
-  const handleRemoveTicker = (ticker: string) => {
-    Alert.alert(
-      '종목 삭제',
-      `${ticker}을(를) watchlist에서 삭제하시겠습니까?`,
-      [
-        {
-          text: '취소',
-          style: 'cancel'
-        },
-        {
-          text: '삭제',
-          style: 'destructive',
-          onPress: () => removeTicker(ticker)
-        }
-      ]
-    );
-  };
-
-  const handleLongPress = (ticker: string) => {
-    handleRemoveTicker(ticker);
-  };
-
-  const renderTickerRow = ({ item }: { item: string }) => {
-    const priceData = prices[item];
-
-    if (!priceData) {
-      return null;
-    }
-
-    return (
-      <TickerRow
-        label={item}
-        price={priceData.price}
-        change={priceData.change}
-        changeRate={priceData.changeRate}
-        sparkData={priceData.sparkData}
-        hasAlert={false}
-        onLongPress={() => handleLongPress(item)}
-      />
-    );
-  };
-
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    // Refresh logic would be handled by the hook's polling
-    setTimeout(() => setRefreshing(false), 1000);
-  }, []);
-
-  if (isLoading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor={Colors.bg} />
-        <View style={styles.appBar}>
-          <Text style={styles.appBarTitle}>WATCHLIST</Text>
-          <Text style={styles.appBarStatus}>장중</Text>
-          <TouchableOpacity onPress={handleAddTicker}>
-            <Text style={styles.appBarIcon}>+</Text>
-          </TouchableOpacity>
-        </View>
-        <MarketStrip items={marketData} />
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.bg} />
-      <View style={styles.appBar}>
-        <Text style={styles.appBarTitle}>WATCHLIST</Text>
-        <Text style={styles.appBarStatus}>장중</Text>
-        <TouchableOpacity onPress={handleAddTicker}>
-          <Text style={styles.appBarIcon}>+</Text>
+
+      <View style={styles.header}>
+        <Text style={styles.title}>WATCHLIST</Text>
+        <Text style={styles.subTitle}>Live</Text>
+      </View>
+
+      <MarketStrip items={MARKET_STRIP} />
+
+      <View style={styles.inputRow}>
+        <TextInput
+          style={styles.input}
+          placeholder="Ticker (e.g. 005930.KS, AAPL)"
+          placeholderTextColor={Colors.t2}
+          value={tickerInput}
+          onChangeText={setTickerInput}
+          autoCapitalize="characters"
+          autoCorrect={false}
+        />
+        <TouchableOpacity style={styles.button} onPress={onAdd}>
+          <Text style={styles.buttonText}>ADD</Text>
         </TouchableOpacity>
       </View>
-      <MarketStrip items={marketData} />
-      {tickers.length === 0 ? (
+
+      {sortedTickers.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>ADD TICKER TO BEGIN</Text>
+          <Text style={styles.empty}>ADD TICKER TO BEGIN</Text>
         </View>
       ) : (
         <FlatList
-          data={tickers}
-          renderItem={renderTickerRow}
+          data={sortedTickers}
           keyExtractor={(item) => item}
-          showsVerticalScrollIndicator={false}
-          style={styles.list}
-          refreshing={refreshing}
-          onRefresh={onRefresh}
+          contentContainerStyle={styles.listContent}
+          renderItem={({ item }) => {
+            const quote = prices[item];
+            if (!quote) {
+              return (
+                <View style={styles.loadingRow}>
+                  <Text style={styles.loadingTicker}>{item}</Text>
+                  <Text style={styles.loadingText}>Loading...</Text>
+                </View>
+              );
+            }
+
+            return (
+              <TickerRow
+                ticker={item}
+                name={quote.ticker}
+                price={quote.price}
+                change={quote.change}
+                changeRate={quote.changeRate}
+                sparkData={[
+                  quote.price - quote.change * 0.8,
+                  quote.price - quote.change * 0.6,
+                  quote.price - quote.change * 0.3,
+                  quote.price - quote.change * 0.2,
+                  quote.price
+                ]}
+                onLongPress={() => onDelete(item)}
+              />
+            );
+          }}
         />
       )}
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.bg,
-  },
-  appBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  container: { flex: 1, backgroundColor: Colors.bg },
+  header: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between"
   },
-  appBarTitle: {
-    fontFamily: 'IBM_Plex_Mono',
-    fontSize: 15,
-    fontWeight: '600',
-    color: Colors.t0,
+  title: { color: Colors.t0, fontSize: 16, fontFamily: FontFamily.monoSemiBold },
+  subTitle: { color: Colors.t2, fontSize: 11, fontFamily: FontFamily.mono },
+  inputRow: {
+    flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    paddingTop: 4
   },
-  appBarStatus: {
-    fontSize: 10,
-    color: Colors.t2,
-  },
-  appBarIcon: {
-    fontSize: 16,
-    color: Colors.t0,
-  },
-  list: {
+  input: {
     flex: 1,
+    height: 44,
+    borderWidth: 1,
+    borderColor: Colors.line,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    color: Colors.t0,
+    backgroundColor: Colors.bg1
   },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  button: {
+    height: 44,
+    minWidth: 86,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 8,
+    backgroundColor: Colors.amber
   },
-  emptyText: {
-    fontSize: 16,
-    color: Colors.t2,
+  buttonText: { color: Colors.bg, fontFamily: FontFamily.monoSemiBold },
+  emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  empty: { color: Colors.t2, marginTop: 24, fontFamily: FontFamily.mono },
+  listContent: { paddingBottom: 14 },
+  loadingRow: {
+    borderWidth: 1,
+    borderColor: Colors.line,
+    backgroundColor: Colors.bg1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginHorizontal: 16,
+    marginBottom: 8
   },
+  loadingTicker: { color: Colors.t0, fontFamily: FontFamily.monoSemiBold, marginBottom: 4 },
+  loadingText: { color: Colors.t2, fontFamily: FontFamily.mono }
 });
 
-export default WatchlistScreen;

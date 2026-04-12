@@ -1,90 +1,158 @@
-// src/hooks/useAlerts.ts
-import { useState, useEffect, useCallback } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AlertCondition } from '../types/alerts';
-import { sendAlert, isOnCooldown, markCooldown } from '../utils/alertNotify';
+import { useCallback, useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import type { AlertCondition } from "../types/alerts";
+import { appendHistoryLog } from "../store/historyStore";
+import { isOnCooldown, markCooldown, sendAlert } from "../notifications/alertNotify";
 
-const ALERTS_KEY = 'sm_alerts';
+const ALERTS_KEY = "sm_alerts";
+const COOLDOWN_MS = 60 * 60 * 1000;
 
-export const useAlerts = () => {
-  const [alerts, setAlerts] = useState<AlertCondition[]>([]);
+const listeners = new Set<(alerts: AlertCondition[]) => void>();
+let cache: AlertCondition[] = [];
+let hydrated = false;
 
-  // Load alerts from AsyncStorage
-  useEffect(() => {
-    const loadAlerts = async () => {
-      try {
-        const stored = await AsyncStorage.getItem(ALERTS_KEY);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          setAlerts(parsed);
-        }
-      } catch (error) {
-        console.error('Failed to load alerts:', error);
-      }
-    };
+async function loadAlertsFromStorage(): Promise<AlertCondition[]> {
+  try {
+    const raw = await AsyncStorage.getItem(ALERTS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed as AlertCondition[];
+  } catch (error) {
+    console.warn("[Alerts] load failed", error);
+    return [];
+  }
+}
 
-    loadAlerts();
-  }, []);
+async function saveAlertsToStorage(alerts: AlertCondition[]) {
+  try {
+    await AsyncStorage.setItem(ALERTS_KEY, JSON.stringify(alerts));
+  } catch (error) {
+    console.warn("[Alerts] save failed", error);
+  }
+}
 
-  // Save alerts to AsyncStorage
-  const saveAlerts = useCallback(async (newAlerts: AlertCondition[]) => {
-    try {
-      await AsyncStorage.setItem(ALERTS_KEY, JSON.stringify(newAlerts));
-    } catch (error) {
-      console.error('Failed to save alerts:', error);
-    }
-  }, []);
+async function hydrate() {
+  if (hydrated) return cache;
+  cache = await loadAlertsFromStorage();
+  hydrated = true;
+  return cache;
+}
 
-  const addAlert = useCallback((condition: Omit<AlertCondition, 'id'>) => {
-    const newAlert: AlertCondition = {
-      ...condition,
-      id: Date.now().toString(36),
-    };
-    
-    const newAlerts = [...alerts, newAlert];
-    setAlerts(newAlerts);
-    saveAlerts(newAlerts);
-  }, [alerts, saveAlerts]);
+function emit(next: AlertCondition[]) {
+  cache = next;
+  listeners.forEach((listener) => listener(cache));
+}
 
-  const removeAlert = useCallback((id: string) => {
-    const newAlerts = alerts.filter(alert => alert.id !== id);
-    setAlerts(newAlerts);
-    saveAlerts(newAlerts);
-  }, [alerts, saveAlerts]);
+async function persist(next: AlertCondition[]) {
+  await saveAlertsToStorage(next);
+  emit(next);
+}
 
-  const getAlerts = useCallback(() => {
-    return alerts;
-  }, [alerts]);
+export async function getStoredAlerts(): Promise<AlertCondition[]> {
+  return hydrate();
+}
 
-  const checkAlerts = useCallback((priceMap: Record<string, number>) => {
-    alerts.forEach(alert => {
-      const currentPrice = priceMap[alert.ticker];
-      
-      if (currentPrice === undefined) return;
-      
-      let fulfilled = false;
-      
-      if (alert.operator === 'above' && currentPrice >= alert.price) {
-        fulfilled = true;
-      } else if (alert.operator === 'below' && currentPrice <= alert.price) {
-        fulfilled = true;
-      }
-      
-      if (fulfilled && !isOnCooldown(alert.id)) {
-        sendAlert(
-          `${alert.ticker} 가격 알림`,
-          `${alert.ticker}의 가격이 ${alert.operator === 'above' ? '상승' : '하락'}하여 ${alert.price}에 도달했습니다.`
-        );
-        markCooldown(alert.id);
-      }
+export async function evaluateAlertsFromPriceMap(priceMap: Record<string, number>): Promise<number> {
+  const alerts = await getStoredAlerts();
+  let fired = 0;
+  let changed = false;
+
+  const next = alerts.map((alert) => {
+    const enabled = alert.enabled !== false;
+    const currentPrice = priceMap[alert.ticker];
+    if (!enabled || currentPrice === undefined) return alert;
+
+    const hit = alert.operator === "above" ? currentPrice >= alert.price : currentPrice <= alert.price;
+    if (!hit) return alert;
+    if (Date.now() - Number(alert.lastFiredAt || 0) < COOLDOWN_MS) return alert;
+    if (isOnCooldown(alert.id)) return alert;
+
+    fired += 1;
+    changed = true;
+    markCooldown(alert.id);
+
+    void sendAlert(
+      `${alert.ticker} ${alert.operator.toUpperCase()} ${alert.price.toLocaleString("ko-KR")}`,
+      `Current: ${currentPrice.toLocaleString("ko-KR")}`
+    );
+
+    void appendHistoryLog({
+      ticker: alert.ticker,
+      price: currentPrice,
+      operator: alert.operator,
+      target: alert.price,
+      time: new Date().toISOString()
     });
-  }, [alerts]);
 
-  return {
-    alerts,
-    addAlert,
-    removeAlert,
-    getAlerts,
-    checkAlerts,
-  };
-};
+    return { ...alert, lastFiredAt: Date.now() };
+  });
+
+  if (changed) {
+    await persist(next);
+  }
+
+  return fired;
+}
+
+export function useAlerts() {
+  const [alerts, setAlerts] = useState<AlertCondition[]>(cache);
+
+  useEffect(() => {
+    listeners.add(setAlerts);
+    void hydrate().then((next) => setAlerts(next));
+    return () => {
+      listeners.delete(setAlerts);
+    };
+  }, []);
+
+  const refresh = useCallback(async () => {
+    const next = await loadAlertsFromStorage();
+    hydrated = true;
+    emit(next);
+  }, []);
+
+  const addAlert = useCallback(async (input: Omit<AlertCondition, "id">) => {
+    const normalizedTicker = input.ticker.trim().toUpperCase();
+    if (!normalizedTicker) return;
+
+    const duplicate = cache.find(
+      (item) =>
+        item.ticker === normalizedTicker &&
+        item.operator === input.operator &&
+        Number(item.price) === Number(input.price)
+    );
+    if (duplicate) return;
+
+    const next: AlertCondition[] = [
+      ...cache,
+      {
+        ...input,
+        ticker: normalizedTicker,
+        id: `${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
+        enabled: true,
+        lastFiredAt: 0
+      }
+    ];
+    await persist(next);
+  }, []);
+
+  const removeAlert = useCallback(async (id: string) => {
+    const next = cache.filter((item) => item.id !== id);
+    await persist(next);
+  }, []);
+
+  const toggleAlert = useCallback(async (id: string) => {
+    const next = cache.map((item) =>
+      item.id === id ? { ...item, enabled: item.enabled === false } : item
+    );
+    await persist(next);
+  }, []);
+
+  return { alerts, addAlert, removeAlert, toggleAlert, refresh };
+}
+
+export function useAlertsCount() {
+  const { alerts } = useAlerts();
+  return alerts.filter((item) => item.enabled !== false).length;
+}

@@ -18,8 +18,11 @@ export const Colors = {
   teal: '#00d4aa',
 } as const;
 export const FontFamily = {
-  mono: 'IBM_Plex_Mono',
-  sans: 'NotoSansKR',
+  mono: 'IBMPlexMono_500Medium',
+  monoSemiBold: 'IBMPlexMono_600SemiBold',
+  sans: 'NotoSansKR_400Regular',
+  sansMedium: 'NotoSansKR_500Medium',
+  sansBold: 'NotoSansKR_700Bold',
 };
 
 export const fmtPrice = (n: number): string =>

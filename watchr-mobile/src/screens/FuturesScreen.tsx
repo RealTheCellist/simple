@@ -1,122 +1,127 @@
-// src/screens/FuturesScreen.tsx
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, StatusBar, TouchableOpacity } from 'react-native';
-import { Colors } from '../theme/tokens';
-import FuturesBigCard from '../components/FuturesBigCard';
-import FuturesGrid from '../components/FuturesGrid';
-import { fetchFutures } from '../api/client';
-import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import { SafeAreaView, StatusBar, StyleSheet, Text, View } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { fetchFutures, type FuturesData } from "../api/client";
+import FuturesBigCard from "../components/FuturesBigCard";
+import FuturesGrid from "../components/FuturesGrid";
+import OpenPredictionCard from "../components/OpenPredictionCard";
+import { predictOpenFromFutures } from "../features/prediction/openingPredictor";
+import { Colors, FontFamily } from "../theme/tokens";
 
-const FuturesScreen: React.FC = () => {
-  const [futuresData, setFuturesData] = useState<any[]>([]);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+type GridItem = {
+  name: string;
+  price: number;
+  changeRate: number;
+};
 
-  // Dummy big card data
-  const bigCardData = {
-    label: 'KOSPI200 선물',
-    price: 25431,
-    change: 123,
-    changeRate: 0.49,
-    sparkData: [25000, 25100, 25200, 25300, 25400, 25431],
-  };
+const FALLBACK: GridItem[] = [
+  { name: "NASDAQ", price: 0, changeRate: 0 },
+  { name: "S&P500", price: 0, changeRate: 0 },
+  { name: "KOSPI", price: 0, changeRate: 0 },
+  { name: "KOSDAQ", price: 0, changeRate: 0 },
+  { name: "USD-KRW", price: 0, changeRate: 0 },
+  { name: "DOW", price: 0, changeRate: 0 }
+];
 
-  // Dummy grid data
-  const dummyGridData = [
-    { name: 'NASDAQ', price: 14231, changeRate: 1.23 },
-    { name: 'S&P 500', price: 4567, changeRate: 0.78 },
-    { name: 'KOSPI', price: 25431, changeRate: 0.23 },
-    { name: 'KOSDAQ', price: 8765, changeRate: -0.45 },
-    { name: 'USD-KRW', price: 1300, changeRate: 0.12 },
-    { name: 'DOW', price: 34567, changeRate: -0.34 },
-  ];
+function findPrimary(rows: FuturesData[]) {
+  return (
+    rows.find((item) => /KOSPI200|K200|KS200|KOSPI/i.test(item.symbol)) ??
+    rows[0] ??
+    null
+  );
+}
 
-  const fetchFuturesData = useCallback(async () => {
+export default function FuturesScreen() {
+  const [rows, setRows] = useState<FuturesData[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<string>("Idle");
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const refresh = useCallback(async () => {
     const data = await fetchFutures();
-    if (data && Array.isArray(data)) {
-      setFuturesData(data);
-    } else {
-      setFuturesData([]);
+    if (!data) {
+      setRows([]);
+      setLastUpdated("Failed");
+      return;
     }
+    setRows(data);
+    setLastUpdated(new Date().toLocaleTimeString("ko-KR"));
   }, []);
 
   useFocusEffect(
     useCallback(() => {
-      // Fetch immediately when screen is focused
-      fetchFuturesData();
-      
-      // Set up interval for polling
-      intervalRef.current = setInterval(() => {
-        fetchFuturesData();
+      void refresh();
+      timerRef.current = setInterval(() => {
+        void refresh();
       }, 60000);
 
       return () => {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
         }
       };
-    }, [fetchFuturesData])
+    }, [refresh])
   );
 
-  // Process data for grid
-  const gridData = futuresData.length > 0 ? futuresData.slice(0, 6) : dummyGridData;
+  const primary = useMemo(() => findPrimary(rows), [rows]);
+  const bigCard = useMemo(
+    () => ({
+      label: primary?.name ?? primary?.symbol ?? "KOSPI200",
+      price: primary?.price ?? 0,
+      change: primary?.change ?? 0,
+      changeRate: primary?.changeRate ?? 0,
+      sparkData: primary
+        ? [
+            primary.price - primary.change * 0.9,
+            primary.price - primary.change * 0.6,
+            primary.price - primary.change * 0.4,
+            primary.price - primary.change * 0.2,
+            primary.price
+          ]
+        : [0, 0, 0, 0, 0]
+    }),
+    [primary]
+  );
+
+  const gridItems: GridItem[] = useMemo(() => {
+    if (!rows.length) return FALLBACK;
+    return rows.slice(0, 6).map((item) => ({
+      name: item.name || item.symbol,
+      price: item.price,
+      changeRate: item.changeRate
+    }));
+  }, [rows]);
+  const prediction = useMemo(() => predictOpenFromFutures(rows), [rows]);
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.bg} />
-      <View style={styles.appBar}>
-        <Text style={styles.appBarTitle}>FUTURES</Text>
-        <View style={styles.statusBadge}>
-          <Text style={styles.statusText}>장중</Text>
-        </View>
-        <TouchableOpacity>
-          <Text style={styles.appBarIcon}>⚙</Text>
-        </TouchableOpacity>
+      <View style={styles.header}>
+        <Text style={styles.title}>FUTURES</Text>
+        <Text style={styles.meta}>{lastUpdated}</Text>
       </View>
-      <FuturesBigCard 
-        label={bigCardData.label}
-        price={bigCardData.price}
-        change={bigCardData.change}
-        changeRate={bigCardData.changeRate}
-        sparkData={bigCardData.sparkData}
+      <OpenPredictionCard prediction={prediction} />
+      <FuturesBigCard
+        label={bigCard.label}
+        price={bigCard.price}
+        change={bigCard.change}
+        changeRate={bigCard.changeRate}
+        sparkData={bigCard.sparkData}
       />
-      <FuturesGrid items={gridData} />
+      <FuturesGrid items={gridItems} />
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.bg,
-  },
-  appBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  container: { flex: 1, backgroundColor: Colors.bg },
+  header: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
   },
-  appBarTitle: {
-    fontFamily: 'IBM_Plex_Mono',
-    fontSize: 15,
-    fontWeight: '600',
-    color: Colors.t0,
-  },
-  statusBadge: {
-    backgroundColor: Colors.upGlow,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  statusText: {
-    fontSize: 10,
-    color: Colors.up,
-    fontWeight: '600',
-  },
-  appBarIcon: {
-    fontSize: 16,
-    color: Colors.t0,
-  },
+  title: { color: Colors.t0, fontSize: 16, fontFamily: FontFamily.monoSemiBold },
+  meta: { color: Colors.t2, fontFamily: FontFamily.mono, fontSize: 10 }
 });
-
-export default FuturesScreen;

@@ -1,7 +1,7 @@
 // src/components/FuturesGrid.tsx
 import React from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import { Colors } from '../theme/tokens';
+import { Colors, FontFamily } from '../theme/tokens';
 
 interface FuturesItem {
   name: string;
@@ -63,13 +63,13 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   price: {
-    fontFamily: 'IBM_Plex_Mono',
+    fontFamily: FontFamily.mono,
     fontSize: 15,
-    fontWeight: '500',
     marginBottom: 4,
+    color: Colors.t0,
   },
   changeRate: {
-    fontFamily: 'IBM_Plex_Mono',
+    fontFamily: FontFamily.mono,
     fontSize: 9,
   },
   bottomBar: {

@@ -1,198 +1,151 @@
-// src/screens/HistoryScreen.tsx
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView, StatusBar, TouchableOpacity, Alert } from 'react-native';
-import { Colors } from '../theme/tokens';
-import { useHistory } from '../hooks/useHistory';
+import React, { useMemo } from "react";
+import {
+  Alert,
+  FlatList,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
+import { Colors, FontFamily } from "../theme/tokens";
+import { useHistory } from "../hooks/useHistory";
 
-const HistoryScreen: React.FC = () => {
-  const { logs, clearAll } = useHistory();
-  const [summary, setSummary] = useState({ total: 0, today: 0 });
+function dateKey(value: string) {
+  const date = new Date(value);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
+    date.getDate()
+  ).padStart(2, "0")}`;
+}
 
-  // Calculate summary
-  useEffect(() => {
-    const total = logs.length;
-    const today = logs.filter(log => {
-      const logDate = new Date(log.time);
-      const todayDate = new Date();
-      return logDate.toDateString() === todayDate.toDateString();
-    }).length;
-    
-    setSummary({ total, today });
+export default function HistoryScreen() {
+  const { logs, clearAll, refresh } = useHistory();
+
+  useFocusEffect(
+    useCallback(() => {
+      void refresh();
+    }, [refresh])
+  );
+
+  const summary = useMemo(() => {
+    const today = dateKey(new Date().toISOString());
+    const todayCount = logs.filter((item) => dateKey(item.time) === today).length;
+    return {
+      total: logs.length,
+      today: todayCount
+    };
   }, [logs]);
 
-  const handleClearAll = () => {
-    Alert.alert(
-      '알림',
-      '모든 이력을 삭제하시겠습니까?',
-      [
-        { text: '취소', style: 'cancel' },
-        { 
-          text: '삭제', 
-          style: 'destructive',
-          onPress: () => clearAll()
-        }
-      ]
-    );
-  };
-
-  const renderHistoryItem = ({ item }: { item: any }) => {
-    const isAbove = item.operator === 'above';
-    const circleColor = isAbove ? Colors.up : Colors.dn;
-    const conditionColor = isAbove ? Colors.up : Colors.dn;
-    
-    return (
-      <View style={styles.historyItem}>
-        <View style={[styles.circle, { backgroundColor: circleColor }]} />
-        <View style={styles.historyContent}>
-          <Text style={styles.ticker}>{item.ticker}</Text>
-          <Text style={styles.time}>{item.time}</Text>
-        </View>
-        <View style={styles.conditionContainer}>
-          <Text style={[styles.condition, { color: conditionColor }]}>
-            {isAbove ? '상승' : '하락'}
-          </Text>
-          <Text style={styles.currentPrice}>{item.price.toLocaleString('ko-KR')}</Text>
-        </View>
-      </View>
-    );
+  const onClear = () => {
+    Alert.alert("Clear History", "Delete all logs?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Clear", style: "destructive", onPress: () => void clearAll() }
+    ]);
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.bg} />
-      <View style={styles.appBar}>
-        <Text style={styles.appBarTitle}>HISTORY</Text>
-        <TouchableOpacity style={styles.clearButton} onPress={handleClearAll}>
-          <Text style={styles.clearButtonText}>CLR</Text>
+
+      <View style={styles.header}>
+        <Text style={styles.title}>HISTORY</Text>
+        <TouchableOpacity style={styles.clearBtn} onPress={onClear}>
+          <Text style={styles.clearText}>CLR</Text>
         </TouchableOpacity>
       </View>
-      
-      <View style={styles.summaryContainer}>
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryValue}>{summary.total}</Text>
-          <Text style={styles.summaryLabel}>총 발동</Text>
+
+      <View style={styles.summaryRow}>
+        <View style={styles.summaryCard}>
+          <Text style={[styles.summaryValue, { color: Colors.up }]}>{summary.total}</Text>
+          <Text style={styles.summaryLabel}>TOTAL</Text>
         </View>
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryValue}>{summary.today}</Text>
-          <Text style={styles.summaryLabel}>오늘 발동</Text>
+        <View style={styles.summaryCard}>
+          <Text style={[styles.summaryValue, { color: Colors.amber }]}>{summary.today}</Text>
+          <Text style={styles.summaryLabel}>TODAY</Text>
         </View>
       </View>
-      
+
       <FlatList
         data={logs}
-        renderItem={renderHistoryItem}
-        keyExtractor={(item) => item.time}
-        style={styles.historyList}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>이력이 없습니다</Text>
-          </View>
-        }
+        keyExtractor={(item, index) => `${item.time}_${index}`}
+        contentContainerStyle={styles.listContent}
+        ListEmptyComponent={<Text style={styles.empty}>NO HISTORY LOGS</Text>}
+        renderItem={({ item }) => {
+          const isAbove = item.operator === "above";
+          const color = isAbove ? Colors.up : Colors.dn;
+          return (
+            <View style={styles.row}>
+              <View style={[styles.dot, { backgroundColor: color }]} />
+              <View style={styles.rowBody}>
+                <Text style={styles.rowTicker}>{item.ticker}</Text>
+                <Text style={styles.rowTime}>{new Date(item.time).toLocaleString("ko-KR")}</Text>
+              </View>
+              <View style={styles.right}>
+                <Text style={[styles.rowCondition, { color }]}>
+                  {item.operator.toUpperCase()} {item.target.toLocaleString("ko-KR")}
+                </Text>
+                <Text style={styles.rowPrice}>{item.price.toLocaleString("ko-KR")}</Text>
+              </View>
+            </View>
+          );
+        }}
       />
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.bg,
-  },
-  appBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  container: { flex: 1, backgroundColor: Colors.bg },
+  header: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
   },
-  appBarTitle: {
-    fontFamily: 'IBM_Plex_Mono',
-    fontSize: 15,
-    fontWeight: '600',
-    color: Colors.t0,
+  title: { color: Colors.t0, fontSize: 16, fontFamily: FontFamily.monoSemiBold },
+  clearBtn: {
+    borderWidth: 1,
+    borderColor: Colors.line,
+    borderRadius: 6,
+    minWidth: 44,
+    height: 28,
+    alignItems: "center",
+    justifyContent: "center"
   },
-  clearButton: {
-    padding: 8,
-  },
-  clearButtonText: {
-    fontSize: 12,
-    color: Colors.t2,
-  },
-  summaryContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: 16,
-    backgroundColor: Colors.bg1,
-    margin: 16,
-    borderRadius: 10,
-  },
-  summaryItem: {
-    alignItems: 'center',
-  },
-  summaryValue: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.t0,
-  },
-  summaryLabel: {
-    fontSize: 12,
-    color: Colors.t2,
-    marginTop: 4,
-  },
-  historyList: {
+  clearText: { color: Colors.t1, fontFamily: FontFamily.mono, fontSize: 10 },
+  summaryRow: { flexDirection: "row", gap: 10, paddingHorizontal: 16, marginBottom: 10 },
+  summaryCard: {
     flex: 1,
-    margin: 16,
-  },
-  historyItem: {
-    flexDirection: 'row',
     backgroundColor: Colors.bg1,
+    borderWidth: 1,
+    borderColor: Colors.line,
     borderRadius: 8,
-    padding: 12,
-    marginBottom: 8,
-    alignItems: 'center',
+    padding: 12
   },
-  circle: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginRight: 12,
+  summaryValue: { fontSize: 22, fontFamily: FontFamily.monoSemiBold, marginBottom: 4 },
+  summaryLabel: { color: Colors.t2, fontSize: 10, fontFamily: FontFamily.mono },
+  listContent: { paddingHorizontal: 16, paddingBottom: 20 },
+  empty: { color: Colors.t2, marginTop: 24, textAlign: "center", fontFamily: FontFamily.mono },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.bg1,
+    borderWidth: 1,
+    borderColor: Colors.line,
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 8
   },
-  historyContent: {
-    flex: 1,
-  },
-  ticker: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: Colors.t0,
-    marginBottom: 4,
-  },
-  time: {
-    fontSize: 8,
-    color: Colors.t3,
-  },
-  conditionContainer: {
-    alignItems: 'flex-end',
-  },
-  condition: {
-    fontSize: 9,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  currentPrice: {
-    fontSize: 10,
-    color: Colors.t0,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: Colors.t2,
-  },
+  dot: { width: 6, height: 6, borderRadius: 3, marginRight: 8 },
+  rowBody: { flex: 1 },
+  rowTicker: { color: Colors.t0, fontSize: 12, fontFamily: FontFamily.monoSemiBold, marginBottom: 2 },
+  rowTime: { color: Colors.t3, fontSize: 9, fontFamily: FontFamily.mono },
+  right: { alignItems: "flex-end" },
+  rowCondition: { fontSize: 10, fontFamily: FontFamily.mono, marginBottom: 2 },
+  rowPrice: { color: Colors.t1, fontSize: 10, fontFamily: FontFamily.mono }
 });
 
-export default HistoryScreen;

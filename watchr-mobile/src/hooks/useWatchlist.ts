@@ -1,114 +1,114 @@
-// src/hooks/useWatchlist.ts
-import { useState, useEffect, useRef, useCallback } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fetchBatch } from '../api/client';
-import { checkAlerts } from './useAlerts';
+import { useCallback, useEffect, useRef, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
+import { fetchBatch, fetchPrice, type PriceData } from "../api/client";
+import { evaluateAlertsFromPriceMap } from "./useAlerts";
 
-const WATCHLIST_KEY = 'sm_watchlist';
+const WATCHLIST_KEY = "sm_watchlist";
 
-export const useWatchlist = () => {
+export async function loadStoredWatchlist(): Promise<string[]> {
+  try {
+    const raw = await AsyncStorage.getItem(WATCHLIST_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((item) => String(item).toUpperCase());
+  } catch (error) {
+    console.warn("[Watchlist] load failed", error);
+    return [];
+  }
+}
+
+export function useWatchlist() {
   const [tickers, setTickers] = useState<string[]>([]);
-  const [prices, setPrices] = useState<Record<string, any>>({});
+  const [prices, setPrices] = useState<Record<string, PriceData>>({});
   const [isLoading, setIsLoading] = useState(true);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Load watchlist from AsyncStorage
+  const persistTickers = useCallback(async (next: string[]) => {
+    setTickers(next);
+    await AsyncStorage.setItem(WATCHLIST_KEY, JSON.stringify(next));
+  }, []);
+
+  const hydrateTickers = useCallback(async () => {
+    const stored = await loadStoredWatchlist();
+    setTickers(stored);
+    setIsLoading(false);
+  }, []);
+
   useEffect(() => {
-    const loadWatchlist = async () => {
-      try {
-        const stored = await AsyncStorage.getItem(WATCHLIST_KEY);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          setTickers(parsed);
-        }
-      } catch (error) {
-        console.error('Failed to load watchlist:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    void hydrateTickers();
+  }, [hydrateTickers]);
 
-    loadWatchlist();
-  }, []);
+  const addTicker = useCallback(
+    async (ticker: string) => {
+      const normalized = ticker.trim().toUpperCase();
+      if (!normalized) return;
+      if (tickers.includes(normalized)) return;
+      await persistTickers([...tickers, normalized]);
+    },
+    [persistTickers, tickers]
+  );
 
-  // Save watchlist to AsyncStorage
-  const saveWatchlist = useCallback(async (newTickers: string[]) => {
-    try {
-      await AsyncStorage.setItem(WATCHLIST_KEY, JSON.stringify(newTickers));
-    } catch (error) {
-      console.error('Failed to save watchlist:', error);
-    }
-  }, []);
+  const removeTicker = useCallback(
+    async (ticker: string) => {
+      const next = tickers.filter((item) => item !== ticker);
+      setPrices((prev) => {
+        const clone = { ...prev };
+        delete clone[ticker];
+        return clone;
+      });
+      await persistTickers(next);
+    },
+    [persistTickers, tickers]
+  );
 
-  // Add ticker to watchlist
-  const addTicker = useCallback(async (ticker: string) => {
-    const upperTicker = ticker.toUpperCase();
-    
-    if (tickers.includes(upperTicker)) {
-      return; // Already exists
-    }
+  const refreshPrices = useCallback(async () => {
+    if (tickers.length === 0) return;
 
-    const newTickers = [...tickers, upperTicker];
-    setTickers(newTickers);
-    await saveWatchlist(newTickers);
-  }, [tickers, saveWatchlist]);
-
-  // Remove ticker from watchlist
-  const removeTicker = useCallback(async (ticker: string) => {
-    const newTickers = tickers.filter(t => t !== ticker);
-    setTickers(newTickers);
-    await saveWatchlist(newTickers);
-  }, [tickers, saveWatchlist]);
-
-  // Fetch prices for all tickers
-  const fetchPrices = useCallback(async () => {
-    if (tickers.length === 0) {
-      return;
+    let nextMap: Record<string, PriceData> = {};
+    const batch = await fetchBatch(tickers);
+    if (batch) {
+      nextMap = batch;
+    } else if (tickers.length === 1) {
+      const single = await fetchPrice(tickers[0]);
+      if (single) nextMap = { [tickers[0]]: single };
     }
 
-    try {
-      const batchData = await fetchBatch(tickers);
-      if (batchData) {
-        setPrices(batchData);
+    if (Object.keys(nextMap).length === 0) return;
 
-        // Build price map for alert checking
-        const priceMap: Record<string, number> = {};
-        Object.keys(batchData).forEach(ticker => {
-          priceMap[ticker] = batchData[ticker].price;
-        });
+    setPrices((prev) => ({ ...prev, ...nextMap }));
 
-        // Check alerts
-        checkAlerts(priceMap);
-      }
-    } catch (error) {
-      console.error('Failed to fetch prices:', error);
-    }
+    const priceMap: Record<string, number> = {};
+    Object.entries(nextMap).forEach(([ticker, quote]) => {
+      priceMap[ticker] = quote.price;
+    });
+    await evaluateAlertsFromPriceMap(priceMap);
   }, [tickers]);
 
-  // Set up polling
-  useEffect(() => {
-    if (tickers.length > 0) {
-      // Fetch immediately
-      fetchPrices();
-      
-      // Set up interval
+  useFocusEffect(
+    useCallback(() => {
+      void refreshPrices();
       intervalRef.current = setInterval(() => {
-        fetchPrices();
+        void refreshPrices();
       }, 5000);
 
       return () => {
         if (intervalRef.current) {
           clearInterval(intervalRef.current);
+          intervalRef.current = null;
         }
       };
-    }
-  }, [fetchPrices]);
+    }, [refreshPrices])
+  );
 
   return {
     tickers,
     prices,
     addTicker,
     removeTicker,
-    isLoading
+    isLoading,
+    refreshPrices
   };
-};
+}
+

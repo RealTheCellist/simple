@@ -1,46 +1,36 @@
-// src/utils/alertNotify.ts
-import * as Notifications from 'expo-notifications';
-import { addLog } from '../hooks/useHistory';
+import * as Notifications from "expo-notifications";
 
-const cooldowns = new Map<string, number>();
+const cooldownMap = new Map<string, number>();
+const COOLDOWN_MS = 60 * 60 * 1000;
 
-export const requestPermission = async () => {
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false
+  })
+});
+
+export async function requestPermission() {
   const { status } = await Notifications.requestPermissionsAsync();
   return status;
-};
+}
 
-export const sendAlert = async (title: string, body: string, ticker?: string, price?: number, operator?: 'above' | 'below', target?: number) => {
+export async function sendAlert(title: string, body: string) {
   await Notifications.scheduleNotificationAsync({
-    content: {
-      title,
-      body,
-      sound: true,
-    },
-    trigger: null,
+    content: { title, body, sound: true },
+    trigger: null
   });
+}
 
-  // Add to history if all parameters are provided
-  if (ticker && price !== undefined && operator && target !== undefined) {
-    addLog({
-      ticker,
-      price,
-      operator,
-      target,
-      time: new Date().toLocaleTimeString('ko-KR')
-    });
-  }
-};
+export function isOnCooldown(id: string) {
+  const last = cooldownMap.get(id);
+  if (!last) return false;
+  return Date.now() - last < COOLDOWN_MS;
+}
 
-export const isOnCooldown = (id: string): boolean => {
-  const lastSent = cooldowns.get(id);
-  if (!lastSent) return false;
-  
-  const now = Date.now();
-  const cooldownPeriod = 60 * 60 * 1000; // 1 hour in milliseconds
-  
-  return now - lastSent < cooldownPeriod;
-};
-
-export const markCooldown = (id: string) => {
-  cooldowns.set(id, Date.now());
-};
+export function markCooldown(id: string) {
+  cooldownMap.set(id, Date.now());
+}

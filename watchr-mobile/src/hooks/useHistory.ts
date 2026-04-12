@@ -1,71 +1,60 @@
-// src/hooks/useHistory.ts
-import { useState, useEffect, useCallback } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { HistoryLog } from '../types/history';
+import { useCallback, useEffect, useState } from "react";
+import type { HistoryLog } from "../types/history";
+import { clearHistoryLogs, loadHistoryLogs, saveHistoryLogs } from "../store/historyStore";
 
-const HISTORY_KEY = 'sm_history';
+const listeners = new Set<(logs: HistoryLog[]) => void>();
+let cache: HistoryLog[] = [];
+let hydrated = false;
 
-export const useHistory = () => {
-  const [logs, setLogs] = useState<HistoryLog[]>([]);
+async function hydrate() {
+  if (hydrated) return cache;
+  cache = await loadHistoryLogs();
+  hydrated = true;
+  return cache;
+}
 
-  // Load logs from AsyncStorage
+function emit(next: HistoryLog[]) {
+  cache = next;
+  listeners.forEach((listener) => listener(cache));
+}
+
+async function persist(next: HistoryLog[]) {
+  await saveHistoryLogs(next);
+  emit(next);
+}
+
+export async function refreshHistoryCache() {
+  const next = await loadHistoryLogs();
+  hydrated = true;
+  emit(next);
+  return next;
+}
+
+export function useHistory() {
+  const [logs, setLogs] = useState<HistoryLog[]>(cache);
+
   useEffect(() => {
-    const loadLogs = async () => {
-      try {
-        const stored = await AsyncStorage.getItem(HISTORY_KEY);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          setLogs(parsed);
-        }
-      } catch (error) {
-        console.error('Failed to load history:', error);
-      }
+    listeners.add(setLogs);
+    void hydrate().then((next) => setLogs(next));
+    return () => {
+      listeners.delete(setLogs);
     };
-
-    loadLogs();
   }, []);
 
-  // Save logs to AsyncStorage
-  const saveLogs = useCallback(async (newLogs: HistoryLog[]) => {
-    try {
-      await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(newLogs));
-    } catch (error) {
-      console.error('Failed to save history:', error);
-    }
+  const addLog = useCallback(async (log: HistoryLog) => {
+    const next = [log, ...cache].slice(0, 50);
+    await persist(next);
   }, []);
 
-  const addLog = useCallback((log: Omit<HistoryLog, 'time'>) => {
-    const newLog: HistoryLog = {
-      ...log,
-      time: new Date().toISOString()
-    };
-    
-    setLogs(prevLogs => {
-      const newLogs = [newLog, ...prevLogs];
-      
-      // Keep only the latest 50 logs
-      if (newLogs.length > 50) {
-        newLogs.splice(50);
-      }
-      
-      saveLogs(newLogs);
-      return newLogs;
-    });
-  }, [saveLogs]);
+  const clearAll = useCallback(async () => {
+    await clearHistoryLogs();
+    emit([]);
+  }, []);
 
-  const getLogs = useCallback(() => {
-    return logs;
-  }, [logs]);
+  const refresh = useCallback(async () => {
+    await refreshHistoryCache();
+  }, []);
 
-  const clearAll = useCallback(() => {
-    setLogs([]);
-    saveLogs([]);
-  }, [saveLogs]);
+  return { logs, addLog, clearAll, refresh };
+}
 
-  return {
-    logs,
-    addLog,
-    getLogs,
-    clearAll
-  };
-};

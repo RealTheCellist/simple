@@ -1,389 +1,246 @@
-// src/screens/AlertsScreen.tsx
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView, StatusBar, TouchableOpacity, TextInput, Alert } from 'react-native';
-import { Colors } from '../theme/tokens';
-import { useAlerts } from '../hooks/useAlerts';
-import { useWatchlist } from '../hooks/useWatchlist';
-import { requestPermission } from '../utils/alertNotify';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  FlatList,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { Colors, FontFamily } from "../theme/tokens";
+import { loadStoredWatchlist } from "../hooks/useWatchlist";
+import { useAlerts } from "../hooks/useAlerts";
+import { requestPermission } from "../notifications/alertNotify";
+import type { AlertOperator } from "../types/alerts";
 
-const AlertsScreen: React.FC = () => {
-  const { alerts, addAlert, removeAlert, getAlerts } = useAlerts();
-  const { tickers } = useWatchlist();
-  const [selectedTicker, setSelectedTicker] = useState<string>('');
-  const [targetPrice, setTargetPrice] = useState<string>('');
-  const [operator, setOperator] = useState<'above' | 'below'>('above');
-  const [showPicker, setShowPicker] = useState<boolean>(false);
+export default function AlertsScreen() {
+  const { alerts, addAlert, removeAlert, toggleAlert, refresh } = useAlerts();
+  const [tickerOptions, setTickerOptions] = useState<string[]>([]);
+  const [ticker, setTicker] = useState("");
+  const [targetPrice, setTargetPrice] = useState("");
+  const [operator, setOperator] = useState<AlertOperator>("above");
 
-  // Request notification permission on component mount
+  const loadTickers = useCallback(async () => {
+    const items = await loadStoredWatchlist();
+    setTickerOptions(items);
+    if (!ticker && items.length) setTicker(items[0]);
+  }, [ticker]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadTickers();
+      void refresh();
+    }, [loadTickers, refresh])
+  );
+
   useEffect(() => {
-    const requestPermissionAsync = async () => {
-      await requestPermission();
-    };
-    
-    requestPermissionAsync();
+    void requestPermission();
   }, []);
 
-  const handleAddAlert = () => {
-    if (!selectedTicker || !targetPrice) {
-      Alert.alert('경고', '모든 필드를 입력해주세요.');
-      return;
-    }
+  const addDisabled = useMemo(() => !ticker || !targetPrice || Number(targetPrice) <= 0, [targetPrice, ticker]);
 
-    const price = parseFloat(targetPrice);
-    if (isNaN(price)) {
-      Alert.alert('경고', '유효한 가격을 입력해주세요.');
-      return;
-    }
-
-    addAlert({
-      ticker: selectedTicker,
+  const onAdd = async () => {
+    if (addDisabled) return;
+    await addAlert({
+      ticker,
       operator,
-      price
+      price: Number(targetPrice),
+      enabled: true,
+      lastFiredAt: 0
     });
-
-    // Reset form
-    setSelectedTicker('');
-    setTargetPrice('');
-    setOperator('above');
-  };
-
-  const handleRemoveAlert = (id: string) => {
-    removeAlert(id);
-  };
-
-  const renderAlertItem = ({ item }: { item: any }) => {
-    const isAbove = item.operator === 'above';
-    const barColor = isAbove ? Colors.up : Colors.dn;
-    
-    return (
-      <View style={styles.alertItem}>
-        <View style={[styles.alertBar, { backgroundColor: barColor }]} />
-        <View style={styles.alertContent}>
-          <Text style={styles.alertTicker}>{item.ticker}</Text>
-          <Text style={styles.alertCondition}>
-            {isAbove ? '이상' : '이하'} {item.price.toLocaleString('ko-KR')}
-          </Text>
-        </View>
-        <TouchableOpacity 
-          style={styles.removeButton}
-          onPress={() => handleRemoveAlert(item.id)}
-        >
-          <Text style={styles.removeButtonText}>×</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  };
-
-  const renderPicker = () => {
-    if (!showPicker) return null;
-    
-    return (
-      <View style={styles.pickerOverlay}>
-        <View style={styles.pickerContainer}>
-          <Text style={styles.pickerTitle}>종목 선택</Text>
-          {tickers.map(ticker => (
-            <TouchableOpacity
-              key={ticker}
-              style={styles.pickerItem}
-              onPress={() => {
-                setSelectedTicker(ticker);
-                setShowPicker(false);
-              }}
-            >
-              <Text style={styles.pickerItemText}>{ticker}</Text>
-            </TouchableOpacity>
-          ))}
-          <TouchableOpacity
-            style={styles.pickerCancel}
-            onPress={() => setShowPicker(false)}
-          >
-            <Text style={styles.pickerCancelText}>취소</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
+    setTargetPrice("");
+    await refresh();
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.bg} />
-      <View style={styles.appBar}>
-        <Text style={styles.appBarTitle}>ALERTS</Text>
-        <Text style={styles.appBarStatus}>장중</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>ALERTS</Text>
+        <Text style={styles.meta}>{alerts.length} total</Text>
       </View>
-      
-      <View style={styles.addCard}>
-        <Text style={styles.cardTitle}>알림 추가</Text>
-        
-        <TouchableOpacity 
-          style={styles.tickerButton}
-          onPress={() => setShowPicker(true)}
-        >
-          <Text style={styles.tickerButtonText}>
-            {selectedTicker || '종목 선택'}
-          </Text>
-        </TouchableOpacity>
-        
+
+      <View style={styles.card}>
+        <Text style={styles.cardLabel}>Ticker</Text>
+        <View style={styles.tickerRow}>
+          {tickerOptions.length === 0 ? (
+            <Text style={styles.noTicker}>Add watchlist ticker first</Text>
+          ) : (
+            tickerOptions.map((item) => {
+              const active = item === ticker;
+              return (
+                <TouchableOpacity
+                  key={item}
+                  style={[styles.tickerChip, active && styles.tickerChipActive]}
+                  onPress={() => setTicker(item)}
+                >
+                  <Text style={[styles.tickerChipText, active && styles.tickerChipTextActive]}>{item}</Text>
+                </TouchableOpacity>
+              );
+            })
+          )}
+        </View>
+
+        <Text style={styles.cardLabel}>Target Price</Text>
         <TextInput
-          style={styles.priceInput}
-          placeholder="목표가 입력"
-          placeholderTextColor={Colors.t2}
+          style={styles.input}
           keyboardType="numeric"
+          placeholder="e.g. 80000"
+          placeholderTextColor={Colors.t2}
           value={targetPrice}
           onChangeText={setTargetPrice}
         />
-        
-        <View style={styles.operatorButtons}>
+
+        <View style={styles.opRow}>
           <TouchableOpacity
-            style={[
-              styles.operatorButton,
-              operator === 'above' && { 
-                backgroundColor: Colors.upGlow,
-                borderColor: Colors.up
-              }
-            ]}
-            onPress={() => setOperator('above')}
+            style={[styles.opButton, operator === "above" && styles.opButtonUp]}
+            onPress={() => setOperator("above")}
           >
-            <Text 
-              style={[
-                styles.operatorButtonText,
-                operator === 'above' && { color: Colors.up }
-              ]}
-            >
-              이상
-            </Text>
+            <Text style={[styles.opButtonText, operator === "above" && styles.opButtonTextUp]}>ABOVE</Text>
           </TouchableOpacity>
-          
           <TouchableOpacity
-            style={[
-              styles.operatorButton,
-              operator === 'below' && { 
-                backgroundColor: Colors.dnGlow,
-                borderColor: Colors.dn
-              }
-            ]}
-            onPress={() => setOperator('below')}
+            style={[styles.opButton, operator === "below" && styles.opButtonDown]}
+            onPress={() => setOperator("below")}
           >
-            <Text 
-              style={[
-                styles.operatorButtonText,
-                operator === 'below' && { color: Colors.dn }
-              ]}
-            >
-              이하
-            </Text>
+            <Text style={[styles.opButtonText, operator === "below" && styles.opButtonTextDown]}>BELOW</Text>
           </TouchableOpacity>
         </View>
-        
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={handleAddAlert}
-        >
-          <Text style={styles.addButtonText}>등록</Text>
+
+        <TouchableOpacity style={[styles.addButton, addDisabled && styles.addButtonDisabled]} onPress={onAdd}>
+          <Text style={styles.addButtonText}>ADD ALERT</Text>
         </TouchableOpacity>
       </View>
-      
+
       <FlatList
         data={alerts}
-        renderItem={renderAlertItem}
         keyExtractor={(item) => item.id}
-        style={styles.alertList}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>등록된 알림이 없습니다</Text>
-          </View>
-        }
+        contentContainerStyle={styles.listContent}
+        ListEmptyComponent={<Text style={styles.empty}>NO ACTIVE ALERTS</Text>}
+        renderItem={({ item }) => {
+          const isAbove = item.operator === "above";
+          const sideColor = isAbove ? Colors.up : Colors.dn;
+          const enabled = item.enabled !== false;
+          return (
+            <View style={styles.alertRow}>
+              <View style={[styles.sideBar, { backgroundColor: sideColor }]} />
+              <View style={styles.alertBody}>
+                <Text style={styles.alertTicker}>{item.ticker}</Text>
+                <Text style={styles.alertDesc}>
+                  {item.operator.toUpperCase()} {Number(item.price).toLocaleString("ko-KR")}
+                </Text>
+              </View>
+              <TouchableOpacity style={styles.smallBtn} onPress={() => void toggleAlert(item.id)}>
+                <Text style={styles.smallBtnText}>{enabled ? "PAUSE" : "PLAY"}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.smallBtn} onPress={() => void removeAlert(item.id)}>
+                <Text style={styles.smallBtnText}>DEL</Text>
+              </TouchableOpacity>
+            </View>
+          );
+        }}
       />
-      
-      {renderPicker()}
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.bg,
-  },
-  appBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  container: { flex: 1, backgroundColor: Colors.bg },
+  header: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
   },
-  appBarTitle: {
-    fontFamily: 'IBM_Plex_Mono',
-    fontSize: 15,
-    fontWeight: '600',
-    color: Colors.t0,
-  },
-  appBarStatus: {
-    fontSize: 10,
-    color: Colors.t2,
-  },
-  addCard: {
-    backgroundColor: Colors.bg1,
-    margin: 16,
+  title: { color: Colors.t0, fontSize: 16, fontFamily: FontFamily.monoSemiBold },
+  meta: { color: Colors.t2, fontFamily: FontFamily.mono, fontSize: 10 },
+  card: {
+    marginHorizontal: 16,
+    marginBottom: 10,
+    padding: 14,
     borderRadius: 10,
-    padding: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.t0,
-    marginBottom: 12,
-  },
-  tickerButton: {
-    backgroundColor: Colors.bg2,
     borderWidth: 1,
-    borderColor: Colors.t2,
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
+    borderColor: Colors.line,
+    backgroundColor: Colors.bg1
   },
-  tickerButtonText: {
-    color: Colors.t0,
-    fontSize: 14,
-  },
-  priceInput: {
-    backgroundColor: Colors.bg2,
+  cardLabel: { color: Colors.t2, fontFamily: FontFamily.mono, fontSize: 10, marginBottom: 8 },
+  tickerRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 12 },
+  noTicker: { color: Colors.t2, fontFamily: FontFamily.mono, fontSize: 11 },
+  tickerChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: Colors.t2,
+    borderColor: Colors.line
+  },
+  tickerChipActive: {
+    borderColor: Colors.amber,
+    backgroundColor: "rgba(245,166,35,0.12)"
+  },
+  tickerChipText: { color: Colors.t1, fontSize: 11, fontFamily: FontFamily.mono },
+  tickerChipTextActive: { color: Colors.amber },
+  input: {
+    height: 42,
+    borderWidth: 1,
+    borderColor: Colors.line,
     borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
+    backgroundColor: Colors.bg2,
     color: Colors.t0,
-    fontSize: 14,
+    paddingHorizontal: 12,
+    marginBottom: 12
   },
-  operatorButtons: {
-    flexDirection: 'row',
-    marginBottom: 12,
-  },
-  operatorButton: {
+  opRow: { flexDirection: "row", gap: 8, marginBottom: 12 },
+  opButton: {
     flex: 1,
-    padding: 12,
-    marginHorizontal: 4,
-    borderWidth: 1,
+    height: 38,
     borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.line,
+    alignItems: "center",
+    justifyContent: "center"
   },
-  operatorButtonText: {
-    fontWeight: '600',
-    fontSize: 14,
-  },
+  opButtonUp: { borderColor: Colors.up, backgroundColor: Colors.upGlow },
+  opButtonDown: { borderColor: Colors.dn, backgroundColor: Colors.dnGlow },
+  opButtonText: { color: Colors.t1, fontFamily: FontFamily.mono, fontSize: 11 },
+  opButtonTextUp: { color: Colors.up },
+  opButtonTextDown: { color: Colors.dn },
   addButton: {
-    backgroundColor: Colors.primary,
-    padding: 12,
+    height: 40,
     borderRadius: 8,
-    alignItems: 'center',
+    backgroundColor: Colors.amber,
+    alignItems: "center",
+    justifyContent: "center"
   },
-  addButtonText: {
-    color: Colors.t0,
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  alertList: {
-    flex: 1,
-    margin: 16,
-  },
-  alertItem: {
-    flexDirection: 'row',
+  addButtonDisabled: { opacity: 0.45 },
+  addButtonText: { color: Colors.bg, fontFamily: FontFamily.monoSemiBold, fontSize: 11 },
+  listContent: { paddingHorizontal: 16, paddingBottom: 20 },
+  empty: { color: Colors.t2, fontFamily: FontFamily.mono, marginTop: 20, textAlign: "center" },
+  alertRow: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: Colors.bg1,
+    borderWidth: 1,
+    borderColor: Colors.line,
     borderRadius: 8,
-    padding: 12,
-    marginBottom: 8,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    marginBottom: 8
   },
-  alertBar: {
-    width: 3,
-    height: '100%',
-    borderRadius: 2,
-    marginRight: 12,
-  },
-  alertContent: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  alertTicker: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.t0,
-    marginBottom: 4,
-  },
-  alertCondition: {
-    fontSize: 12,
-    color: Colors.t2,
-  },
-  removeButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 30,
+  sideBar: { width: 3, alignSelf: "stretch" },
+  alertBody: { flex: 1, paddingHorizontal: 10, paddingVertical: 10 },
+  alertTicker: { color: Colors.t0, fontFamily: FontFamily.monoSemiBold, fontSize: 12, marginBottom: 3 },
+  alertDesc: { color: Colors.t2, fontFamily: FontFamily.mono, fontSize: 10 },
+  smallBtn: {
     height: 30,
+    minWidth: 46,
+    borderWidth: 1,
+    borderColor: Colors.line,
+    borderRadius: 6,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 6
   },
-  removeButtonText: {
-    fontSize: 18,
-    color: Colors.t2,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: Colors.t2,
-  },
-  pickerOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  pickerContainer: {
-    backgroundColor: Colors.bg1,
-    borderRadius: 10,
-    width: '80%',
-    maxHeight: '60%',
-    padding: 16,
-  },
-  pickerTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.t0,
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  pickerItem: {
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.bg2,
-  },
-  pickerItemText: {
-    fontSize: 14,
-    color: Colors.t0,
-  },
-  pickerCancel: {
-    padding: 12,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  pickerCancelText: {
-    fontSize: 14,
-    color: Colors.t2,
-  },
+  smallBtnText: { color: Colors.t1, fontFamily: FontFamily.mono, fontSize: 9 }
 });
 
-export default AlertsScreen;

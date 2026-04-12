@@ -1,7 +1,7 @@
 // src/components/MarketStrip.tsx
 import React from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
-import { Colors } from '../theme/tokens';
+import { Colors, FontFamily } from '../theme/tokens';
 
 interface MarketItem {
   name: string;
@@ -59,13 +59,12 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   price: {
-    fontFamily: 'IBM_Plex_Mono',
+    fontFamily: FontFamily.mono,
     fontSize: 12,
-    fontWeight: '500',
     marginBottom: 2,
   },
   changeRate: {
-    fontFamily: 'IBM_Plex_Mono',
+    fontFamily: FontFamily.mono,
     fontSize: 8,
   },
 });

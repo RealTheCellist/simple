@@ -1,6 +1,6 @@
 // src/components/Sparkline.tsx
 import React from 'react';
-import { Svg, Path } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 
 interface SparklineProps {
   data: number[];
@@ -22,8 +22,9 @@ const Sparkline: React.FC<SparklineProps> = ({ data, color, width = 52, height =
   const normalizedData = data.map(value => (value - min) / range);
   
   // Create SVG path
+  const denominator = Math.max(1, data.length - 1);
   const points = normalizedData.map((value, index) => {
-    const x = (index / (data.length - 1)) * width;
+    const x = (index / denominator) * width;
     const y = height - (value * height);
     return `${x},${y}`;
   }).join(' ');

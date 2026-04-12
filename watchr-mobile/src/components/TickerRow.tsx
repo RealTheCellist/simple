@@ -1,7 +1,7 @@
 // src/components/TickerRow.tsx
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Colors } from '../theme/tokens';
+import { Colors, FontFamily } from '../theme/tokens';
 import Sparkline from './Sparkline';
 
 interface TickerRowProps {
@@ -13,6 +13,7 @@ interface TickerRowProps {
   sparkData: number[];
   hasAlert?: boolean;
   onPress?: () => void;
+  onLongPress?: () => void;
   onDelete?: () => void;
 }
 
@@ -25,13 +26,14 @@ const TickerRow: React.FC<TickerRowProps> = ({
   sparkData,
   hasAlert = false,
   onPress,
+  onLongPress,
   onDelete
 }) => {
   const isPositive = change >= 0;
   const changeColor = isPositive ? Colors.up : Colors.dn;
   
   return (
-    <TouchableOpacity onPress={onPress} style={styles.container}>
+    <TouchableOpacity onPress={onPress} onLongPress={onLongPress} style={styles.container}>
       <View style={[styles.accentBar, { backgroundColor: isPositive ? Colors.up : Colors.dn }]} />
       <View style={styles.content}>
         <View style={styles.leftContent}>
@@ -86,9 +88,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   ticker: {
-    fontFamily: 'IBM_Plex_Mono',
+    fontFamily: FontFamily.monoSemiBold,
     fontSize: 13,
-    fontWeight: '600',
     color: Colors.t0,
   },
   nameContainer: {
@@ -114,9 +115,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   price: {
-    fontFamily: 'IBM_Plex_Mono',
+    fontFamily: FontFamily.mono,
     fontSize: 13,
-    fontWeight: '500',
     color: Colors.t0,
   },
   changeContainer: {
@@ -125,14 +125,12 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   change: {
-    fontFamily: 'IBM_Plex_Mono',
+    fontFamily: FontFamily.mono,
     fontSize: 9,
-    fontWeight: '600',
   },
   changeRate: {
-    fontFamily: 'IBM_Plex_Mono',
+    fontFamily: FontFamily.mono,
     fontSize: 9,
-    fontWeight: '600',
     marginLeft: 4,
   },
 });
