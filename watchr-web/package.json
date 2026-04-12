@@ -9,6 +9,7 @@
     "test": "node ./src/prediction.selftest.js",
     "check:perf": "node ./scripts/check-perf-budget.mjs",
     "check:smoke": "node ./scripts/smoke-dist.mjs",
+    "hotfix:start": "powershell -ExecutionPolicy Bypass -File ./scripts/start-hotfix.ps1",
     "preview": "vite preview",
     "preview:host": "vite preview --host",
     "check": "npm run build"

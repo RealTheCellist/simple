@@ -71,6 +71,8 @@ Workflow files are in `../.github/workflows`:
 For required secrets/variables and rollout steps, see `DEPLOYMENT.md`.
 Rollback procedure is documented in `ROLLBACK.md`.
 Release history is tracked in `CHANGELOG.md`.
+Post-deploy monitoring is in `POST_DEPLOY_CHECKLIST.md`.
+Hotfix workflow template is in `HOTFIX_TEMPLATE.md`.
 
 ## Implemented app features
 

@@ -8,3 +8,4 @@
 - Adaptive weight tuning mode for prediction factors
 - Runtime API resilience with timeout + retry/backoff
 - Manual rollback workflow and rollback playbook
+- Post-deploy checklist and hotfix template/process assets
