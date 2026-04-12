@@ -1,14 +1,22 @@
 import { runBacktest } from "./core/backtest.js";
 import { runWalkForward } from "./core/walkforward.js";
 import { DEFAULT_WEIGHTS } from "./core/model.js";
-import { loadRowsFromCsv } from "./data/csv.js";
 import { generateSyntheticRows } from "./data/synthetic.js";
-import { loadRowsFromYahoo } from "./data/yahoo.js";
+import { loadRowsWithPolicy } from "./data/policy.js";
+import { analyzeRowsQuality } from "./utils/dataQuality.js";
 import { topTradeRows, writeReport } from "./utils/report.js";
 
 function parseBool(value) {
   if (typeof value === "boolean") return value;
   return String(value).toLowerCase() === "true";
+}
+
+function parseWeekdays(input) {
+  if (!input) return [];
+  return String(input)
+    .split(",")
+    .map((v) => Number(v.trim()))
+    .filter((v) => Number.isInteger(v) && v >= 0 && v <= 6);
 }
 
 function parseArgs(argv) {
@@ -19,11 +27,19 @@ function parseArgs(argv) {
     seed: 42,
     threshold: 12,
     feeBps: 2,
+    slippageBps: 1,
+    taxBps: 0,
+    shortCarryBps: 4,
     riskScale: 0.65,
     maxExposure: 0.6,
     minExposure: 0.05,
+    blockWeekdays: "",
+    blockHighVolPct: null,
+    maxLossGuardPct: null,
+    cooldownDaysAfterLoss: 1,
     out: "reports/latest-report.json",
     csv: "",
+    backupCsv: "",
     stressRuns: 30,
     realFallback: true,
     strictReal: false,
@@ -39,6 +55,10 @@ function parseArgs(argv) {
     if (!(key in options)) return;
 
     const current = options[key];
+    if (current === null) {
+      options[key] = rawValue === "null" ? null : Number(rawValue);
+      return;
+    }
     if (typeof current === "number") {
       options[key] = Number(rawValue);
       return;
@@ -89,6 +109,7 @@ function printSummary(summary) {
   console.log(`Win Rate: ${summary.winRatePct}%`);
   console.log(`Sharpe-like: ${summary.sharpeLike}`);
   console.log(`Final Equity: ${summary.finalEquity}`);
+  console.log(`Total Costs: ${summary.totalCostPct}%`);
 }
 
 function printTopMoves(rows) {
@@ -96,7 +117,7 @@ function printTopMoves(rows) {
   console.log("Top Impact Days:");
   rows.forEach((row) => {
     console.log(
-      `- ${row.date} | signal=${row.signal} score=${row.score} net=${row.netReturnPct}% equity=${row.equity}`
+      `- ${row.date} | signal=${row.signal} score=${row.score} net=${row.netReturnPct}% cost=${row.costPct}% equity=${row.equity}`
     );
   });
 }
@@ -109,49 +130,35 @@ function printWalkForward(summary) {
   );
 }
 
-async function loadRows(options) {
-  if (options.csv) {
-    return { rows: loadRowsFromCsv(options.csv), source: "csv", note: "" };
-  }
-  if (options.mode === "real") {
-    try {
-      const rows = await loadRowsFromYahoo({ years: options.years });
-      return { rows, source: "yahoo", note: "" };
-    } catch (error) {
-      if (options.strictReal) throw error;
-      if (!options.realFallback) throw error;
-      return {
-        rows: generateSyntheticRows({ days: options.days, seed: options.seed }),
-        source: "synthetic_fallback",
-        note: `real_data_unavailable: ${error.message}`
-      };
-    }
-  }
+function buildBaseParams(options) {
   return {
-    rows: generateSyntheticRows({ days: options.days, seed: options.seed }),
-    source: "synthetic",
-    note: ""
+    weights: DEFAULT_WEIGHTS,
+    threshold: options.threshold,
+    feeBps: options.feeBps,
+    slippageBps: options.slippageBps,
+    taxBps: options.taxBps,
+    shortCarryBps: options.shortCarryBps,
+    riskScale: options.riskScale,
+    maxExposure: options.maxExposure,
+    minExposure: options.minExposure,
+    blockedWeekdays: parseWeekdays(options.blockWeekdays),
+    blockHighVolPct: options.blockHighVolPct,
+    maxLossGuardPct: options.maxLossGuardPct,
+    cooldownDaysAfterLoss: options.cooldownDaysAfterLoss
   };
 }
 
 async function main() {
   const options = parseArgs(process.argv.slice(2));
-  const loaded = await loadRows(options);
+  const loaded = await loadRowsWithPolicy(options);
   const rows = loaded.rows;
 
   if (rows.length === 0) {
     throw new Error("No input rows available");
   }
 
-  const baseParams = {
-    weights: DEFAULT_WEIGHTS,
-    threshold: options.threshold,
-    feeBps: options.feeBps,
-    riskScale: options.riskScale,
-    maxExposure: options.maxExposure,
-    minExposure: options.minExposure
-  };
-
+  const quality = analyzeRowsQuality(rows);
+  const baseParams = buildBaseParams(options);
   const result = runBacktest(rows, baseParams);
 
   let stressSummary = null;
@@ -168,8 +175,7 @@ async function main() {
   let walkForward = null;
   if (options.walkForward) {
     walkForward = runWalkForward(rows, {
-      feeBps: options.feeBps,
-      minExposure: options.minExposure,
+      ...baseParams,
       trainDays: options.wfTrainDays,
       testDays: options.wfTestDays,
       stepDays: options.wfStepDays
@@ -179,6 +185,9 @@ async function main() {
   const report = {
     generatedAt: new Date().toISOString(),
     source: loaded.source,
+    providersTried: loaded.providersTried ?? [],
+    note: loaded.note ?? "",
+    dataQuality: quality,
     options,
     summary: result.summary,
     stressSummary,
@@ -203,6 +212,8 @@ async function main() {
   }
   console.log("");
   console.log(`Source: ${loaded.source}`);
+  console.log(`DataRows: ${quality.rows} (${quality.startDate} ~ ${quality.endDate})`);
+  console.log(`ProvidersTried: ${(loaded.providersTried ?? []).join(" -> ")}`);
   if (loaded.note) {
     console.log(`Note: ${loaded.note}`);
   }

@@ -20,7 +20,14 @@ function buildGrid(baseOptions = {}) {
   const riskScaleList = baseOptions.riskScaleGrid ?? [0.45, 0.65, 0.85];
   const maxExposureList = baseOptions.maxExposureGrid ?? [0.4, 0.6, 0.8];
   const feeBps = baseOptions.feeBps ?? 2;
+  const slippageBps = baseOptions.slippageBps ?? 1;
+  const taxBps = baseOptions.taxBps ?? 0;
+  const shortCarryBps = baseOptions.shortCarryBps ?? 4;
   const minExposure = baseOptions.minExposure ?? 0.05;
+  const blockedWeekdays = baseOptions.blockedWeekdays ?? [];
+  const blockHighVolPct = baseOptions.blockHighVolPct ?? null;
+  const maxLossGuardPct = baseOptions.maxLossGuardPct ?? null;
+  const cooldownDaysAfterLoss = baseOptions.cooldownDaysAfterLoss ?? 1;
 
   const grid = [];
   thresholdList.forEach((threshold) => {
@@ -32,7 +39,14 @@ function buildGrid(baseOptions = {}) {
           riskScale,
           maxExposure,
           minExposure,
-          feeBps
+          feeBps,
+          slippageBps,
+          taxBps,
+          shortCarryBps,
+          blockedWeekdays,
+          blockHighVolPct,
+          maxLossGuardPct,
+          cooldownDaysAfterLoss
         });
       });
     });
