@@ -1,11 +1,14 @@
 {
   "name": "watchr-web",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "test": "node ./src/prediction.selftest.js",
+    "check:perf": "node ./scripts/check-perf-budget.mjs",
+    "check:smoke": "node ./scripts/smoke-dist.mjs",
     "preview": "vite preview",
     "preview:host": "vite preview --host",
     "check": "npm run build"

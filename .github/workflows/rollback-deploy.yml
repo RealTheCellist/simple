@@ -1,24 +1,37 @@
-name: Deploy Netlify
+name: Rollback Deploy
 
 on:
-  push:
-    branches: [main, master]
-    paths:
-      - "watchr-web/**"
-      - ".github/workflows/deploy-netlify.yml"
   workflow_dispatch:
+    inputs:
+      target_ref:
+        description: "Git ref to redeploy (commit SHA, tag, or branch)"
+        required: true
+        default: "main"
+      provider:
+        description: "Deployment target"
+        required: true
+        type: choice
+        default: both
+        options:
+          - both
+          - netlify
+          - vercel
 
 permissions:
   contents: read
 
-concurrency:
-  group: deploy-netlify-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  deploy:
+  rollback:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: watchr-web
     env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
       VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
       VITE_APP_VERSION: ${{ vars.VITE_APP_VERSION }}
       VITE_ENABLE_MOCK_FALLBACK: ${{ vars.VITE_ENABLE_MOCK_FALLBACK }}
@@ -31,13 +44,12 @@ jobs:
       VITE_PREDICTION_CAPTURE_MINUTES: ${{ vars.VITE_PREDICTION_CAPTURE_MINUTES }}
       VITE_PREDICTION_MIN_SAMPLES: ${{ vars.VITE_PREDICTION_MIN_SAMPLES }}
       VITE_MAX_PREDICTION_LOGS: ${{ vars.VITE_MAX_PREDICTION_LOGS }}
-    defaults:
-      run:
-        working-directory: watchr-web
 
     steps:
-      - name: Checkout
+      - name: Checkout target ref
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.target_ref }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -61,29 +73,33 @@ jobs:
       - name: Smoke check dist
         run: npm run check:smoke
 
-      - name: Validate Netlify secrets
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      - name: Deploy rollback to Netlify
+        if: ${{ inputs.provider == 'both' || inputs.provider == 'netlify' }}
         run: |
           if [ -z "$NETLIFY_AUTH_TOKEN" ] || [ -z "$NETLIFY_SITE_ID" ]; then
-            echo "Missing NETLIFY_AUTH_TOKEN or NETLIFY_SITE_ID in repository secrets."
+            echo "Missing NETLIFY_AUTH_TOKEN or NETLIFY_SITE_ID."
             exit 1
           fi
+          npx netlify-cli@17 deploy --dir=dist --prod --site "$NETLIFY_SITE_ID" --auth "$NETLIFY_AUTH_TOKEN"
 
-      - name: Deploy to Netlify (Production)
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-        run: npx netlify-cli@17 deploy --dir=dist --prod --site "$NETLIFY_SITE_ID" --auth "$NETLIFY_AUTH_TOKEN"
+      - name: Deploy rollback to Vercel
+        if: ${{ inputs.provider == 'both' || inputs.provider == 'vercel' }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "Missing VERCEL_TOKEN, VERCEL_ORG_ID, or VERCEL_PROJECT_ID."
+            exit 1
+          fi
+          npx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
+          npx vercel@latest build --prod --token="$VERCEL_TOKEN"
+          npx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
 
-      - name: Notify deployment failure
+      - name: Notify rollback failure
         if: ${{ failure() && secrets.DEPLOY_ALERT_WEBHOOK_URL != '' }}
         env:
           DEPLOY_ALERT_WEBHOOK_URL: ${{ secrets.DEPLOY_ALERT_WEBHOOK_URL }}
         run: |
           payload=$(cat <<'JSON'
-          {"text":"[WATCHR] Netlify production deploy failed. Check GitHub Actions run for details."}
+          {"text":"[WATCHR] Rollback workflow failed. Immediate investigation required."}
           JSON
           )
           curl -sS -X POST -H "Content-Type: application/json" -d "$payload" "$DEPLOY_ALERT_WEBHOOK_URL" || true

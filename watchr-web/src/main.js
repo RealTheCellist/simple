@@ -1,15 +1,26 @@
 import "./style.css";
+import { buildAdaptiveWeightMap, computeMainSessionOutlook } from "./prediction.js";
 
 const defaultApiBase = (import.meta.env.VITE_API_BASE_URL || "http://localhost:3000").replace(/\/+$/, "");
+const APP_VERSION = String(import.meta.env.VITE_APP_VERSION || "1.0.0");
 const ENABLE_MOCK_FALLBACK = String(import.meta.env.VITE_ENABLE_MOCK_FALLBACK ?? "true").toLowerCase() !== "false";
 const API_TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT_MS ?? 9000);
+const API_RETRY_ATTEMPTS = Number(import.meta.env.VITE_API_RETRY_ATTEMPTS ?? 3);
+const API_RETRY_BASE_MS = Number(import.meta.env.VITE_API_RETRY_BASE_MS ?? 350);
+const API_RETRY_MAX_MS = Number(import.meta.env.VITE_API_RETRY_MAX_MS ?? 2200);
 const MAX_HISTORY_LOGS = Number(import.meta.env.VITE_MAX_HISTORY_LOGS ?? 300);
+const PREDICTION_EVAL_MINUTES = Number(import.meta.env.VITE_PREDICTION_EVAL_MINUTES ?? 45);
+const PREDICTION_CAPTURE_MINUTES = Number(import.meta.env.VITE_PREDICTION_CAPTURE_MINUTES ?? 10);
+const PREDICTION_MIN_SAMPLES = Number(import.meta.env.VITE_PREDICTION_MIN_SAMPLES ?? 10);
+const MAX_PREDICTION_LOGS = Number(import.meta.env.VITE_MAX_PREDICTION_LOGS ?? 500);
 
 const STORAGE_KEYS = {
   apiUrl: "watchr_api_url",
   watchlist: "sm_watchlist",
   alerts: "sm_alerts",
-  history: "sm_history"
+  history: "sm_history",
+  predictionLogs: "sm_prediction_logs",
+  predictionAdaptive: "sm_prediction_adaptive"
 };
 
 const COOLDOWN_MS = 60 * 60 * 1000;
@@ -20,7 +31,7 @@ app.innerHTML = `
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand"><span class="brand-dot"></span><span>WATCHR WEB APP</span></div>
-      <span class="pill">RUNNABLE MVP - VITE BUILD</span>
+      <span class="pill">OFFICIAL RELEASE v${APP_VERSION}</span>
     </div>
   </header>
   <main class="wrap shell">
@@ -64,6 +75,13 @@ app.innerHTML = `
         <div class="panel-head">
           <h3>Futures</h3>
           <span id="futuresMeta" class="pill">Idle</span>
+        </div>
+        <section id="futuresPrediction" class="prediction-card">
+          <div class="prediction-empty">PREDICTION UNAVAILABLE</div>
+        </section>
+        <div class="prediction-controls">
+          <button id="toggleAdaptiveBtn" class="btn" type="button">Adaptive Weights: OFF</button>
+          <button id="clearPredictionBtn" class="btn" type="button">Reset Backtest</button>
         </div>
         <div id="futuresGrid" class="futures-grid"></div>
         <div id="futuresEmpty" class="empty">NO FUTURES DATA</div>
@@ -115,6 +133,23 @@ function readArray(key, fallback) {
   }
 }
 
+function readBool(key, fallback) {
+  const raw = localStorage.getItem(key);
+  if (raw === null) return fallback;
+  return raw === "1";
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function readPredictionLogs() {
+  const logs = readArray(STORAGE_KEYS.predictionLogs, []);
+  return logs
+    .filter((entry) => entry && typeof entry === "object")
+    .slice(0, MAX_PREDICTION_LOGS);
+}
+
 const state = {
   activeTab: "watchlist",
   apiBaseUrl: (localStorage.getItem(STORAGE_KEYS.apiUrl) || defaultApiBase).replace(/\/+$/, ""),
@@ -123,6 +158,10 @@ const state = {
   futures: [],
   alerts: readArray(STORAGE_KEYS.alerts, []),
   history: readArray(STORAGE_KEYS.history, []),
+  predictionLogs: readPredictionLogs(),
+  predictionAdaptive: readBool(STORAGE_KEYS.predictionAdaptive, false),
+  adaptiveWeightMap: {},
+  currentOutlook: null,
   timers: { watchlist: null, futures: null }
 };
 
@@ -140,6 +179,9 @@ const el = {
   tickerInput: document.getElementById("tickerInput"),
   addTickerBtn: document.getElementById("addTickerBtn"),
   futuresGrid: document.getElementById("futuresGrid"),
+  futuresPrediction: document.getElementById("futuresPrediction"),
+  toggleAdaptiveBtn: document.getElementById("toggleAdaptiveBtn"),
+  clearPredictionBtn: document.getElementById("clearPredictionBtn"),
   futuresEmpty: document.getElementById("futuresEmpty"),
   futuresMeta: document.getElementById("futuresMeta"),
   alertsCount: document.getElementById("alertsCount"),
@@ -165,9 +207,20 @@ function saveStateArrays() {
   localStorage.setItem(STORAGE_KEYS.history, JSON.stringify(state.history));
 }
 
+function savePredictionState() {
+  localStorage.setItem(STORAGE_KEYS.predictionLogs, JSON.stringify(state.predictionLogs.slice(0, MAX_PREDICTION_LOGS)));
+  localStorage.setItem(STORAGE_KEYS.predictionAdaptive, state.predictionAdaptive ? "1" : "0");
+}
+
 function toNumber(value) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : Number.NaN;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 function fmtNumber(value) {
@@ -243,6 +296,8 @@ function normalizeFutures(payload) {
 }
 
 function renderFutures() {
+  renderFuturesPrediction();
+  renderPredictionControls();
   el.futuresGrid.innerHTML = "";
   el.futuresEmpty.style.display = state.futures.length ? "none" : "block";
 
@@ -259,6 +314,168 @@ function renderFutures() {
     `;
     el.futuresGrid.appendChild(card);
   });
+}
+
+function toSign(value, deadzone = 0.03) {
+  if (!Number.isFinite(value)) return 0;
+  if (value > deadzone) return 1;
+  if (value < -deadzone) return -1;
+  return 0;
+}
+
+function recomputeAdaptiveWeights() {
+  state.adaptiveWeightMap = buildAdaptiveWeightMap(state.predictionLogs, PREDICTION_MIN_SAMPLES);
+}
+
+function getOutlookForFutures(futures) {
+  const weightMap = state.predictionAdaptive ? state.adaptiveWeightMap : undefined;
+  return computeMainSessionOutlook(futures, { weightMap });
+}
+
+function pickReferenceFactor(outlook) {
+  if (!outlook?.available || !Array.isArray(outlook.factors) || !outlook.factors.length) return null;
+  return (
+    outlook.factors.find((factor) => factor.key === "kospi200") ||
+    outlook.factors.find((factor) => factor.key === "kosdaq") ||
+    outlook.factors[0]
+  );
+}
+
+function capturePredictionSnapshot(outlook) {
+  if (!outlook?.available) return;
+  const referenceFactor = pickReferenceFactor(outlook);
+  if (!referenceFactor) return;
+
+  const now = Date.now();
+  const lastTime = state.predictionLogs.length ? Number(state.predictionLogs[0].time || 0) : 0;
+  if (now - lastTime < PREDICTION_CAPTURE_MINUTES * 60 * 1000) return;
+
+  state.predictionLogs.unshift({
+    id: makeId("pred"),
+    time: now,
+    label: outlook.label,
+    score: outlook.score,
+    expectedOpenMovePct: outlook.expectedOpenMovePct,
+    referenceKey: referenceFactor.key,
+    referenceChangeAtPred: referenceFactor.changePercent,
+    factors: outlook.factors.map((factor) => ({
+      key: factor.key,
+      contribution: factor.contribution,
+      changePercent: factor.changePercent
+    })),
+    resolvedAt: 0,
+    actualMovePct: null,
+    directionHit: null,
+    absErrorPct: null
+  });
+
+  state.predictionLogs = state.predictionLogs.slice(0, MAX_PREDICTION_LOGS);
+  savePredictionState();
+}
+
+function settlePredictionLogs(outlook) {
+  if (!outlook?.available || !Array.isArray(outlook.factors) || !outlook.factors.length) return false;
+  const now = Date.now();
+  let changed = false;
+
+  state.predictionLogs.forEach((entry) => {
+    if (entry.resolvedAt) return;
+    if (now - Number(entry.time || 0) < PREDICTION_EVAL_MINUTES * 60 * 1000) return;
+    const refFactor = outlook.factors.find((factor) => factor.key === entry.referenceKey);
+    if (!refFactor) return;
+
+    const startChange = toNumber(entry.referenceChangeAtPred);
+    const currentChange = toNumber(refFactor.changePercent);
+    const predictedMove = toNumber(entry.expectedOpenMovePct);
+    if (!Number.isFinite(startChange) || !Number.isFinite(currentChange) || !Number.isFinite(predictedMove)) return;
+
+    const actualMovePct = Number((currentChange - startChange).toFixed(3));
+    entry.actualMovePct = actualMovePct;
+    entry.absErrorPct = Number(Math.abs(predictedMove - actualMovePct).toFixed(3));
+    entry.directionHit = toSign(predictedMove) === toSign(actualMovePct);
+    entry.resolvedAt = now;
+    changed = true;
+  });
+
+  if (changed) {
+    savePredictionState();
+  }
+  return changed;
+}
+
+function getPredictionStats() {
+  const resolved = state.predictionLogs.filter((entry) => entry.resolvedAt && Number.isFinite(toNumber(entry.absErrorPct)));
+  const directional = resolved.filter((entry) => toSign(toNumber(entry.expectedOpenMovePct)) !== 0 || toSign(toNumber(entry.actualMovePct)) !== 0);
+  const hitCount = directional.filter((entry) => entry.directionHit === true).length;
+  const avgAbsError = resolved.length
+    ? resolved.reduce((sum, entry) => sum + toNumber(entry.absErrorPct), 0) / resolved.length
+    : 0;
+
+  return {
+    captured: state.predictionLogs.length,
+    resolved: resolved.length,
+    pending: state.predictionLogs.length - resolved.length,
+    hitRate: directional.length ? (hitCount / directional.length) * 100 : 0,
+    avgAbsError
+  };
+}
+
+function renderPredictionControls() {
+  el.toggleAdaptiveBtn.textContent = `Adaptive Weights: ${state.predictionAdaptive ? "ON" : "OFF"}`;
+}
+
+function renderFuturesPrediction() {
+  const outlook = state.currentOutlook || getOutlookForFutures(state.futures);
+  const stats = getPredictionStats();
+  if (!outlook.available) {
+    el.futuresPrediction.innerHTML = `
+      <div class="prediction-head">
+        <div class="prediction-title">Main Session Outlook</div>
+        <div class="prediction-chip neutral">No signal</div>
+      </div>
+      <div class="prediction-empty">Futures indicators are not enough yet.</div>
+      <div class="prediction-meta">Backtest captured ${stats.captured}, resolved ${stats.resolved}.</div>
+    `;
+    return;
+  }
+
+  const toneClass = outlook.tone === "up" ? "up" : (outlook.tone === "down" ? "down" : "neutral");
+  const signedMove = `${outlook.expectedOpenMovePct > 0 ? "+" : ""}${outlook.expectedOpenMovePct.toFixed(2)}%`;
+  const factorRows = outlook.topFactors
+    .map((factor) => {
+      const factorTone = factor.contribution >= 0 ? "up" : "down";
+      const changeText = `${factor.changePercent > 0 ? "+" : ""}${factor.changePercent.toFixed(2)}%`;
+      return `
+        <div class="factor-row">
+          <span class="factor-name">${factor.label}</span>
+          <span class="factor-change ${factorTone}">${changeText}</span>
+        </div>
+      `;
+    })
+    .join("");
+
+  el.futuresPrediction.innerHTML = `
+    <div class="prediction-head">
+      <div class="prediction-title">Main Session Outlook</div>
+      <div class="prediction-chip ${toneClass}">${outlook.label}</div>
+    </div>
+    <div class="prediction-main">
+      <div>
+        <div class="prediction-summary">${outlook.summary}</div>
+        <div class="prediction-meta">Confidence ${outlook.confidence}% | Coverage ${outlook.coverage}% | Score ${outlook.score}</div>
+      </div>
+      <div class="prediction-move ${toneClass}">${signedMove}</div>
+    </div>
+    <div class="prediction-stats">
+      <span>Backtest ${stats.resolved}/${stats.captured}</span>
+      <span>Hit ${stats.hitRate.toFixed(1)}%</span>
+      <span>MAE ${stats.avgAbsError.toFixed(2)}%</span>
+      <span>Pending ${stats.pending}</span>
+    </div>
+    <div class="factor-list">
+      ${factorRows}
+    </div>
+  `;
 }
 
 function renderAlertTickerOptions() {
@@ -344,6 +561,23 @@ function renderAll() {
 }
 
 async function fetchJson(path) {
+  let lastError = null;
+  const attempts = Math.max(1, Math.floor(API_RETRY_ATTEMPTS));
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await fetchJsonOnce(path);
+    } catch (error) {
+      lastError = error;
+      if (attempt === attempts) break;
+      const backoff = Math.min(API_RETRY_BASE_MS * (2 ** (attempt - 1)), API_RETRY_MAX_MS);
+      const jitter = Math.floor(Math.random() * 120);
+      await sleep(backoff + jitter);
+    }
+  }
+  throw lastError || new Error("Request failed");
+}
+
+async function fetchJsonOnce(path) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
   try {
@@ -505,17 +739,34 @@ async function refreshFutures() {
   try {
     const payload = await fetchJson("/api/futures");
     state.futures = normalizeFutures(payload);
+    recomputeAdaptiveWeights();
+    state.currentOutlook = getOutlookForFutures(state.futures);
+    capturePredictionSnapshot(state.currentOutlook);
+    const settled = settlePredictionLogs(state.currentOutlook);
+    if (settled) {
+      recomputeAdaptiveWeights();
+      state.currentOutlook = getOutlookForFutures(state.futures);
+    }
     renderFutures();
     el.futuresMeta.textContent = `Updated ${new Date().toLocaleTimeString()}`;
   } catch (error) {
     if (!ENABLE_MOCK_FALLBACK) {
       state.futures = [];
+      state.currentOutlook = null;
       renderFutures();
       el.futuresMeta.textContent = "Failed";
       setStatus(`Futures fetch failed (${error.message}).`, "err");
       return;
     }
     state.futures = buildMockFutures();
+    recomputeAdaptiveWeights();
+    state.currentOutlook = getOutlookForFutures(state.futures);
+    capturePredictionSnapshot(state.currentOutlook);
+    const settled = settlePredictionLogs(state.currentOutlook);
+    if (settled) {
+      recomputeAdaptiveWeights();
+      state.currentOutlook = getOutlookForFutures(state.futures);
+    }
     renderFutures();
     el.futuresMeta.textContent = `Mock ${new Date().toLocaleTimeString()}`;
     setStatus(`Futures using mock data (${error.message}).`, "warn");
@@ -646,6 +897,23 @@ function bindEvents() {
     refreshFutures();
   });
   el.notifBtn.addEventListener("click", requestNotificationPermission);
+  el.toggleAdaptiveBtn.addEventListener("click", () => {
+    state.predictionAdaptive = !state.predictionAdaptive;
+    savePredictionState();
+    recomputeAdaptiveWeights();
+    state.currentOutlook = getOutlookForFutures(state.futures);
+    renderFutures();
+    setStatus(`Adaptive weights ${state.predictionAdaptive ? "enabled" : "disabled"}.`, "ok");
+  });
+  el.clearPredictionBtn.addEventListener("click", () => {
+    if (!confirm("Reset prediction backtest logs?")) return;
+    state.predictionLogs = [];
+    state.adaptiveWeightMap = {};
+    savePredictionState();
+    state.currentOutlook = getOutlookForFutures(state.futures);
+    renderFutures();
+    setStatus("Prediction backtest logs cleared.", "ok");
+  });
 
   el.addTickerBtn.addEventListener("click", addTicker);
   el.tickerInput.addEventListener("keydown", (event) => {
@@ -670,10 +938,13 @@ function bindEvents() {
 
 async function init() {
   el.apiUrlInput.value = state.apiBaseUrl;
+  recomputeAdaptiveWeights();
+  state.currentOutlook = getOutlookForFutures(state.futures);
   bindEvents();
   renderAll();
   startPolling();
   await refreshWatchlist();
+  await refreshFutures();
   updateCounts();
   setStatus("Ready. Add tickers and alerts to start.", "ok");
 }

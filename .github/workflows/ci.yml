@@ -31,8 +31,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Test
+        run: npm run test
+
       - name: Build
         run: npm run build
+
+      - name: Check performance budget
+        run: npm run check:perf
+
+      - name: Smoke check dist
+        run: npm run check:smoke
 
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4

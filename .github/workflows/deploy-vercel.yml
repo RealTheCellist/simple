@@ -26,9 +26,17 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
       VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+      VITE_APP_VERSION: ${{ vars.VITE_APP_VERSION }}
       VITE_ENABLE_MOCK_FALLBACK: ${{ vars.VITE_ENABLE_MOCK_FALLBACK }}
       VITE_API_TIMEOUT_MS: ${{ vars.VITE_API_TIMEOUT_MS }}
+      VITE_API_RETRY_ATTEMPTS: ${{ vars.VITE_API_RETRY_ATTEMPTS }}
+      VITE_API_RETRY_BASE_MS: ${{ vars.VITE_API_RETRY_BASE_MS }}
+      VITE_API_RETRY_MAX_MS: ${{ vars.VITE_API_RETRY_MAX_MS }}
       VITE_MAX_HISTORY_LOGS: ${{ vars.VITE_MAX_HISTORY_LOGS }}
+      VITE_PREDICTION_EVAL_MINUTES: ${{ vars.VITE_PREDICTION_EVAL_MINUTES }}
+      VITE_PREDICTION_CAPTURE_MINUTES: ${{ vars.VITE_PREDICTION_CAPTURE_MINUTES }}
+      VITE_PREDICTION_MIN_SAMPLES: ${{ vars.VITE_PREDICTION_MIN_SAMPLES }}
+      VITE_MAX_PREDICTION_LOGS: ${{ vars.VITE_MAX_PREDICTION_LOGS }}
 
     steps:
       - name: Checkout
@@ -44,8 +52,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Test
+        run: npm run test
+
       - name: Build
         run: npm run build
+
+      - name: Check performance budget
+        run: npm run check:perf
+
+      - name: Smoke check dist
+        run: npm run check:smoke
 
       - name: Validate Vercel secrets
         run: |
@@ -62,3 +79,14 @@ jobs:
 
       - name: Deploy to Vercel (Production)
         run: npx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+
+      - name: Notify deployment failure
+        if: ${{ failure() && secrets.DEPLOY_ALERT_WEBHOOK_URL != '' }}
+        env:
+          DEPLOY_ALERT_WEBHOOK_URL: ${{ secrets.DEPLOY_ALERT_WEBHOOK_URL }}
+        run: |
+          payload=$(cat <<'JSON'
+          {"text":"[WATCHR] Vercel production deploy failed. Check GitHub Actions run for details."}
+          JSON
+          )
+          curl -sS -X POST -H "Content-Type: application/json" -d "$payload" "$DEPLOY_ALERT_WEBHOOK_URL" || true

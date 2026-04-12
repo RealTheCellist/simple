@@ -1,0 +1,8 @@
+{
+  "maxIndexHtmlBytes": 2500,
+  "maxLargestJsBytes": 32000,
+  "maxTotalJsBytes": 38000,
+  "maxLargestCssBytes": 12000,
+  "maxTotalCssBytes": 15000,
+  "maxTotalGzipBytes": 16000
+}
