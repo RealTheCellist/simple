@@ -28,9 +28,9 @@ npm run check:smoke
 - 로그인 후 `me`, `audit` 엔드포인트를 조회해 RBAC 상태를 표시
 - 감사로그는 최근 10건을 카드로 표시
 - 데모 계정:
-  - `admin@watchr.local / admin123`
-  - `trader@watchr.local / trader123`
-  - `viewer@watchr.local / viewer123`
+  - `admin@watchr.local / admin12345`
+  - `trader@watchr.local / trader12345`
+  - `viewer@watchr.local / viewer12345`
 
 ## Main Panels
 

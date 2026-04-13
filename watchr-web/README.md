@@ -2,7 +2,7 @@
 
 Deployable Vite web app for WATCHR with runtime controls, fallback mode, and host configs.
 
-Current release: `v1.0.0`
+Current release: `v1.0.3`
 
 ## Local run
 

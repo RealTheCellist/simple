@@ -1,6 +1,6 @@
 {
   "name": "watchr-mobile",
-  "version": "0.1.0",
+  "version": "1.0.3",
   "main": "index.ts",
   "scripts": {
     "start": "expo start",

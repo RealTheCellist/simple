@@ -1,6 +1,6 @@
 {
   "name": "watchr-api",
-  "version": "0.1.0",
+  "version": "1.0.3",
   "private": true,
   "type": "module",
   "description": "WATCHR shared backend API for web and mobile clients",
@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "lint": "node --check src/index.js && node --check src/services/marketData.js && node --check src/services/prediction.js && node --check src/realtime/hub.js && node --check src/realtime/protocol.js && node --check src/enterprise/roles.js && node --check src/enterprise/token.js && node --check src/enterprise/store.js && node --check src/enterprise/audit.js && node --check src/enterprise/middleware.js && node --check src/enterprise/router.js",
+    "lint": "node --check src/index.js && node --check src/services/marketData.js && node --check src/services/prediction.js && node --check src/realtime/hub.js && node --check src/realtime/protocol.js && node --check src/enterprise/roles.js && node --check src/enterprise/token.js && node --check src/enterprise/store.js && node --check src/enterprise/audit.js && node --check src/enterprise/middleware.js && node --check src/enterprise/router.js && node --check src/lib/metrics.js",
     "test": "node --test"
   },
   "engines": {

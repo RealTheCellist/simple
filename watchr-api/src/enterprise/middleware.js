@@ -7,7 +7,7 @@ function bearerTokenFromHeader(req) {
   return raw.slice("Bearer ".length).trim();
 }
 
-export function enterpriseAuthRequired({ tokenSecret, store, audit }) {
+export function enterpriseAuthRequired({ tokenSecret, store, audit, metrics }) {
   return (req, res, next) => {
     const token = bearerTokenFromHeader(req);
     if (!token) {
@@ -23,6 +23,7 @@ export function enterpriseAuthRequired({ tokenSecret, store, audit }) {
         status: "fail",
         meta: { reason: verified.reason }
       });
+      metrics?.incAuth("tokenFailure");
       return res.status(401).json({ error: "unauthorized", reason: verified.reason });
     }
 

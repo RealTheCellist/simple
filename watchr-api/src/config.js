@@ -13,6 +13,7 @@ function toNumber(value, fallback) {
 export const config = {
   port: toNumber(process.env.PORT, 3000),
   host: process.env.HOST || "0.0.0.0",
+  appVersion: process.env.APP_VERSION || "1.0.3",
   nodeEnv: process.env.NODE_ENV || "development",
   mockFallback: toBool(process.env.MOCK_FALLBACK, true),
   upstreamTimeoutMs: toNumber(process.env.UPSTREAM_TIMEOUT_MS, 9000),
@@ -22,8 +23,16 @@ export const config = {
   realtimePath: process.env.REALTIME_PATH || "/ws",
   realtimeBroadcastMs: toNumber(process.env.REALTIME_BROADCAST_MS, 5000),
   enterpriseEnabled: toBool(process.env.ENTERPRISE_ENABLED, true),
+  enterpriseAllowDemoUsers: toBool(
+    process.env.ENTERPRISE_ALLOW_DEMO_USERS,
+    process.env.NODE_ENV !== "production"
+  ),
+  enterpriseBootstrapAdminEmail: process.env.ENTERPRISE_BOOTSTRAP_ADMIN_EMAIL || "",
+  enterpriseBootstrapAdminPassword: process.env.ENTERPRISE_BOOTSTRAP_ADMIN_PASSWORD || "",
+  enterprisePasswordMinLength: toNumber(process.env.ENTERPRISE_PASSWORD_MIN_LENGTH, 10),
   enterpriseTokenSecret:
     process.env.ENTERPRISE_TOKEN_SECRET || "dev-enterprise-secret-change-this",
   enterpriseTokenTtlSec: toNumber(process.env.ENTERPRISE_TOKEN_TTL_SEC, 60 * 60 * 8),
-  enterpriseAuditMaxEntries: toNumber(process.env.ENTERPRISE_AUDIT_MAX_ENTRIES, 2000)
+  enterpriseAuditMaxEntries: toNumber(process.env.ENTERPRISE_AUDIT_MAX_ENTRIES, 2000),
+  metricsEnabled: toBool(process.env.METRICS_ENABLED, true)
 };

@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.0.3 - 2026-04-13
+
+- Added release note for `v1.0.2` and aligned latest release metadata
+- Synced package versions across web/api/ops/mobile to `1.0.3`
+- Added mobile CI workflow for TypeScript safety gate
+- Hardened enterprise auth store with hashed passwords and stronger policy
+- Added protected ops metrics endpoint for runtime observability
+
+## v1.0.2 - 2026-04-13
+
+- Published latest integrated release note (`watchr-web/releases/v1.0.2.md`)
+
 ## v1.0.1 - 2026-04-13
 
 - Platform expansion release: `watchr-api`, `watchr-ops`, `watchr-quant-lab` integrated

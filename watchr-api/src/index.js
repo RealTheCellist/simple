@@ -2,24 +2,33 @@ import http from "node:http";
 import express from "express";
 import { config } from "./config.js";
 import { createAuditStore } from "./enterprise/audit.js";
-import { enterpriseAuthRequired } from "./enterprise/middleware.js";
+import { enterpriseAuthRequired, permissionRequired } from "./enterprise/middleware.js";
 import { createEnterpriseRouter } from "./enterprise/router.js";
 import { createEnterpriseStore } from "./enterprise/store.js";
+import { createMetricsStore } from "./lib/metrics.js";
 import { createRealtimeHub } from "./realtime/hub.js";
 import { fetchBatchPrices, fetchFuturesSnapshot, fetchPrice } from "./services/marketData.js";
 import { predictOpenFromFutures } from "./services/prediction.js";
 
 const app = express();
-const enterpriseStore = createEnterpriseStore();
+const metrics = createMetricsStore();
+const enterpriseStore = createEnterpriseStore({
+  allowDemoUsers: config.enterpriseAllowDemoUsers,
+  bootstrapAdminEmail: config.enterpriseBootstrapAdminEmail,
+  bootstrapAdminPassword: config.enterpriseBootstrapAdminPassword,
+  passwordMinLength: config.enterprisePasswordMinLength
+});
 const enterpriseAudit = createAuditStore(config.enterpriseAuditMaxEntries);
 const enterpriseAuth = enterpriseAuthRequired({
   tokenSecret: config.enterpriseTokenSecret,
   store: enterpriseStore,
-  audit: enterpriseAudit
+  audit: enterpriseAudit,
+  metrics
 });
 const enterpriseRouter = createEnterpriseRouter({
   store: enterpriseStore,
   audit: enterpriseAudit,
+  metrics,
   authRequired: enterpriseAuth,
   tokenSecret: config.enterpriseTokenSecret,
   tokenTtlSec: config.enterpriseTokenTtlSec
@@ -29,6 +38,7 @@ function healthPayload() {
   return {
     status: "ok",
     service: "watchr-api",
+    version: config.appVersion,
     env: config.nodeEnv,
     mockFallback: config.mockFallback,
     timestamp: new Date().toISOString()
@@ -47,6 +57,13 @@ async function buildRealtimeSnapshot() {
 }
 
 app.use(express.json());
+app.use((req, res, next) => {
+  res.on("finish", () => {
+    metrics.incRoute(req.method, req.path);
+    metrics.incStatus(res.statusCode);
+  });
+  next();
+});
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", config.corsOrigin);
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -129,6 +146,28 @@ app.get("/api/realtime/snapshot", async (req, res) => {
   return res.json(snapshot);
 });
 
+app.get(
+  "/api/ops/metrics",
+  enterpriseAuth,
+  permissionRequired("audit:read"),
+  (req, res) => {
+    if (!config.metricsEnabled) {
+      return res.status(404).json({ error: "metrics_disabled" });
+    }
+    const realtimeStatus = realtimeHub
+      ? realtimeHub.status()
+      : { enabled: false, connections: 0, path: config.realtimePath };
+    return res.json(
+      metrics.snapshot({
+        env: config.nodeEnv,
+        version: config.appVersion,
+        realtime: realtimeStatus,
+        enterpriseEnabled: config.enterpriseEnabled
+      })
+    );
+  }
+);
+
 app.use((error, req, res, next) => {
   console.error("[watchr-api]", error);
   res.status(500).json({ error: "internal_error" });
@@ -136,6 +175,12 @@ app.use((error, req, res, next) => {
 
 if (realtimeHub) {
   realtimeHub.start();
+}
+
+if (config.enterpriseEnabled && enterpriseStore.countUsers() === 0) {
+  console.warn(
+    "[watchr-api] enterprise enabled but no users provisioned. Set ENTERPRISE_BOOTSTRAP_ADMIN_EMAIL/PASSWORD."
+  );
 }
 
 server.listen(config.port, config.host, () => {

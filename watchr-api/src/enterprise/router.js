@@ -6,6 +6,7 @@ import { issueToken } from "./token.js";
 export function createEnterpriseRouter({
   store,
   audit,
+  metrics,
   authRequired,
   tokenSecret,
   tokenTtlSec
@@ -26,6 +27,7 @@ export function createEnterpriseRouter({
     const user = store.validateLogin(email, password);
 
     if (!user) {
+      metrics?.incAuth("loginFailure");
       audit.add({
         actorId: "anonymous",
         actorEmail: email || "anonymous",
@@ -35,6 +37,7 @@ export function createEnterpriseRouter({
       });
       return res.status(401).json({ error: "invalid_credentials" });
     }
+    metrics?.incAuth("loginSuccess");
 
     const token = issueToken(
       {
