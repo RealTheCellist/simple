@@ -1,6 +1,14 @@
 import "./style.css";
 import { REFRESH_MS } from "./config";
-import { connectRealtime, fetchOpsSnapshot } from "./api";
+import {
+  connectRealtime,
+  enterpriseAudit,
+  enterpriseLogin,
+  enterpriseMe,
+  fetchOpsSnapshot,
+  loadEnterpriseToken,
+  saveEnterpriseToken
+} from "./api";
 import { FACTOR_META, defaultWeights, scoreWithWeights } from "./opsMath";
 import {
   applyReleaseVersion,
@@ -31,7 +39,14 @@ const el = {
   versionInput: document.querySelector("#versionInput"),
   applyVersionBtn: document.querySelector("#applyVersionBtn"),
   rollbackBtn: document.querySelector("#rollbackBtn"),
-  releaseInfo: document.querySelector("#releaseInfo")
+  releaseInfo: document.querySelector("#releaseInfo"),
+  entEmailInput: document.querySelector("#entEmailInput"),
+  entPasswordInput: document.querySelector("#entPasswordInput"),
+  entLoginBtn: document.querySelector("#entLoginBtn"),
+  entLogoutBtn: document.querySelector("#entLogoutBtn"),
+  entUserInfo: document.querySelector("#entUserInfo"),
+  entAuditRefreshBtn: document.querySelector("#entAuditRefreshBtn"),
+  entAuditRows: document.querySelector("#entAuditRows")
 };
 
 const state = {
@@ -40,7 +55,10 @@ const state = {
   weights: loadWeights(defaultWeights()),
   qaEvents: loadQaEvents(),
   release: loadReleaseState(),
-  realtimeConnected: false
+  realtimeConnected: false,
+  enterpriseToken: loadEnterpriseToken(),
+  enterpriseUser: null,
+  enterpriseAudit: []
 };
 
 function signed(value, digits = 2) {
@@ -63,7 +81,11 @@ function statText(target, value, cls) {
 function renderTopStats(health, prediction) {
   const online = health?.status === "ok";
   const suffix = state.realtimeConnected ? " · RT" : " · POLL";
-  statText(el.healthText, `${online ? "ONLINE" : "DEGRADED"}${suffix}`, online ? "up" : "dn");
+  statText(
+    el.healthText,
+    `${online ? "ONLINE" : "DEGRADED"}${suffix}`,
+    online ? "up" : "dn"
+  );
   if (!prediction) {
     statText(el.biasText, "--");
     statText(el.scoreText, "--");
@@ -79,7 +101,8 @@ function renderTopStats(health, prediction) {
 function renderContributors() {
   const rows = state.prediction?.contributors || [];
   if (!rows.length) {
-    el.contributors.innerHTML = `<div class="row"><span class="name">데이터 없음</span><span class="rate">-</span><span class="score">-</span></div>`;
+    el.contributors.innerHTML =
+      `<div class="row"><span class="name">데이터 없음</span><span class="rate">-</span><span class="score">-</span></div>`;
     return;
   }
   el.contributors.innerHTML = rows
@@ -154,6 +177,43 @@ function renderRelease() {
   el.releaseInfo.innerHTML = rows.join("");
 }
 
+function renderEnterpriseAuth() {
+  if (!state.enterpriseUser) {
+    el.entUserInfo.innerHTML =
+      `<div class="row"><span class="name">인증 상태</span><span class="rate dn">SIGNED OUT</span><span class="score">login required</span></div>`;
+    return;
+  }
+  const perms = state.enterpriseUser.permissions || [];
+  el.entUserInfo.innerHTML = `
+    <div class="row"><span class="name">${state.enterpriseUser.name}</span><span class="rate up">${state.enterpriseUser.role}</span><span class="score">${state.enterpriseUser.email}</span></div>
+    <div class="row"><span class="name">Permissions</span><span class="rate">${perms.length}</span><span class="score">${perms.join(", ")}</span></div>
+  `;
+}
+
+function renderEnterpriseAudit() {
+  if (!state.enterpriseUser) {
+    el.entAuditRows.innerHTML =
+      `<div class="row"><span class="name">로그인 필요</span><span class="rate">-</span><span class="score">-</span></div>`;
+    return;
+  }
+  if (!state.enterpriseAudit.length) {
+    el.entAuditRows.innerHTML =
+      `<div class="row"><span class="name">감사로그 없음</span><span class="rate">-</span><span class="score">-</span></div>`;
+    return;
+  }
+  el.entAuditRows.innerHTML = state.enterpriseAudit
+    .slice(0, 10)
+    .map((log) => {
+      const ok = log.status === "ok";
+      return `<div class="row">
+        <span class="name">${log.action}</span>
+        <span class="rate ${ok ? "up" : "dn"}">${log.status}</span>
+        <span class="score">${new Date(log.at).toLocaleTimeString("ko-KR")}</span>
+      </div>`;
+    })
+    .join("");
+}
+
 function renderTimestamp(modeLabel) {
   el.lastUpdated.textContent = `${modeLabel} ${new Date().toLocaleTimeString("ko-KR")}`;
 }
@@ -165,6 +225,38 @@ function applySnapshot({ health, prediction, futures }, modeLabel) {
   renderContributors();
   renderSimulation();
   renderTimestamp(modeLabel);
+}
+
+async function refreshEnterpriseMe() {
+  if (!state.enterpriseToken) {
+    state.enterpriseUser = null;
+    renderEnterpriseAuth();
+    return;
+  }
+  try {
+    const payload = await enterpriseMe(state.enterpriseToken);
+    state.enterpriseUser = payload.user || null;
+  } catch (error) {
+    state.enterpriseToken = "";
+    state.enterpriseUser = null;
+    saveEnterpriseToken("");
+  }
+  renderEnterpriseAuth();
+}
+
+async function refreshEnterpriseAudit() {
+  if (!state.enterpriseToken || !state.enterpriseUser) {
+    state.enterpriseAudit = [];
+    renderEnterpriseAudit();
+    return;
+  }
+  try {
+    const payload = await enterpriseAudit(state.enterpriseToken, { limit: 20 });
+    state.enterpriseAudit = payload.logs || [];
+  } catch (error) {
+    state.enterpriseAudit = [];
+  }
+  renderEnterpriseAudit();
 }
 
 async function refreshNow() {
@@ -183,7 +275,8 @@ async function refreshNow() {
     );
   } catch (error) {
     renderTopStats({ status: "error" }, null);
-    el.contributors.innerHTML = `<div class="row"><span class="name">API 연결 실패</span><span class="rate dn">ERR</span><span class="score">check backend</span></div>`;
+    el.contributors.innerHTML =
+      `<div class="row"><span class="name">API 연결 실패</span><span class="rate dn">ERR</span><span class="score">check backend</span></div>`;
     renderTimestamp("FAIL");
   } finally {
     el.refreshBtn.disabled = false;
@@ -249,15 +342,55 @@ function bindEvents() {
     state.release = rollbackRelease();
     renderRelease();
   });
+
+  el.entLoginBtn.addEventListener("click", async () => {
+    const email = String(el.entEmailInput.value || "").trim();
+    const password = String(el.entPasswordInput.value || "");
+    if (!email || !password) return;
+    try {
+      const payload = await enterpriseLogin({ email, password });
+      state.enterpriseToken = payload.token || "";
+      saveEnterpriseToken(state.enterpriseToken);
+      state.enterpriseUser = payload.user || null;
+      el.entPasswordInput.value = "";
+      renderEnterpriseAuth();
+      await refreshEnterpriseAudit();
+    } catch (error) {
+      state.enterpriseUser = null;
+      state.enterpriseToken = "";
+      saveEnterpriseToken("");
+      renderEnterpriseAuth();
+      state.enterpriseAudit = [];
+      renderEnterpriseAudit();
+    }
+  });
+
+  el.entLogoutBtn.addEventListener("click", () => {
+    state.enterpriseToken = "";
+    state.enterpriseUser = null;
+    state.enterpriseAudit = [];
+    saveEnterpriseToken("");
+    renderEnterpriseAuth();
+    renderEnterpriseAudit();
+  });
+
+  el.entAuditRefreshBtn.addEventListener("click", () => {
+    void refreshEnterpriseAudit();
+  });
 }
 
-function boot() {
+async function boot() {
   buildWeightControls();
   renderQa();
   renderRelease();
   renderSimulation();
   bindEvents();
-  void refreshNow();
+  renderEnterpriseAuth();
+  renderEnterpriseAudit();
+
+  await refreshNow();
+  await refreshEnterpriseMe();
+  await refreshEnterpriseAudit();
 
   const disconnectRealtime = setupRealtime();
   window.addEventListener("beforeunload", () => {
@@ -271,4 +404,4 @@ function boot() {
   }, REFRESH_MS);
 }
 
-boot();
+void boot();

@@ -20,5 +20,10 @@ export const config = {
   corsOrigin: process.env.CORS_ORIGIN || "*",
   realtimeEnabled: toBool(process.env.REALTIME_ENABLED, true),
   realtimePath: process.env.REALTIME_PATH || "/ws",
-  realtimeBroadcastMs: toNumber(process.env.REALTIME_BROADCAST_MS, 5000)
+  realtimeBroadcastMs: toNumber(process.env.REALTIME_BROADCAST_MS, 5000),
+  enterpriseEnabled: toBool(process.env.ENTERPRISE_ENABLED, true),
+  enterpriseTokenSecret:
+    process.env.ENTERPRISE_TOKEN_SECRET || "dev-enterprise-secret-change-this",
+  enterpriseTokenTtlSec: toNumber(process.env.ENTERPRISE_TOKEN_TTL_SEC, 60 * 60 * 8),
+  enterpriseAuditMaxEntries: toNumber(process.env.ENTERPRISE_AUDIT_MAX_ENTRIES, 2000)
 };

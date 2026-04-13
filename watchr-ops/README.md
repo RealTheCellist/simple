@@ -23,6 +23,15 @@ npm run check:smoke
 - 실시간 연결 성공 시 Ops는 `RT` 모드로 표시
 - 실시간이 끊기면 자동으로 HTTP 폴링 모드로 fallback
 
+## Enterprise Panel
+
+- 로그인 후 `me`, `audit` 엔드포인트를 조회해 RBAC 상태를 표시
+- 감사로그는 최근 10건을 카드로 표시
+- 데모 계정:
+  - `admin@watchr.local / admin123`
+  - `trader@watchr.local / trader123`
+  - `viewer@watchr.local / viewer123`
+
 ## Main Panels
 
 - API health + 실시간 시그널

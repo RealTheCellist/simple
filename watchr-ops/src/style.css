@@ -284,6 +284,23 @@ h2 {
   font-family: var(--mono);
 }
 
+.auth-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.auth-form input {
+  background: #0d1322;
+  border: 1px solid #2a375c;
+  color: var(--text);
+  border-radius: 9px;
+  padding: 9px;
+  font-family: var(--mono);
+  min-width: 0;
+}
+
 @media (max-width: 920px) {
   .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

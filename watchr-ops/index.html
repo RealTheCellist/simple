@@ -91,6 +91,33 @@
           <div id="releaseInfo" class="rows"></div>
         </article>
       </section>
+
+      <section class="panel-grid">
+        <article class="panel">
+          <header class="panel-head">
+            <h2>Enterprise Auth</h2>
+            <span class="chip purple">RBAC</span>
+          </header>
+          <div class="auth-form">
+            <input id="entEmailInput" type="email" placeholder="admin@watchr.local" />
+            <input id="entPasswordInput" type="password" placeholder="password" />
+            <button id="entLoginBtn" class="btn mini primary">로그인</button>
+            <button id="entLogoutBtn" class="btn mini">로그아웃</button>
+          </div>
+          <div id="entUserInfo" class="rows"></div>
+        </article>
+
+        <article class="panel">
+          <header class="panel-head">
+            <h2>Enterprise Audit</h2>
+            <span class="chip amber">AUDIT</span>
+          </header>
+          <div class="qa-actions">
+            <button id="entAuditRefreshBtn" class="btn mini primary">새로고침</button>
+          </div>
+          <div id="entAuditRows" class="rows"></div>
+        </article>
+      </section>
     </main>
 
     <script type="module" src="/src/main.js"></script>

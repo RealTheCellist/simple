@@ -21,6 +21,13 @@ npm run dev
 - `GET /api/predict/open`
 - `GET /api/realtime/status`
 - `GET /api/realtime/snapshot`
+- `POST /api/enterprise/auth/login`
+- `GET /api/enterprise/me`
+- `GET /api/enterprise/roles`
+- `GET /api/enterprise/users` (RBAC)
+- `POST /api/enterprise/users` (RBAC)
+- `GET /api/enterprise/audit` (RBAC)
+- `POST /api/enterprise/decision` (RBAC)
 
 ## Realtime (WebSocket)
 
@@ -46,6 +53,16 @@ npm run dev
 - `REALTIME_ENABLED`
 - `REALTIME_PATH`
 - `REALTIME_BROADCAST_MS`
+- `ENTERPRISE_ENABLED`
+- `ENTERPRISE_TOKEN_SECRET`
+- `ENTERPRISE_TOKEN_TTL_SEC`
+- `ENTERPRISE_AUDIT_MAX_ENTRIES`
+
+## Demo Enterprise Accounts
+
+- `admin@watchr.local` / `admin123`
+- `trader@watchr.local` / `trader123`
+- `viewer@watchr.local` / `viewer123`
 
 ## Notes
 

@@ -1,16 +1,65 @@
 import { API_BASE_URL, resolveRealtimeUrl } from "./config";
 
-async function fetchJson(path) {
-  const res = await fetch(`${API_BASE_URL}${path}`);
-  if (!res.ok) {
-    throw new Error(`${res.status} ${path}`);
+const ENTERPRISE_TOKEN_KEY = "ops_enterprise_token";
+
+function headersWithAuth(token) {
+  const headers = { "Content-Type": "application/json" };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
   }
-  return await res.json();
+  return headers;
+}
+
+async function fetchJson(path, { method = "GET", token, body } = {}) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method,
+    headers: headersWithAuth(token),
+    body: body ? JSON.stringify(body) : undefined
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const err = new Error(payload?.error || `${response.status} ${path}`);
+    err.status = response.status;
+    err.payload = payload;
+    throw err;
+  }
+  return payload;
+}
+
+export function loadEnterpriseToken() {
+  return localStorage.getItem(ENTERPRISE_TOKEN_KEY) ?? "";
+}
+
+export function saveEnterpriseToken(token) {
+  if (!token) {
+    localStorage.removeItem(ENTERPRISE_TOKEN_KEY);
+    return;
+  }
+  localStorage.setItem(ENTERPRISE_TOKEN_KEY, token);
 }
 
 export async function fetchOpsSnapshot() {
-  const [health, open] = await Promise.all([fetchJson("/health"), fetchJson("/api/predict/open")]);
+  const [health, open] = await Promise.all([
+    fetchJson("/health"),
+    fetchJson("/api/predict/open")
+  ]);
   return { health, open };
+}
+
+export async function enterpriseLogin({ email, password }) {
+  return fetchJson("/api/enterprise/auth/login", {
+    method: "POST",
+    body: { email, password }
+  });
+}
+
+export async function enterpriseMe(token) {
+  return fetchJson("/api/enterprise/me", { token });
+}
+
+export async function enterpriseAudit(token, { limit = 30 } = {}) {
+  return fetchJson(`/api/enterprise/audit?limit=${encodeURIComponent(String(limit))}`, { token });
 }
 
 export function connectRealtime({ onSnapshot, onConnected, onDisconnected, onError }) {

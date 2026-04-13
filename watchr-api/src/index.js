@@ -1,11 +1,29 @@
 import http from "node:http";
 import express from "express";
 import { config } from "./config.js";
+import { createAuditStore } from "./enterprise/audit.js";
+import { enterpriseAuthRequired } from "./enterprise/middleware.js";
+import { createEnterpriseRouter } from "./enterprise/router.js";
+import { createEnterpriseStore } from "./enterprise/store.js";
 import { createRealtimeHub } from "./realtime/hub.js";
 import { fetchBatchPrices, fetchFuturesSnapshot, fetchPrice } from "./services/marketData.js";
 import { predictOpenFromFutures } from "./services/prediction.js";
 
 const app = express();
+const enterpriseStore = createEnterpriseStore();
+const enterpriseAudit = createAuditStore(config.enterpriseAuditMaxEntries);
+const enterpriseAuth = enterpriseAuthRequired({
+  tokenSecret: config.enterpriseTokenSecret,
+  store: enterpriseStore,
+  audit: enterpriseAudit
+});
+const enterpriseRouter = createEnterpriseRouter({
+  store: enterpriseStore,
+  audit: enterpriseAudit,
+  authRequired: enterpriseAuth,
+  tokenSecret: config.enterpriseTokenSecret,
+  tokenTtlSec: config.enterpriseTokenTtlSec
+});
 
 function healthPayload() {
   return {
@@ -79,6 +97,10 @@ app.get("/api/predict/open", async (req, res) => {
     generatedAt: snapshot.generatedAt
   });
 });
+
+if (config.enterpriseEnabled) {
+  app.use("/api/enterprise", enterpriseRouter);
+}
 
 const server = http.createServer(app);
 const realtimeHub = config.realtimeEnabled
