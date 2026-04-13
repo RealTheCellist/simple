@@ -1,0 +1,97 @@
+name: Ops Routine Automation
+
+on:
+  schedule:
+    - cron: "15 0 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ops-routine-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  platform-checks:
+    name: Platform Checks (${{ matrix.project.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project:
+          - name: web
+            path: watchr-web
+            cache: watchr-web/package-lock.json
+            command: npm run test && npm run build && npm run check:perf && npm run check:smoke
+          - name: api
+            path: watchr-api
+            cache: watchr-api/package-lock.json
+            command: npm run lint && npm test
+          - name: ops
+            path: watchr-ops
+            cache: watchr-ops/package-lock.json
+            command: npm run build && npm run check:smoke
+          - name: mobile
+            path: watchr-mobile
+            cache: watchr-mobile/package-lock.json
+            command: npm run typecheck
+          - name: quant-lab
+            path: watchr-quant-lab
+            cache: watchr-quant-lab/package-lock.json
+            command: npm test && npm run run -- --days=252 --seed=42 --stressRuns=10 --out=reports/ops-routine-report.json
+    defaults:
+      run:
+        working-directory: ${{ matrix.project.path }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: ${{ matrix.project.cache }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run routine checks
+        run: ${{ matrix.project.command }}
+
+      - name: Upload Quant report
+        if: matrix.project.name == 'quant-lab'
+        uses: actions/upload-artifact@v4
+        with:
+          name: watchr-quant-lab-ops-routine-report
+          path: watchr-quant-lab/reports/ops-routine-report.json
+
+  production-probe:
+    name: Production Probe
+    runs-on: ubuntu-latest
+    needs: platform-checks
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run endpoint probe
+        id: probe
+        env:
+          WATCHR_WEB_URL: ${{ secrets.WATCHR_WEB_URL }}
+          WATCHR_API_URL: ${{ secrets.WATCHR_API_URL }}
+          WATCHR_OPS_URL: ${{ secrets.WATCHR_OPS_URL }}
+          OPS_PROBE_TIMEOUT_MS: "8000"
+          OPS_PROBE_STRICT: "false"
+        run: node .github/scripts/ops-probe.mjs > ops-probe-summary.md
+
+      - name: Publish step summary
+        run: cat ops-probe-summary.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload probe summary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ops-probe-summary
+          path: ops-probe-summary.md

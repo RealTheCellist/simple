@@ -38,3 +38,9 @@ Trigger rollback when any of the following persists over 10 minutes:
 - Alert/history core flows are blocked
 
 Rollback procedure: `watchr-web/ROLLBACK.md`
+
+## Daily automation
+
+- Confirm scheduled workflow `Ops Routine Automation` completes daily.
+- Review `ops-probe-summary` artifact for endpoint PASS/SKIP/FAIL status.
+- Escalate if two consecutive daily runs show the same failing probe.
