@@ -8,6 +8,7 @@ Use this checklist immediately after production deployment.
 2. Open production URL and verify initial page render.
 3. Check browser console for uncaught errors.
 4. Verify API connectivity from `Connection > Check Backend`.
+5. Verify Ops login succeeds (`admin@watchr.local`) and `/api/enterprise/me` responds.
 
 ## 5-15 minutes
 
@@ -16,6 +17,8 @@ Use this checklist immediately after production deployment.
 3. Adaptive toggle and backtest reset buttons respond.
 4. Alerts add/toggle/remove works.
 5. History tab summary numbers update correctly.
+6. Ops realtime status shows `connected` (or graceful `fallback` without crash).
+7. Enterprise audit list updates after login/logout and decision actions.
 
 ## 15-60 minutes
 
@@ -23,6 +26,7 @@ Use this checklist immediately after production deployment.
 2. Verify notification permission and local alert trigger path.
 3. Validate no abnormal latency spikes in network panel.
 4. Check deploy alert webhook channel has no failure events.
+5. Confirm WebSocket channel in API has stable connection count and no error bursts.
 
 ## Rollback trigger guideline
 

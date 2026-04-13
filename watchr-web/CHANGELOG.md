@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.0.1 - 2026-04-13
+
+- Platform expansion release: `watchr-api`, `watchr-ops`, `watchr-quant-lab` integrated
+- Quant Lab matured with real-data mode, walk-forward validation, and data policy/cost model
+- Realtime pipeline shipped (API WebSocket hub + Ops subscribe/polling fallback)
+- Enterprise capability shipped (auth login, RBAC permissions, audit trail)
+- Production hardening and release sync updates across mobile/web tooling
+
 ## v1.0.0 - 2026-04-12
 
 - Production deployment pipelines for Netlify and Vercel
